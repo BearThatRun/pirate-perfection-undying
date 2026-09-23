@@ -16,6 +16,9 @@ local World = World
 local W_raycast = World.raycast
 local throw_projectile = ProjectileBase.throw_projectile
 local peer_id = managers.network:session():local_peer():id()
+local T_projectiles = tweak_data.blackmarket.projectiles
+local ammo_ids = { [1] = "frag", [3] = "rocket_frag", [4] = "molotov" }
+local pcall = pcall
 
 VERSION = '1.1'
 
@@ -32,7 +35,12 @@ function MAIN()
 			local mul = mvec_dist(self._unit:position(), col_ray.unit:position()) / 800
 			mvec_mul( direction, mul )
 			
-			throw_projectile( togg_vars.sentry_ammo or 1, from_pos, direction, peer_id )
+			-- x64: projectiles are looked up by id now ("frag"), not by number
+			local ammo = togg_vars.sentry_ammo
+			ammo = ammo_ids[ammo] or ammo or "frag"
+			if T_projectiles[ammo] then
+				pcall( throw_projectile, ammo, from_pos, direction, peer_id )
+			end
 		end
 
 		if not col_ray or col_ray.distance > 600 then

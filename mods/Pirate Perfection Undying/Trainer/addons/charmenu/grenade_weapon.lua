@@ -28,7 +28,7 @@ function MAIN()
 		local mvec_spread_direction = direction * 5
 
 		if Network:is_client() then
-			session:send_to_host( "request_throw_projectile", 2, from_pos, mvec_spread_direction )
+			session:send_to_host( "request_throw_projectile", tweak_data.blackmarket:get_index_from_projectile_id("frag"), from_pos, mvec_spread_direction ) -- x64: index looked up, not hardcoded
 		else
 			local local_peer_id = session:local_peer():id()
 			throw_projectile(--[[2]] 'frag', from_pos, mvec_spread_direction, local_peer_id )

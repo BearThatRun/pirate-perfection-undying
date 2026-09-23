@@ -35,6 +35,17 @@ if not carry_stacker_setup then
 		IntimitateInteractionExt__interact_blocked = backup_func('IntimitateInteractionExt._interact_blocked'),
 	}
 
+	-- x64 / current game: the host checks every dropped bag against the ONE bag it thinks
+	-- each player carries (NetworkPeer.verify_bag). Keep that record in sync with the bag
+	-- in our hands, or every stacked bag after the first fails to drop ("ghost" bags).
+	local function sync_own_carry( carry_id )
+		local session = managers.network and managers.network:session()
+		local peer = session and session:local_peer()
+		if peer then
+			peer._carry_id = carry_id
+		end
+	end
+
 	function PlayerManager:refresh_stack_counter()
 		local count = #self.carry_stack + (self:is_carrying() and 1 or 0)
 		managers.hud:remove_special_equipment("carrystacker")
@@ -59,6 +70,7 @@ if not carry_stacker_setup then
 		if cdata then
 			if self:is_carrying() then self:carry_discard() end
 			ofuncs.managers_player_set_carry(self, cdata.carry_id, cdata.value or 100, cdata.dye_initiated, cdata.has_dye_pack, cdata.dye_value_multiplier)
+			sync_own_carry(cdata.carry_id)
 		end
 	end
 
@@ -86,6 +98,8 @@ if not carry_stacker_setup then
 			tab_insert(self.carry_stack, self:get_my_carry_data())
 		end
 		ofuncs.managers_player_set_carry(self, ...)
+		local carry_id = ...
+		sync_own_carry(carry_id)
 		self:refresh_stack_counter()
 	end
 
@@ -98,6 +112,7 @@ if not carry_stacker_setup then
 		if self._current_state == "carry" then
 			managers.player:set_player_state( "standard" )
 		end
+		sync_own_carry(nil)
 	end
 
 	local IntimitateInteractionExt = IntimitateInteractionExt

@@ -181,6 +181,19 @@ local function bag_people()
 			end
 			ply_clear_carry(M_player)
 		end
+		-- Undying: with the carry stacker loaded, every corpse pickup also pushed a "person" bag
+		-- onto the stack, which left a stuck bag icon. Drop those stack entries.
+		local stack = M_player.carry_stack
+		if stack then
+			for i = #stack, 1, -1 do
+				if stack[i] and stack[i].carry_id == name then
+					table.remove(stack, i)
+				end
+			end
+			if M_player.refresh_stack_counter then
+				M_player:refresh_stack_counter()
+			end
+		end
 	end
 end
 ---------------------------------------------------------------------------------------------------

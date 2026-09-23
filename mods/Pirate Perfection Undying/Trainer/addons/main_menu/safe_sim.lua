@@ -80,12 +80,26 @@ local function choose_item(safe)
 	else
 		local group = is_weapon and T_B_weapon_skins or T_E_armor_skins
 		for _, skin in pairs(T_E_contents[safe.content].contains[data.category]) do
-			if group[skin].rarity == rarity then
+			if group[skin] and group[skin].rarity == rarity then
 				tab_insert(skin_index, skin)
 			end
 		end
 	end
-	data.entry = skin_index[rand(#skin_index)]
+	-- x64: skip skins the current game no longer has; an unknown entry crashed the safe screen
+	local valid = {}
+	for _, skin in pairs(skin_index) do
+		if (is_weapon and T_B_weapon_skins or T_E_armor_skins)[skin] then
+			tab_insert(valid, skin)
+		end
+	end
+	if #valid == 0 then
+		for _, skin in pairs(T_E_contents[safe.content].contains[data.category] or {}) do
+			if (is_weapon and T_B_weapon_skins or T_E_armor_skins)[skin] then
+				tab_insert(valid, skin)
+			end
+		end
+	end
+	data.entry = valid[rand(#valid)]
 	data.quality = is_weapon and random_choice(q_index, "q") or nil
 	data.def_id = 101
 	local i = 1
@@ -108,9 +122,7 @@ local function start_open(name, data)
 	managers.menu_scene:create_economy_safe_scene(name, ready_clbk)
 	local item = choose_item(data)
 	MenuCallbackHandler:_safe_result_recieved(nil, {item}, {})
-	if togg_vars.sim_add then
-		M_blackmarket:tradable_add_item(item.instance_id, item.category, item.entry, item.quality, item.bonus, 1)
-	end
+	-- Undying: "Add skins to inventory" was removed (it gave you paid skins). The simulator only shows the result.
 end
 
 chance_menu = function()
@@ -137,7 +149,6 @@ end
 
 main_menu = function()
 	local data = {
-		{text = tr.safe_sim_add_skin, type = "toggle", toggle = "sim_add", callback = function() togg_vars.sim_add = not togg_vars.sim_add end, switch_back = true},
 		{text = tr.safe_sim_chances, callback = chance_menu, menu = true},
 		{},
 	}

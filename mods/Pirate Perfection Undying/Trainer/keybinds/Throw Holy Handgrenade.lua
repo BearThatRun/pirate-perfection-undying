@@ -21,18 +21,18 @@ if inGame() and managers.platform:presence() == "Playing" and not inChat() then
 	local dir = self._unit:movement():m_head_rot():y()
 		if Network:is_client() then
 			--managers.network:session():send_to_host( "server_throw_grenade", 1, pos, dir )
-			managers.network:session():send_to_host("request_throw_projectile", 1, pos, dir)
-			managers.network:session():send_to_host("request_throw_projectile", 1, pos, dir)
-			managers.network:session():send_to_host("request_throw_projectile", 1, pos, dir)
-			--managers.network:session():send_to_host("request_throw_projectile", 1, pos, dir)
-			--managers.network:session():send_to_host("request_throw_projectile", 1, pos, dir)
+			managers.network:session():send_to_host("request_throw_projectile", tweak_data.blackmarket:get_index_from_projectile_id("frag"), pos, dir)
+			managers.network:session():send_to_host("request_throw_projectile", tweak_data.blackmarket:get_index_from_projectile_id("frag"), pos, dir)
+			managers.network:session():send_to_host("request_throw_projectile", tweak_data.blackmarket:get_index_from_projectile_id("frag"), pos, dir)
+			--managers.network:session():send_to_host("request_throw_projectile", tweak_data.blackmarket:get_index_from_projectile_id("frag"), pos, dir)
+			--managers.network:session():send_to_host("request_throw_projectile", tweak_data.blackmarket:get_index_from_projectile_id("frag"), pos, dir)
 		else
 			--GrenadeBase.server_throw_grenade( 1, pos, dir )
-			ProjectileBase.throw_projectile(1, pos, dir, managers.network:session():local_peer():id())
-			ProjectileBase.throw_projectile(1, pos, dir, managers.network:session():local_peer():id())
-			ProjectileBase.throw_projectile(1, pos, dir, managers.network:session():local_peer():id())
-			--ProjectileBase.throw_projectile(1, pos, dir, managers.network:session():local_peer():id())
-			--ProjectileBase.throw_projectile(1, pos, dir, managers.network:session():local_peer():id())
+			ProjectileBase.throw_projectile("frag", pos, dir, managers.network:session():local_peer():id())
+			ProjectileBase.throw_projectile("frag", pos, dir, managers.network:session():local_peer():id())
+			ProjectileBase.throw_projectile("frag", pos, dir, managers.network:session():local_peer():id())
+			--ProjectileBase.throw_projectile("frag", pos, dir, managers.network:session():local_peer():id())
+			--ProjectileBase.throw_projectile("frag", pos, dir, managers.network:session():local_peer():id())
 		end
 	end
 	managers.player:player_unit():camera():play_redirect( Idstring( "throw_grenade" ) )

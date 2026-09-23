@@ -599,9 +599,9 @@ function ServerSpawnBag(name, zipline_unit)
    local has_dye_pack = carry_data.has_dye_pack
    local dye_value_multiplier = carry_data.dye_value_multiplier
    if Network:is_client() then
-	  managers.network:session():send_to_host("server_drop_carry", name, carry_data.multiplier, carry_data.dye_initiated, carry_data.has_dye_pack, carry_data.dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), camera_ext:forward(), Vector3(0, 0, 0), zipline_unit)
+	  managers.network:session():send_to_host("server_drop_carry", name, carry_data.multiplier, carry_data.dye_initiated, carry_data.has_dye_pack, carry_data.dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), camera_ext:forward(), 0, zipline_unit)
    else
-	  managers.player:server_drop_carry(name, carry_data.multiplier, carry_data.dye_initiated, carry_data.has_dye_pack, carry_data.dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), camera_ext:forward(), Vector3(0, 0, 0), zipline_unit, managers.network:session():local_peer():id())
+	  managers.player:server_drop_carry(name, carry_data.multiplier, carry_data.dye_initiated, carry_data.has_dye_pack, carry_data.dye_value_multiplier, camera_ext:position(), camera_ext:rotation(), camera_ext:forward(), 0, zipline_unit, nil) -- x64: throw level is a number; nil peer = host's own drop
    end
 end
 

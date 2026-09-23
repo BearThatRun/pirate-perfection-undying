@@ -71,7 +71,14 @@ local get_category_data = function( category )
 end
 
 load_package = function(name)
-	PackageLoad(PackageManager, name)
+	-- x64: many levels now list several packages (a table). Passing the table, or a package that
+	-- doesn't exist, to PackageManager.load crashes the game, so load each existing one once.
+	local names = type(name) == "table" and name or { name }
+	for _, pkg in ipairs(names) do
+		if type(pkg) == "string" and PackageManager:package_exists(pkg) and not PackageManager:loaded(pkg) then
+			PackageLoad(PackageManager, pkg)
+		end
+	end
 end
 
 -- Parse functions

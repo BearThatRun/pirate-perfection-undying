@@ -22,12 +22,32 @@ local pairs = pairs
 local gm = getmetatable
 local plugins = plugins
 local ppr_config = ppr_config
-local os_remove = os.remove
-local os_rename = os.rename
+-- x64: os.remove/os.rename don't know the mod folder, so prefix it like ppr_io.open does
+local os_remove = function( p ) return os.remove( ppr_io.root .. p ) end
+local os_rename = function( a, b ) return os.rename( ppr_io.root .. a, ppr_io.root .. b ) end
+
+-- Undying: text inputs only confirmed with Enter; these helpers back a "Confirm" button
+local function input_value( btn )
+	local input = btn and btn.input
+	local panel = input and input.input_panel
+	if panel and panel.child and panel:child( "input_text" ) then
+		return panel:child( "input_text" ):text()
+	end
+	return btn and btn.value
+end
+
+local function clean_name( name )
+	name = tostring( name or "" ):gsub( "^%s+", "" ):gsub( "%s+$", "" ):gsub( '[\\/:%*%?"<>|]', "_" )
+	return name
+end
 
 local main_menu, create_config_menu, load_config_menu, are_you_sure, delete_config_menu, rename_config_menu, rename_config_input, reload_ppr_config, save_settings_create_config, _save_settings_create_config
 
 local create_config = function( name, clbk )
+	name = clean_name( name )
+	if name == "" then
+		return
+	end
 	local path = "Trainer/configs/"..name..".lua"
 	fh = io_open(path, "r")
 	if ( fh ) then
@@ -36,7 +56,7 @@ local create_config = function( name, clbk )
 	end
 	--Write stub
 	fh = io_open(path, "w")
-	fh:write("return function(cfg) return\n")
+	fh:write("return function( cfg )\nend\n") -- x64 fix: the old stub had no "end" and failed to load
 	fh:close()
 	main_menu()
 	return path
@@ -57,9 +77,17 @@ local delete_config = function( name )
 		ppr_config.DefaultConfig = "default_config"
 		ppr_config()
 	end
+	show_hint("Config deleted: " .. name)
+	if delete_config_menu then
+		delete_config_menu()
+	end
 end
 
 local rename_config = function( name, new_name )
+	new_name = clean_name( new_name )
+	if new_name == "" then
+		return
+	end
 	local old_loc = "Trainer/configs/"..name..".lua"
 	local new_loc = "Trainer/configs/"..new_name..".lua"
 	os_rename(old_loc, new_loc)
@@ -73,7 +101,8 @@ local rename_config = function( name, new_name )
 end
 
 local save_settings = function()	
-	game_config() -- reload config
+	game_config() -- write changed settings into the active config file
+	show_hint("Settings saved to " .. tostring(ppr_config.DefaultConfig))
 end
 
 local get_configs_list = function()
@@ -106,6 +135,7 @@ do
 	local data = {
 		{ text = tr['config_type'] ..":", type = "input", callback_input = create_config, switch_back = true },
 	}
+	data[2] = { text = tr['input_confirm'], callback = function() create_config( input_value( data[1] ) ) end }
 	create_config_menu = function()
 		Menu_open( Menu, { title = tr['config_create'], button_list = data, back = main_menu } )
 	end
@@ -128,6 +158,7 @@ rename_config_input = function( name )
 	local data = {
 		{ text = tr['config_type'] ..":", type = "input", callback_input = function( new_name ) rename_config( name, new_name ) end, switch_back = true },
 	}
+	data[2] = { text = tr['input_confirm'], callback = function() rename_config( name, input_value( data[1] ) ) end }
 	
 	Menu_open( Menu, { title = tr['config_rename'], button_list = data, back = rename_config_menu } )
 end
@@ -183,6 +214,7 @@ do
 	local data = {
 		{ text = tr['config_type'] ..":", type = "input", callback_input = _save_settings_create_config, switch_back = true },
 	}
+	data[2] = { text = tr['input_confirm'], callback = function() _save_settings_create_config( input_value( data[1] ) ) end }
 	save_settings_create_config = function()
 		Menu_open( Menu, { title = tr['config_create'], button_list = data, back = main_menu } )
 	end
@@ -190,6 +222,7 @@ end
 
 reload_ppr_config = function()
 	ppr_config()
+	show_hint("Default config: " .. tostring(ppr_config.DefaultConfig))
 end
 
 local main_menu_data = {
@@ -209,7 +242,15 @@ local main_menu_data = {
 }
 
 main_menu = function()
-	Menu_open( Menu, { title = tr['config_menu'], description = tr['config_current']..': '..ppr_config.DefaultConfig, button_list = main_menu_data } )
+	-- Undying: the WayPoints menu only works in a heist, so hide it in the main menu
+	local list = main_menu_data
+	if not GameSetup then
+		list = {}
+		for i = 3, #main_menu_data do
+			list[#list + 1] = main_menu_data[i]
+		end
+	end
+	Menu_open( Menu, { title = tr['config_menu'], description = tr['config_current']..': '..ppr_config.DefaultConfig, button_list = list } )
 end
 
 return main_menu
