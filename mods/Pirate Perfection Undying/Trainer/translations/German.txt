@@ -91,7 +91,6 @@ F1 : Hilfe Menü
 F2 : Configurations Menü
 F3 : Haupt Menü / Charakter Menü
 F4 : Job Menü / Tarn Menü
-F5 : Spoof Name Menü / Troll Menü
 Page_UP : Vorausplanungs Menü
 Page_Down : Musik Menü
 Home : Normalizer Menü

@@ -139,7 +139,6 @@ end
 
 local main_menu_data = { title = tr.loc_menu, description = '', button_list = {
 		{ text = tr.loc_menu_choose_local, callback = browse_locs, menu = true },
-		{ text = tr.loc_menu_choose_remote, callback = dl_main, menu = true },
 	}
 }
 local function main()

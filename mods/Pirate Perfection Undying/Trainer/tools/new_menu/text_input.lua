@@ -96,8 +96,7 @@ end
 
 function TextInput:update()
 	local enabled = self.input_enabled
-	local M = M_mouse_pointer._mouse
-	local x, y = M:x(), M:y()
+	local x, y = ppr_menu_mouse_pos()
 	local is_inside = self.input_panel:inside( x, y )
 	
 	if ( not enabled and is_inside ) then

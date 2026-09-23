@@ -171,10 +171,6 @@ if cfg.FreeAssets then
 	end
 end
 
-if cfg.RSSFeed then
-	ppr_require 'Trainer/hud/RSS Feed'
-end
-
 if cfg.FreeBlackMarket then
 	ppr_require 'Trainer/addons/FreeBlackMarket'
 end
@@ -197,10 +193,6 @@ end
 
 if cfg.NoStatsSynced then
 	function NetworkAccountSTEAM.publish_statistics() end
-end
-
-if cfg.check_for_updates then
-	ppr_require 'Trainer/addons/updatechecker'
 end
 
 if cfg.AllPerks then
@@ -238,25 +230,6 @@ end
 if cfg.DebugConsole then
 	console.CreateConsole()
 end
-
-if cfg.announcements and MenuSetup then
-	ppr_require 'Trainer/addons/announcements'
-	local interval = cfg.announcements_interval or 180
-	local t = Global.announce_T or (os_clock() - interval + 5)
-	local M_announce_manager = managers.announce_manager
-	local check_and_announce = M_announce_manager.check_and_announce
-	RunNewLoopIdent('announce_loop',function()
-			local _t = os_clock()
-			if _t - t >= interval then
-				t = _t
-				Global.announce_T = _t
-				check_and_announce(M_announce_manager)
-			end
-		end)
-end
-
---First launch check
-ppr_require('Trainer/menu/firstlaunch')
 
 --Notices users, if crash happened.
 if cfg.ExceptionsCrashDetect and managers.exception then

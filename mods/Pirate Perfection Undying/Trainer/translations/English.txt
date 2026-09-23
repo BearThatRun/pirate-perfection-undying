@@ -91,7 +91,6 @@ F1 : Help Menu
 F2 : Configuration Menu
 F3 : Main Pre-Game Menu / Character Menu
 F4 : Job Menu / Stealth Menu
-F5 : Spoof Name Menu / Troll Menu
 Page_UP : Tools Menu
 Page_Down : Music Menu
 Home : Normalizer Menu

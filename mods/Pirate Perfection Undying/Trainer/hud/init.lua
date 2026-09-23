@@ -24,19 +24,11 @@ ppr_obj.__elements = {}
 
 --Wrapped requires into separate function for update_object()
 local function exec()
-	--Version text
-	if ppr_config.HUD_VersionText and MenuSetup then
-		ppr_dofile('Trainer/hud/version_text')
-	end
-	--Moving text
-	if ppr_config.HUD_MovingText then
-		ppr_dofile('Trainer/hud/moving_text')
-	end
+	-- x64 port: the version text and the scrolling announcement banner were removed.
 end
 
 --Called when resolution changed
 function ppr_obj:update_object()
-	StopLoopIdent('moving_text')
 	ppr_obj:destroy()
 	ppr_obj = ExGUIObject:new( GameSetup and M_gui:create_fullscreen_workspace() or M_gui:create_fullscreen_16_9_workspace() )
 	G.ppr_obj = ppr_obj

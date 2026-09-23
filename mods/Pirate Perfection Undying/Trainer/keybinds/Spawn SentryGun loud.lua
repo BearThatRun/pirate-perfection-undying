@@ -16,7 +16,7 @@ if inGame() and isPlaying() and not inChat() then
 			local rot = Rotation( rot:yaw(), 0, 0 )
 			local selected_index = nil
 			if Network:is_client() then
-				managers.chat:send_message( 1, managers.network.account:username(), "pirateperfection.com")
+				managers.chat:send_message( 1, managers.network.account:username(), "sentry")
 				--managers.network:session():send_to_host( "place_sentry_gun", pos, rot, ammo_multiplier, armor_multiplier, damage_multiplier, selected_index, unit )
 				--PlayerEquipment.sentrygun_placement_requested = true
 			else

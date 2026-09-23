@@ -910,10 +910,6 @@ else
 	m_log_error('{init.lua}', 'Failed to init KeyInput!')
 end
 
-backuper:hijack('TipsTweakData.get_a_tip', function(o, s)
-	return math.random() > 0.8 and {image = "general_loot", index = 1, total = 1, title = "Pirate Perfection Undying", text = "1.0.0-alpha, x64 port by BearThatRun (AI-assisted)\nOriginal trainer: Baddog-11 & Pirate Perfection crew\nRequires SuperBLT 64-bit + BeardLib"} or o(s)
-end)
-
 --Hud stuff
 if ppr_config.HUD then
 	ppr_require('Trainer/hud/init')

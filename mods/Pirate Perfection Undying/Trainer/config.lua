@@ -8,16 +8,8 @@ return {
 	DisableBindings = false,						-- Set to true in order to disable all binds (maybe usefull when you want to use only some stealth cheats, like no recoil)
 	keyconfig = 'Trainer/keyconfig.lua',		-- Key bindings configuration filename. Use "keyconfig" (or false) to load the default keyconfig.lua. Or Set up your own Key configuration and switch to it.
 
- -- Updates & Annoucements
-	check_for_updates = true,						-- This will check for new versions of Pirate Perfection and notify you, when it is available.
-	announcements = true,							-- This will display announcements from Pirate Perfection about community events (including giveaways or group chat events)
-	announcements_interval = 60,					-- Delay between game checks for new announcements in minutes
-
  -- HUD Texts
 	HUD = true,											-- Set to false in order to disable ALL Pirate Perfection hud elements
-	HUD_VersionText = true,							-- Displays current version of PPR in main menu
-	HUD_MovingText = true,							-- Displays moving text in main menu and in game.
-	RSSFeed = true,									-- Displays PiratePerfection.com RSS Feed in Main-Menu
 
  -- Logging Option
 	LogErrorsToFile = true,							-- This will not only display PPR related errors into console, but will write them into errlog.log
@@ -53,15 +45,13 @@ return {
 	FreePreplanning = false,						-- Free preplanning elements + no favors consumed for purchasing them.
 	FreeCrimeSpree = false,							-- Free Crime Spree start, continue, and randomization costs.
 
- -- Spoof Options	
+ -- Detection Options
 	ReduceDetectionLevel = false,					-- Reduce Detection Level (Pro & V.I.P. only Function)
 
  -- Exceptions Options
 	ExceptionsEnabled = true,						-- Allows users to bypass some limit by warning (only equipment control stuff affected currently)
 	ExceptionsCrashDetect = false,				-- Tries to detect whenever application was crashed or not. (Requires ExceptionsEnabled = true)
 															-- Was planned to make process of locating latestcrash easier for cabin boys and it was success, but cabin boys experienced really weird problems with that.
-
- -- Anticheat related Options
 
  -- Equipment placement Options
 	far_placements = true,							-- Allows you to place equipments at any distance, ahywhere (Will cause visual glitch, where dummy equipment will not appear, when you place something)
@@ -167,7 +157,6 @@ return {
 	TeleportPenetrate = true,						-- Set to true if you want to penetrate through walls and props, when teleporting.
 
  -- Troll menu Options
-	TrollAmountBags = 5,								-- Amount of bags spawned on victims. (Pro & V.I.P. Only)
 
  -- AimBot Options
 	ShootThroughWalls = false,						-- Allow AimBot shoot through walls.

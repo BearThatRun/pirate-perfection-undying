@@ -62,8 +62,7 @@ function Slider:set_default_value()
 end
 
 function Slider:update()
-	local M = M_mouse_pointer._mouse
-	local x, y = M:x(), M:y()
+	local x, y = ppr_menu_mouse_pos()
 	
 	if self.slider:inside( x, y ) and ( ( not self.button.plugin and mouse_down( mouse, left_click ) ) or mouse_down( mouse, right_click ) ) then
 		self:on_slider( x )

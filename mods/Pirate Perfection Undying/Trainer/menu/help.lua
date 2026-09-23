@@ -58,7 +58,6 @@ main = function()
 			button_list =	{	{ text = tr.help_keybinds, callback = keybinds },
 								{ text = tr.help_cheatertag, callback = cheatertag },
 								{ text = tr.help_credits, callback = credits },
-								{ text = tr.help_site, callback = overlay_activate, data = { Steam, "url",'https://pirateperfection.com' }},
 							},
 			w_mul = 2.3,
 			h_mul = 3.4
@@ -89,7 +88,7 @@ credits = function()
 						{ text = tr.next_page, callback = keybinds }, 
 						--{ text = tr.btn_close }
 					}
-	open_menu({ title = tr.help_credits, description = tr.help_credits_desc, button_list = data, w_mul = 2, h_mul = 2 })
+	open_menu({ title = tr.help_credits, description = "x64 port (Pirate Perfection Undying): BearThatRun (AI-assisted)\n\n" .. tr.help_credits_desc, button_list = data, w_mul = 2, h_mul = 2 })
 end
 
 return main

@@ -85,7 +85,7 @@ end
 
 function MultiChoice:update()
 	local arrow_left, arrow_right = self.arrow_left, self.arrow_right
-	local x, y = gui_mouse:x(), gui_mouse:y()
+	local x, y = ppr_menu_mouse_pos()
 	local left_moved = keyboard_pressed( keyboard, left_arrow_btn )
 	local right_moved
 	if ( not left_moved ) then

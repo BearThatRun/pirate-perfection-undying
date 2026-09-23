@@ -37,16 +37,6 @@ local prefix = "base_"
 local options = {
 	{name = "HUD_Announce_Sub", desc = true, sub = {
 		{name = "HUD"},
-		{},
-		{name = "HUD_VersionText"},
-		{name = "HUD_MovingText"},
-		{},
-		{name = "announcements"},
-		{name = "announcements_interval", type = "slider", max = 720},
-		{},
-		{name = "check_for_updates"},
-		{},
-		{name = "RSSFeed"},
 	}},
 	{name = "General_Sub", desc = true, sub = {
 		{name = "Language", menu = function() return rlist_files("Trainer/translations/", "txt") or {} end},
@@ -76,9 +66,6 @@ local options = {
 		{name = "NoSkinMods"},
 	}},
 	{name = "Anticheat_Sub", desc = true, sub = {
-		{},
-		{},
-		{},
 		{name = "ControlCheats", desc = true, menu = {
 			base_ControlCheats_false = false,
 			base_ControlCheats_1 = 1,
@@ -160,7 +147,6 @@ local options = {
 		{name = "rain_bags_amount", type = "slider", max = 1000},
 		{name = "SpawnBagsAmount", type = "slider", max = 100},
 		{name = "SpawnBagKey", type = "input"},
-		{name = "TrollAmountBags", type = "slider", max = 100},
 	}},
 	{name = "slow_sub", desc = true, sub = {
 		{name = "SmSpeed", type = "slider", max = 100},

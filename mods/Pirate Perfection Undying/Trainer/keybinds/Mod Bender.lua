@@ -51,7 +51,7 @@ if inGame() then
 		managers.chat:send_message( 1, managers.network.account:username(), "squak")
 	end
 	performsentry = performsentry or function()
-		managers.chat:send_message( 1, managers.network.account:username(), "pirateperfection.com")
+		managers.chat:send_message( 1, managers.network.account:username(), "sentry")
 	end
 	performtrip = performtrip or function()
 		managers.chat:send_message( 1, managers.network.account:username(), "mutiny")
@@ -343,7 +343,7 @@ if inGame() and managers.platform:presence() == "Playing" and isHost()then
 
 		if message:find("joke") then self:send_message(self:tell_joke(math.random(1,100))) end
 		if message:find("ammunition") or message:find("Hoxtalicious!!!") then self:spawn_ammo(name) end
-		if message:find("sentry") or message:find("pirateperfection.com")  then self:spawn_sentry(name) end
+		if message:find("sentry") then self:spawn_sentry(name) end
 		if message:find("trip") or message:find("mine")  or message:find("mutiny") then self:spawn_trip(name) end
 		if message:find("fuck") then self:send_message("Rude talking makes me angry, only I can talk like that." ) end
 		if message:find("crap") then self:send_message("Rude talking makes me angry, only I can talk like that." ) end

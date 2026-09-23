@@ -92,10 +92,6 @@ if is_server and cfg.SecureAll then
 	ppr_require('Trainer/addons/secureall')
 end
 
-if cfg.HUD then
-	ppr_require("Trainer/addons/ppr_text")
-end
-
 if cfg.Crosshair then
 	ppr_require("Trainer/addons/crosshair")
 end

@@ -14,6 +14,16 @@ local io_open = ppr_io.open
 
 local tr = Localization.translate
 
+-- x64 port: mouse position in the menus' 1280 layout workspace (fixes ultrawide hit areas)
+function ppr_menu_mouse_pos()
+	local mp = managers.mouse_pointer
+	local x, y = mp._mouse:world_position()
+	if mp.convert_1280_mouse_pos then
+		return mp:convert_1280_mouse_pos( x, y )
+	end
+	return x, y
+end
+
 ppr_require 'Trainer/tools/new_menu/tickbox'
 ppr_require 'Trainer/tools/new_menu/slider'
 ppr_require 'Trainer/tools/new_menu/multi_choice'
@@ -315,7 +325,7 @@ function Menu:add_navigation()
 	
 	local close_button = self:_add_button( navigation_panel, tr['exit'], text_config )
 	close_button:set_name("close_button")
-	close_button:set_x( navigation_panel:w()/2 )
+	close_button:set_center_x( navigation_panel:w()/2 )
 end
 
 function Menu:_add_button( panel, text, text_config )
@@ -393,7 +403,7 @@ function Menu:update()
 end
 
 function Menu:mouse_update()
-	local x, y = M_mouse_pointer._mouse:x(), M_mouse_pointer._mouse:y()
+	local x, y = ppr_menu_mouse_pos()
 	
 	local is_left_click		=	mouse_pressed( mouse, left_click )
 	local is_right_click	=	not is_left_click and mouse_pressed( mouse, right_click )
