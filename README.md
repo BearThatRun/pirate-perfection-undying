@@ -5,7 +5,7 @@ An x64 port of **Pirate Perfection Reborn Trainer V.I.P. Edition v2.0.0** for PA
 - **x64 port:** [BearThatRun](https://github.com/BearThatRun). AI-assisted: the analysis, scripts and edits were made together with Claude (Anthropic), and every change is in the git history.
 - **Original trainer:** Baddog-11 and the Pirate Perfection Developer Crew. Edited with permission from the Pirate Perfection forum admin.
 
-> Status: **1.0.0-alpha, not yet tested in game.**
+> Status: **v0.01 Unique Edition** (early test build: loads in game, menus and cleanup still being tested).
 
 ## Requirements
 

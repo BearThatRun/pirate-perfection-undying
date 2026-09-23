@@ -1,4 +1,4 @@
-Pirate Perfection Undying 1.0.0-alpha - x64 port for PAYDAY 2 (Diesel 3.0, 64-bit)
+Pirate Perfection Undying v0.01 Unique Edition - x64 port for PAYDAY 2 (Diesel 3.0, 64-bit)
 Port by BearThatRun (AI-assisted). Based on Pirate Perfection Reborn Trainer! V.I.P. Edition v2.0.0
 by Baddog-11 and the Pirate Perfection Developer Crew. Edited with permission.
 
