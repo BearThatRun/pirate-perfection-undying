@@ -1,3 +1,26 @@
+Pirate Perfection Undying 1.0.0-alpha - x64 port for PAYDAY 2 (Diesel 3.0, 64-bit)
+Port by BearThatRun (AI-assisted). Based on Pirate Perfection Reborn Trainer! V.I.P. Edition v2.0.0
+by Baddog-11 and the Pirate Perfection Developer Crew. Edited with permission.
+
+Requirements:
+	- PAYDAY 2 64-bit (update 247 or newer)
+	- SuperBLT 64-bit  (https://modworkshop.net/mod/58342)
+	- BeardLib 5.1+    (https://modworkshop.net/mod/14924)
+
+Install: copy the "Pirate Perfection Undying" folder into PAYDAY 2\mods\
+Do NOT copy an old 32-bit WSOCK32.dll, IPHLPAPI.dll or mods\base folder into your game.
+
+Changes from the original:
+	- Packaged for SuperBLT 64-bit, BeardLib is required
+	- Removed: DLC unlocker, paid skin unlocks, anticheat bypass, mod hiding,
+	  "not modded" lobby, name spoof, loot card spoof, troll menu (F5), stealth_v2
+	- No more cmd.exe / hard-coded paths; several old bugs fixed
+	- Full history: see the git log
+
+=====================================================================
+Original Read Me follows.
+=====================================================================
+
 Pirate Perfection Reborn Trainer! V.I.P. Edition for PAYDAY 2 Version 2.0.0-DE by Baddog-11
 remade from white list with a fresh new structure and less bugs than in previous versions.
 Some scripts were improved, some got lost from original Pirate Perfection, but are slowly being reintroduced.

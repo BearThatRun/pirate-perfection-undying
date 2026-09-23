@@ -17,7 +17,7 @@ local ppr_dofile = ppr_dofile
 local ME_CREATOR = 'Baddog-11'
 local ME_VERSION = '2.0.0'
 local ME_EDITION = 'V.I.P.'
-local BLT_VERSION = 'v3.1.2 (R026)'
+local BLT_VERSION = 'SuperBLT 64-bit'
 
 local ppr_config = ppr_require('Trainer/config')
 
@@ -911,7 +911,7 @@ else
 end
 
 backuper:hijack('TipsTweakData.get_a_tip', function(o, s)
-	return math.random() > 0.8 and {image = "general_loot", index = 1, total = 1, title = "Pirate Perfection Reborn Trainer! V.I.P. Edition", text = "Trainer: v2.0.0-PaE\nSuperBLT: v3.1.2 (R026)\nCreator: Baddog-11\nVisit us at www.Pirateperfection.com"} or o(s)
+	return math.random() > 0.8 and {image = "general_loot", index = 1, total = 1, title = "Pirate Perfection Undying", text = "1.0.0-alpha, x64 port by BearThatRun (AI-assisted)\nOriginal trainer: Baddog-11 & Pirate Perfection crew\nRequires SuperBLT 64-bit + BeardLib"} or o(s)
 end)
 
 --Hud stuff

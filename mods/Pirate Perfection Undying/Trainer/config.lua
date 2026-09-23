@@ -1,4 +1,4 @@
--- Pirate Perfection Reborn Trainer! V.I.P. Edition Main Configuration File.
+-- Pirate Perfection Undying Main Configuration File. (x64 port of Pirate Perfection Reborn Trainer! V.I.P. Edition)
 -- To turn options ON write true after '=' , to turn options OFF write false.
 -- Config frequently being updated through versions, don't forget to update it.
 

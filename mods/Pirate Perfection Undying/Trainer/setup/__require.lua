@@ -14,7 +14,7 @@
 -- Fix for blt
 ppr_io = {}
 -- x64 port: mod root comes from SuperBLT's ModPath, so the folder can be renamed
-ppr_io.root = rawget(_G, "ModPath") or "mods/[MOD] Pirate Perfection Reborn Trainer! V.I.P. Edition/"
+ppr_io.root = rawget(_G, "ModPath") or "mods/Pirate Perfection Undying/"
 if ppr_io.root:sub(-1) ~= "/" and ppr_io.root:sub(-1) ~= "\\" then ppr_io.root = ppr_io.root .. "/" end
 local io_open = io.open
 local io_lines = io.lines
