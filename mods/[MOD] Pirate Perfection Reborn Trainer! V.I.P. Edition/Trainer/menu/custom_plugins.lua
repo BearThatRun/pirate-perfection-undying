@@ -21,11 +21,7 @@ local str_split = string.split
 local io_popen = ppr_io.io_popen
 
 local function scan_for_plugins()
-	local list = io_popen("@echo OFF & cd Trainer/plugins & for /r %f in (*.lua) do echo %~nf"):read("*all")
-	if ( list ~= "" ) then
-		list = str_split(list, '\n')
-		return list
-	end
+	return ppr_io.list_files( "Trainer/plugins", "lua" ) -- x64 port: no io.popen/cmd.exe
 end
 
 --Are we precached list already ?

@@ -134,11 +134,7 @@ load_lego_file = function()
 end
 
 local get_file_list = function()
-	local list = io_popen("@echo OFF & cd Trainer/addons/lego & for /r %f in (*.lua) do echo %~nf"):read("*all")
-	if ( list ~= "" ) then
-		list = str_split(list, '\n')
-		return list
-	end
+	return ppr_io.list_files( "Trainer/addons/lego", "lua" ) -- x64 port: no io.popen/cmd.exe
 end
 
 local add_favorite = function( unit_name )

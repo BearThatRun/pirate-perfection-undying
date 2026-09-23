@@ -110,7 +110,7 @@ local http_request = Steam.http_request
 
 if ( not ppr_config.no_liberty_hook ) then
 	local f = io_open("IPHLPAPI.dll", "rb")
-	assert( not f, "Please, remove IPHLPAPI.dll from game folder.")
+	assert( not f, "Please remove the old 32-bit IPHLPAPI.dll from the game folder. PAYDAY 2 x64 uses the 64-bit SuperBLT WSOCK32.dll.")
 end
 
 --Fixes dumb behavior of _G
@@ -233,7 +233,7 @@ if ppr_config.ExceptionsEnabled then
 				text = tr.except_crash_warn,
 				ok = tr.except_yes,
 				cancel = tr.except_no,
-				clbk = function() os.execute('start latestcrash') end,
+				clbk = function() m_log_error('crash_t', 'Crash log: %LOCALAPPDATA%\\PAYDAY 2\\crashlog.txt') end, -- x64 port: no shell
 				no_except = true }
 			)
 	end
@@ -805,10 +805,10 @@ end
 --Returns table, containing short filenames.
 function rlist_files( path, ext )
 	if not ext then ext = 'lua' end
-	local list = io_popen("@echo OFF & cd "..path.." & for /r %f in (*."..ext..") do echo %~nf"):read("*all")
+	local list = ppr_io.list_files( path, ext ) -- x64 port: no io.popen/cmd.exe
 	
-	if list ~= '' then
-		return str_split(list, '\n')
+	if list then
+		return list
 	else
 		m_log_error("rlist_files()", "Failed to retrive files in", path)
 	end

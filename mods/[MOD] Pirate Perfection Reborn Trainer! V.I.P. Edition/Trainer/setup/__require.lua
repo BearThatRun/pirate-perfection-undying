@@ -13,23 +13,48 @@
 
 -- Fix for blt
 ppr_io = {}
+-- x64 port: mod root comes from SuperBLT's ModPath, so the folder can be renamed
+ppr_io.root = rawget(_G, "ModPath") or "mods/[MOD] Pirate Perfection Reborn Trainer! V.I.P. Edition/"
+if ppr_io.root:sub(-1) ~= "/" and ppr_io.root:sub(-1) ~= "\\" then ppr_io.root = ppr_io.root .. "/" end
 local io_open = io.open
 local io_lines = io.lines
 local io_popen = io.popen
 
 ppr_io.open = function( file, mode )
-	file = "mods/[MOD] Pirate Perfection Reborn Trainer! V.I.P. Edition/" .. file
+	file = ppr_io.root .. file
 	return io_open( file, mode )
 end
 
 ppr_io.lines = function( file )
-	file = "mods/[MOD] Pirate Perfection Reborn Trainer! V.I.P. Edition/" .. file
+	file = ppr_io.root .. file
 	return io_lines( file )
 end
 
 ppr_io.io_popen = function( command )
-	command = command:gsub("Trainer/", "mods/[MOD] Pirate Perfection Reborn Trainer! V.I.P. Edition/Trainer/")
+	command = command:gsub("Trainer/", ppr_io.root .. "Trainer/")
 	return io_popen( command )
+end
+
+-- x64 port: recursive file listing through SuperBLT's file API instead of
+-- io.popen + cmd.exe. Returns short names without extension (like %~nf), or nil.
+ppr_io.list_files = function( rel_dir, ext )
+	ext = ( ext or "lua" ):lower()
+	local out = {}
+	local function walk( dir )
+		for _, name in ipairs( file.GetFiles( dir ) or {} ) do
+			local base, e = name:match( "^(.*)%.([^%.]+)$" )
+			if base and e:lower() == ext then
+				table.insert( out, base )
+			end
+		end
+		for _, sub in ipairs( file.GetDirectories( dir ) or {} ) do
+			walk( dir .. sub .. "/" )
+		end
+	end
+	local dir = ppr_io.root .. rel_dir
+	if dir:sub(-1) ~= "/" then dir = dir .. "/" end
+	walk( dir )
+	if #out > 0 then return out end
 end
 
 do
