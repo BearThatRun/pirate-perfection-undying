@@ -75,6 +75,7 @@ by Baddog-11 and the Pirate Perfection Developer Crew. Edited with permission.
 
 -- Credits :
 x64 port: BearThatRun (AI-assisted)
+Icon artwork: BearThatRun
 
 Original trainer:
 Main Developer: Baddog-11
