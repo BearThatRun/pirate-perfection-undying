@@ -67,26 +67,17 @@ local options = {
 		{name = "DisableAutoKick", host = true},
 		{},
 		{name = "ReduceDetectionLevel"},
-		{name = "NameSpoof", type = "input"},
 	}},
 	{name = "Unlocker_Sub", desc = true, sub = {
-		{name = "DLCUnlocker"},
 		{name = "unlocked_hoxton"},
 		{name = "unlocked_arbiter"},
 		{name = "unlocked_aldstone_items"},
 		{name = "CrewUnlocker"},
-		{name = "AllWeaponSkins"},
 		{name = "NoSkinMods"},
-		{name = "AllArmorSkins"},
 	}},
 	{name = "Anticheat_Sub", desc = true, sub = {
-		{name = "Hide_All_Mods"},
-        {name = "Hide_Pirate_Perfection"},
-		{name = "non_modded_lobby"},
 		{},
-		{name = "DisableAnticheat"},
 		{},
-		{name = "PreventEquipDetecting", host = true},
 		{},
 		{name = "ControlCheats", desc = true, menu = {
 			base_ControlCheats_false = false,
@@ -214,17 +205,6 @@ local options = {
 		{name = "LegoPrevKey", type = "input"},
 		{name = "LegoNextKey", type = "input"},
 	}},
-	{name = "SpoofCards_sub", desc = true, sub = function()
-		local data = {{name = "SpoofCards"}, {}}
-		for typ_n, typ in pairs({safes = T_economy.safes, drills = T_economy.drills}) do
-			for id, item in pairs(typ) do
-				if item.name_id then
-					insert(data, {name = typ_n..id, disp = M_localization:text(item.name_id)})
-				end
-			end
-		end
-		return data
-	end},
 	{name = "Debug_Sub", desc = true, sub = {
 		{name = "DebugConsole"},
 		{},

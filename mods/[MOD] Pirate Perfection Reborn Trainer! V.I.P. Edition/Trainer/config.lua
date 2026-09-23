@@ -5,7 +5,7 @@
 return {
 -- Pirate Perfection Reborn Trainer related Options
  -- Keybinds
-	DisableBindings = false,						-- Set to true in order to disable all binds (maybe usefull when you want to use only DLCUnlocker and some stealth cheats, like no recoil)
+	DisableBindings = false,						-- Set to true in order to disable all binds (maybe usefull when you want to use only some stealth cheats, like no recoil)
 	keyconfig = 'Trainer/keyconfig.lua',		-- Key bindings configuration filename. Use "keyconfig" (or false) to load the default keyconfig.lua. Or Set up your own Key configuration and switch to it.
 
  -- Updates & Annoucements
@@ -37,10 +37,7 @@ return {
 	Extend_Inventory_Slots = false,				-- Extend Inventory Slots
 
  -- Unlocker Options
-	DLCUnlocker = false,								-- Unlocks all dlcs in game. Use with caution, OVERKILL implemented check, if you wearing DLC item or creating DLC heist from DLC you don't own.
-	AllWeaponSkins = false,							-- Gives you all Weapon skins
 	NoSkinMods = false,								-- Prevents skins from automatically adding their own modifications.
-	AllArmorSkins = false,							-- Gives you all Armor skins
 	unlocked_hoxton = false,						-- Unlocks old hoxton without need to complete heist and being in official payday 2 group.
 	unlocked_arbiter = false,						-- Unlocks the Arbiter Grenade Launcher without collecting the Gage spec ops cases.
 	unlocked_aldstone_items = false,				-- Unlocks all Aldstone Items.
@@ -57,7 +54,6 @@ return {
 	FreeCrimeSpree = false,							-- Free Crime Spree start, continue, and randomization costs.
 
  -- Spoof Options	
-	NameSpoof = "A fellow V.I.P. Pirate",		-- Your new name in game, set to false in order to use your steam name. Don't forget to write your name in "Quotation Marks" (V.I.P. only Function)
 	ReduceDetectionLevel = false,					-- Reduce Detection Level (Pro & V.I.P. only Function)
 
  -- Exceptions Options
@@ -66,11 +62,6 @@ return {
 															-- Was planned to make process of locating latestcrash easier for cabin boys and it was success, but cabin boys experienced really weird problems with that.
 
  -- Anticheat related Options
-	DisableAnticheat = true,						-- Disables some anticheat checks, also it turns off DLC ownership checks.
-	PreventEquipDetecting = false,				-- Experimental way to prevent extra grenades and equipments from tagging you as cheater. (V.I.P. Only)
-	Hide_All_Mods = false,							-- Prevents other Users from seeing all of your mods.
-	Hide_Pirate_Perfection = false,				-- Hides Pirate Perfection from others.
-	non_modded_lobby = false,						-- Sets your Lobby to not Modded. (Pro & V.I.P. Only Function)
 
  -- Equipment placement Options
 	far_placements = true,							-- Allows you to place equipments at any distance, ahywhere (Will cause visual glitch, where dummy equipment will not appear, when you place something)
@@ -193,9 +184,6 @@ return {
 	LegoPrevKey = '7',								-- Quick-switch to previous prop from the list.
 	LegoNextKey = '8',								-- Quick-switch to next prop from the list.
 
- -- Loot Card Spoofer Option
-	SpoofCards = false,								-- Fake your multiplayer loot drops to always drop a random safe or drill.
-
  -- Debug HUD Options
 	DebugDramaDraw = false,							-- Enable drama HUD.
 	DebugStateDraw = false,							-- Enable displaying state on unit.
@@ -265,7 +253,6 @@ return {
 	xray_sub = nil,									--
 	aimbot_sub = nil,									--
 	Lego_sub = nil,									--
-	SpoofCards_sub = nil,							--
 	Lasercolor = nil,									--
 	xray_CamsCol = nil,								--
 	xray_CivCol = nil,								--

@@ -32,7 +32,6 @@ return{	['f1']				= { handled_callback	= 'Trainer/menu/help.lua',									ig_cha
 			['f2']				= { handled_callback	= 'Trainer/menu/config_menu.lua',						ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
 			['f3']				= { handled_callback	= 'Trainer/menu/main_menu-charmenu.lua',				ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
 			['f4']				= { handled_callback	= 'Trainer/menu/jobmenu-stealthmenu.lua',				ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
-			['f5']				= { handled_callback	= 'Trainer/menu/spoof_name-troll_menu.lua',			ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
 		--	['+']					= { handled_callback	= 'Trainer/menu/custom_plugins.lua',					ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game (Not Fully implemented)
 			['page up']			= { handled_callback	= 'Trainer/menu/ingame/tools.lua',						ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
 			['page down']		= { handled_callback	= 'Trainer/keybinded/music_menu.lua',					ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game

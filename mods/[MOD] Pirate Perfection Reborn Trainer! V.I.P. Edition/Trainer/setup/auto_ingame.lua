@@ -80,10 +80,6 @@ if not cfg.DisableInvFix then
 	ppr_require('Trainer/addons/invfix')
 end
 
-if cfg.PreventEquipDetecting and is_server then
-	ppr_require('Trainer/experimental/stealth_v2')
-end
-
 if cfg.ReduceDetectionLevel then
 	load_plugin('tools/spoof_detection_lvl')
 end

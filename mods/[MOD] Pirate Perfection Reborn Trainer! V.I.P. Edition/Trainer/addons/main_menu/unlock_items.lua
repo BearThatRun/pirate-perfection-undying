@@ -28,8 +28,13 @@ end
 unlock_weapons = function()
 	local weapons = Global.blackmarket_manager.weapons
 	for weapon_id in pairs( weapons ) do
-		managers.upgrades:aquire( weapon_id )
-		weapons[ weapon_id ].unlocked = true
+		-- x64 port: leave weapons from unowned DLCs locked
+		local def = tweak_data.upgrades.definitions[ weapon_id ]
+		local dlc = def and def.dlc
+		if not dlc or managers.dlc:is_dlc_unlocked( dlc ) then
+			managers.upgrades:aquire( weapon_id )
+			weapons[ weapon_id ].unlocked = true
+		end
 	end
 end
 
@@ -40,7 +45,12 @@ unlock_items_category = function( item_type )
 		end
 		
 		local global_value = get_global_value( data )
-		managers.blackmarket:add_to_inventory( global_value, item_type, id )
+		-- x64 port: skip items that belong to a DLC the player does not own
+		local gv_tweak = tweak_data.lootdrop.global_values[ global_value ]
+		local dlc_locked = gv_tweak and gv_tweak.dlc and not managers.dlc:is_dlc_unlocked( global_value )
+		if not dlc_locked then
+			managers.blackmarket:add_to_inventory( global_value, item_type, id )
+		end
 	end
 end
 

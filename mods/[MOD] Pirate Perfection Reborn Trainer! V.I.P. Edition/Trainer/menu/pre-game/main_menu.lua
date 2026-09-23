@@ -413,13 +413,11 @@ inventory_menu = function()
 		{},
 		{ text = tr['unlock_weapons'], callback = unlock_items, data = "weapons" },
 		{ text = tr['unlock_weap_mods'], callback = unlock_items, data = "weapon_mods" },
-		{ text = tr['unlock_all_weapon_skins'], callback = ppr_dofile, data = "Trainer/addons/all_weaponskins.lua" },
 		{},
 		{ text = tr['unlock_masks'], callback = unlock_items, data = "masks" },
 		{ text = tr['unlock_materials'], callback = unlock_items, data = "materials" },
 		{ text = tr['unlock_textures'], callback = unlock_items, data = "textures" },
 		{ text = tr['unlock_colors'], callback = unlock_items, data = "colors" },
-		{ text = tr['unlock_all_armor_skins'], callback = ppr_dofile, data = "Trainer/addons/all_armorskins.lua" },
 		{},
 		{ text = tr['clear_inventory_menu'], callback = remove_items_menu, menu = true },
 	}

@@ -31,19 +31,6 @@ if cfg.StraightToMainMenu then
 	ppr_require('Trainer/addons/StraightToMainMenu')
 end
 
-if cfg.DisableAnticheat then
-	ppr_require 'Trainer/addons/disable_anticheat'
-end
-
-if cfg.NameSpoof then
-	Global.spoofed_name = Global.spoofed_name or cfg.NameSpoof
-	ppr_require 'Trainer/addons/namespoof'
-end
-
-if cfg.DLCUnlocker then
-	ppr_require 'Trainer/addons/dlc_unlocker'
-end
-
 if cfg.EnableDebug then
 	ppr_require 'Trainer/addons/debugenable'
 end
@@ -224,14 +211,6 @@ if cfg.DisableAutoKick then
 	Global.game_settings.auto_kick = false
 end
 
-if cfg.AllWeaponSkins then
-	ppr_require 'Trainer/addons/all_weaponskins'
-end
-
-if cfg.AllArmorSkins then
-	ppr_require 'Trainer/addons/all_armorskins'
-end
-
 if cfg.CrewUnlocker then
 	ppr_require 'Trainer/addons/crew_unlocker'
 end
@@ -254,22 +233,6 @@ end
 
 if cfg.Extend_Inventory_Slots then
 	ppr_require 'Trainer/addons/Extend_Inventory_Slots'
-end
-
-if cfg.Hide_All_Mods then
-	ppr_require 'Trainer/addons/Hide All Mods'
-end
-
-if cfg.Hide_Pirate_Perfection then
-	ppr_require 'Trainer/addons/Hide Pirate Perfection'
-end
-
-if cfg.non_modded_lobby then
-	ppr_require 'Trainer/addons/non_modded_lobby'
-end
-
-if cfg.non_modded_lobby then
-	ppr_require 'Trainer/addons/non_modded_lobby'
 end
 
 if cfg.DebugConsole then
@@ -315,10 +278,6 @@ hijack(backuper, 'PlayerManager.aquire_default_upgrades', function(o, self, ...)
 	end
 	o(self, ...)
 end)
-
-if cfg.SpoofCards and not Global.game_settings.single_player then
-	ppr_require('Trainer/addons/spoof_cards')
-end
 
 if not togg_vars.backup_key then
 	togg_vars.backup_key = NetworkMatchMakingSTEAM._BUILD_SEARCH_INTEREST_KEY
