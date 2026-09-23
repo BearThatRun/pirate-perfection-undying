@@ -112,22 +112,6 @@
 											"run_in_game"		:	true,
 											"localized"			:	false
 										},
-										{	"keybind_id"		:	"Lego_Remove",
-											"name"				:	"Lego Remove",
-											"description"		:	"Lego Remove",
-											"script_path"		:	"Trainer/keybinds/Lego Remove.LUA",
-											"run_in_menu"		:	false,
-											"run_in_game"		:	true,
-											"localized"			:	false
-										},
-										{	"keybind_id"		:	"LEGO_Spawn",
-											"name"				:	"LEGO Spawn",
-											"description"		:	"LEGO Spawn",
-											"script_path"		:	"Trainer/keybinds/LEGO Spawn.LUA",
-											"run_in_menu"		:	false,
-											"run_in_game"		:	true,
-											"localized"			:	false
-										},
 										{	"keybind_id"		:	"Media_Mod",
 											"name"				:	"Media Mod",
 											"description"		:	"Media Mod",

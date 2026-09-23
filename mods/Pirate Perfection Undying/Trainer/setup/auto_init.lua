@@ -252,20 +252,6 @@ hijack(backuper, 'PlayerManager.aquire_default_upgrades', function(o, self, ...)
 	o(self, ...)
 end)
 
-if not togg_vars.backup_key then
-	togg_vars.backup_key = NetworkMatchMakingSTEAM._BUILD_SEARCH_INTEREST_KEY
-end
-local f = io_open("Trainer/configs/crew_finder/password", "r")
-if f then
-	togg_vars.add_string = f:read() or ""
-	if togg_vars.add_string ~= "" then
-		M_N_matchmake._distance_filter = 3
-	end
-	NetworkMatchMakingSTEAM._BUILD_SEARCH_INTEREST_KEY = togg_vars.backup_key..togg_vars.add_string
-	f:close()
-else
-	togg_vars.add_string = ""
-end
 
 if cfg.NoSkinMods then
 	for _, skin in pairs(weapon_skins) do

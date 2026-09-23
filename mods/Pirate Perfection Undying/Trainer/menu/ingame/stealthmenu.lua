@@ -77,7 +77,6 @@ main_menu = function()
 		{ text = tr['add_ecm'], callback = add_ecm, switch_back = true },
 		{ text = tr['remote_camera_access'], callback = remote_camera },
 		{},
-		{ text = tr['change_fov'], plugin = "change_fov" },
 		{ text = tr['dis_cams'], plugin = "disable_cams", host_only = true, switch_back = true },
 		{ text = tr['steal_pagers'], plugin = "steal_pagers_on_melee", switch_back = true },
 		{},

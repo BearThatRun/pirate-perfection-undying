@@ -198,7 +198,6 @@ customize_safehouse = function()
 		{text = tr.base_SafeHouseDoors, type = "toggle", toggle = 'SafeHouseDoors', callback = toggle_customization, data = 'SafeHouseDoors', switch_back = true},
 		{text = tr.base_SafeHouseInvest, type = "toggle", toggle = 'SafeHouseInvest', callback = toggle_customization, data = 'SafeHouseInvest', switch_back = true},
 		{text = tr.base_SafeHouseInvestAmt, type = "multi_choice", name = 'SafeHouseInvestAmt', multi_callback = function(n, v) togg_vars[n] = v end, multi_choice_data = safehouse_invest_amts, value = togg_vars.SafeHouseInvestAmt, switch_back = true},
-		{text = tr.base_SafeHouseLego, type = "toggle", toggle = 'SafeHouseLego', callback = function() if not togg_vars.SafeHouseLego then toggle_customization('SafeHouseLego') end end},
 		{},
 		{ text = tr['Auto_Complete_All_Challenges'], callback = Auto_Complete_All_Challenges },
 		{ text = tr['Auto_Complete_Safehouse_Challenge'], callback = Auto_Complete_Safehouse_Challenge },

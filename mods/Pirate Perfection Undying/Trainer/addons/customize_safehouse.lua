@@ -45,7 +45,6 @@ local togg_vars = togg_vars
 togg_vars.SafeHouseDoors = togg_vars.SafeHouseDoors == nil and ppr_config.SafeHouseDoors or togg_vars.SafeHouseDoors
 togg_vars.SafeHouseInvest = togg_vars.SafeHouseInvest == nil and ppr_config.SafeHouseInvest or togg_vars.SafeHouseInvest
 togg_vars.SafeHouseInvestAmt = togg_vars.SafeHouseInvestAmt == nil and ppr_config.SafeHouseInvestAmt or togg_vars.SafeHouseInvestAmt
-togg_vars.SafeHouseLego = togg_vars.SafeHouseLego == nil and ppr_config.SafeHouseLego or togg_vars.SafeHouseLego
 
 if not PiratePerfectionSafeHouse then
 	PiratePerfectionSafeHouse = {}
@@ -376,12 +375,3 @@ if level_id == 'chill' then
 	end
 end
 
-if togg_vars.SafeHouseLego and not PiratePerfection_safehouse.SafeHouseLego then
-	ppr_config.LegoFile = 'custom_safehouse'
-	local _, load_lego = ppr_require('Trainer/menu/ingame/lego_menu')
-	if load_lego() then
-		PiratePerfection_safehouse.SafeHouseLego = true
-	else
-		togg_vars.SafeHouseLego = nil
-	end
-end

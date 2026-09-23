@@ -26,7 +26,6 @@ main_menu = function()
 		{ text = tr['mod_driver'], plugin = "driver", host_only = true },
 		{ text = tr['mod_helicopter'], plugin = "helicopter", host_only = true },
 		{ text = tr['mod_aimbot'], plugin = "aimbot" },
-		{ text = tr['mod_lego'], callback = ppr_require("Trainer/menu/ingame/lego_menu"), host_only = true },
 		{ text = tr['mod_pvp'], callback = function() ppr_require("Trainer/pvp/pvp.lua")() end },
 		{ text = tr['mod_wavehouse'], plugin = "wavehouse", host_only = true },
 		{ text = tr['mod_TerminatorHUD'], plugin = "TerminatorHUD" },		

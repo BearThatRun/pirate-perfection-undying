@@ -184,13 +184,6 @@ local options = {
 		{name = "MaxAimDist", type = "slider", max = 10000},
 		{name = "AimbotDamageMul", type = "slider", max = 100},
 	}},
-	{name = "Lego_sub", desc = true, sub = {
-		{name = "LegoFile", type = "input"},
-		{name = "LegoDeleteKey", type = "input"},
-		{name = "LegoSpawnKey", type = "input"},
-		{name = "LegoPrevKey", type = "input"},
-		{name = "LegoNextKey", type = "input"},
-	}},
 	{name = "Debug_Sub", desc = true, sub = {
 		{name = "DebugConsole"},
 		{},
@@ -267,7 +260,6 @@ local options = {
 			end
 			return data
 		end},
-		{name = "SafeHouseLego"},
 	}},
 }
 

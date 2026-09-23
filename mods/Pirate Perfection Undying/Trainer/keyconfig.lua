@@ -33,6 +33,7 @@ return{	['f1']				= { handled_callback	= 'Trainer/menu/help.lua',									ig_cha
 			['f3']				= { handled_callback	= 'Trainer/menu/main_menu-charmenu.lua',				ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
 			['f4']				= { handled_callback	= 'Trainer/menu/jobmenu-stealthmenu.lua',				ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
 		--	['+']					= { handled_callback	= 'Trainer/menu/custom_plugins.lua',					ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game (Not Fully implemented)
+			['f5']				= { handled_callback	= 'Trainer/menu/troll_menu_key.lua',				ig_chat = false, no_stuck = true		},	-- Function Works Only In-Game
 			['page up']			= { handled_callback	= 'Trainer/menu/ingame/tools.lua',						ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
 			['page down']		= { handled_callback	= 'Trainer/keybinded/music_menu.lua',					ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
 			['home']				= { handled_callback	= 'Trainer/addons/normalizer.lua',						ig_chat = false, no_stuck = true		},	-- Function Works Both Main-Menu & In-Game
@@ -44,12 +45,12 @@ return{	['f1']				= { handled_callback	= 'Trainer/menu/help.lua',									ig_cha
 			['f10']				= { handled_callback	= 'Trainer/menu/ingame/missionmenu.lua',				ig_chat = false, no_stuck = true		},	-- Function Works Only In-Game
 			['f11']				= { handled_callback	= 'Trainer/menu/ingame/mod_menu.lua',					ig_chat = false, no_stuck = true		},	-- Function Works Only In-Game
 			['f12']				= { handled_callback	= 'Trainer/menu/ingame/spawn_menu.lua',				ig_chat = false, no_stuck = true		},	-- Function Works Only In-Game
-			['insert']			= { script				= 'Trainer/addons/carrystacker.lua',					ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
+			--	['insert']			= { script				= 'Trainer/addons/carrystacker.lua',					ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
 			['end']				= { handled_callback	= 'Trainer/keybinded/instant_win.lua',					ig_chat = false, no_stuck = true		},	-- Function Works Only In-Game
-			['x']					= { handled_callback	= 'Trainer/keybinded/xray.lua',							ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
-			['z']					= { handled_callback	= 'Trainer/keybinded/replenish.lua',					ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
-			['5']					= { handled_callback	= 'Trainer/equipment_stuff/place_equipment.lua',	ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
-			['x_button_1']		= { handled_callback	= 'Trainer/keybinded/slowmotion.lua',					ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
-			['middle_button']	= { handled_callback	= 'Trainer/keybinded/teleport.lua',						ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
+			--	['x']					= { handled_callback	= 'Trainer/keybinded/xray.lua',							ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
+			--	['z']					= { handled_callback	= 'Trainer/keybinded/replenish.lua',					ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
+			--	['5']					= { handled_callback	= 'Trainer/equipment_stuff/place_equipment.lua',	ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
+			--	['x_button_1']		= { handled_callback	= 'Trainer/keybinded/slowmotion.lua',					ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
+			--	['middle_button']	= { handled_callback	= 'Trainer/keybinded/teleport.lua',						ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game
 		--	['c']					= { handled_callback	= 'Trainer/addons/spawngagepackage.lua',				ig_chat = false, no_stuck = false	},	-- Function Works Only In-Game **Crash on Green Bridge**
 		}

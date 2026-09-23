@@ -55,12 +55,6 @@ by Baddog-11 and the Pirate Perfection Developer Crew. Edited with permission.
 
 	Driver mod:		arrow left/right/up/down - Move left/right/up/down.
 
-	Lego mod:		Page Up		- Place lego.
-					Page Down	- Remove lego.
-					H			- Delete props button.
-					6			- Spawn props button.
-					7			- Quick-switch to previous prop from the list.
-					8			- Quick-switch to next prop from the list.
 
 -- Changes from the original v2.0.0 :
 	- Packaged for SuperBLT 64-bit, BeardLib is required and lists the mod in its mod manager

@@ -166,12 +166,9 @@ return {
 	AimMode = 2,										-- AimBot mode (1 - Only auto shoot, 2 - Only aim, 3 - Auto aim and shoot).
 	RightClick = true,								-- Only let the AimBot work if the right mouse button is held.
 
- -- Lego Options
-	LegoFile = 'default',							-- Default lego file.
-	LegoDeleteKey = 'h',								-- Delete props button.
-	LegoSpawnKey = '6',								-- Spawn props button.
-	LegoPrevKey = '7',								-- Quick-switch to previous prop from the list.
-	LegoNextKey = '8',								-- Quick-switch to next prop from the list.
+ -- F5 menu
+	TrollAmountBags = 5,								-- How many bags "Give bags" in the F5 menu spawns.
+
 
  -- Debug HUD Options
 	DebugDramaDraw = false,							-- Enable drama HUD.
@@ -223,7 +220,6 @@ return {
 	SafeHouseDoors = true,							-- Makes doors actually doors in the Safe House.
 	SafeHouseInvest = false,						-- Put your offshore money on the line to increase or decrease your funds.
 	SafeHouseInvestAmt = 500,						-- Amount of money to give to put on Safe House Investment.
-	SafeHouseLego = false,							-- Automatically loads a file named 'custom_safehouse' upon entering the Safe House.
 
 -- Enables Sub Menus for PPR Setup Menu		-- No need to Change something, this is just to prevent some errors getting logged in the console to reduce the lag caused by this.
 	announce_sub = nil,								-- 
@@ -241,7 +237,6 @@ return {
 	slow_sub = nil,									--
 	xray_sub = nil,									--
 	aimbot_sub = nil,									--
-	Lego_sub = nil,									--
 	Lasercolor = nil,									--
 	xray_CamsCol = nil,								--
 	xray_CivCol = nil,								--

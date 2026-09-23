@@ -216,10 +216,6 @@ if cfg.inf_follow_hostages then
 	load_plugin( 'stealthmenu/inf_follow_hostages' )
 end
 
--- Stealth menu
-if cfg.change_fov then
-	load_plugin( 'stealthmenu/change_fov' )
-end
 
 if cfg.disable_cams and is_server then
 	query_execution_testfunc(is_playing,{ f = load_plugin, a = { ( 'stealthmenu/disable_cams' ) } })

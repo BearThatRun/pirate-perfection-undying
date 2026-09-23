@@ -43,7 +43,6 @@ return {
 	dont_call_police = false,				-- Civilians no longer call police
 	inf_body_bags = false,					-- You have infinite amount of body bags
 	ReduceDetectionLevel = false,			-- Reduce Detection Level (Pro & V.I.P. Only)
-	change_fov = false,						-- Use mousewheel to change FOV
 	lobotomize_ai = false,					-- Lobotomize enemy AI
 	invisible_player = false,				-- Make players invisible for AI
 

@@ -329,7 +329,6 @@ end
 -- Menu
 level_menu = function()	
 	local data = { 
-		{ text = tr['level_revolver'], plugin = "level_revolver" },
 		{},
 		{},
 		{ text = tr['set_level'] .. ":", type = "slider", slider_data = { name = "set_level", value = 0, max = 255 }, switch_back = true },
@@ -388,8 +387,11 @@ skill_menu = function()
 end
 
 infamy_menu = function()
+	-- x64: the old cap was 25; the current game goes much higher (Infamy 2.0)
+	local ranks = tweak_data.infamy and tweak_data.infamy.ranks
+	local max_inf = type(ranks) == "table" and #ranks or tonumber(ranks) or 500
 	local data = { 
-		{ text = tr['set_inf'] .. ':', type = "slider", slider_data = { name = "inf_level", value = 0, max = 25 }, switch_back = true },
+		{ text = tr['set_inf'] .. ':', type = "slider", slider_data = { name = "inf_level", value = 0, max = max_inf }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_infamy_level, name = "inf_level" },
 		{},
 		{ text = tr['set_inf_points'] .. ':', type = "slider", slider_data = { name = "inf_points", value = 0, max = 25 }, switch_back = true },

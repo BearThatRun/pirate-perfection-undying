@@ -38,7 +38,7 @@ local is_singleplayer = ppr_config.jobmenu_singleplayer
 
 local contact_menus = {} --Here will be preloaded contact menus
 
-local main,contact_menu,heist_menu,stage_menu,escapes_menu,crewfinder_menu
+local main,contact_menu,heist_menu,stage_menu,escapes_menu
 
 --local odd_heists = ppr_config.jobmenu_odd_jobs or {}
 
@@ -120,41 +120,6 @@ contact_menu = function(contact)
 	Menu_open( Menu, data )
 end
 
-local function input_pass(character)
-	togg_vars.add_string = togg_vars.add_string..character
-	crewfinder_menu()
-end
-
-local function confirm_pass()
-	local f = io_open("Trainer/configs/crew_finder/password", "w")
-	if f then
-		f:write(togg_vars.add_string)
-		f:close()
-	end
-	if togg_vars.add_string == "" then
-		M_N_matchmake._distance_filter = 1
-	else
-		M_N_matchmake._distance_filter = 3
-	end
-	NetworkMatchMakingSTEAM._BUILD_SEARCH_INTEREST_KEY = togg_vars.backup_key..togg_vars.add_string
-end
-
-crewfinder_menu = function()
-	data = {
-		{text = tr.job_menu_crew_pass..togg_vars.add_string, switch_back = true},
-		{},
-	}
-	for i = 0, 9 do
-		local input = tostring(i)
-		tab_insert(data, {text = input, callback = input_pass, data = input})
-	end
-	tab_insert(data, {})
-	tab_insert(data, {text = tr.reset, callback = function() togg_vars.add_string = "" confirm_pass() crewfinder_menu() end})
-	tab_insert(data, {})
-	tab_insert(data, {text = tr.job_menu_crew_confirm, callback = confirm_pass})
-
-	Menu_open(Menu, {title = tr.job_menu_crew_finder, description = tr.job_menu_crew_desc, button_list = data, back = main})
-end
 
 --Difficulties list 
 local diffs = {}
@@ -211,7 +176,6 @@ local main_menu_data = {
 --	{},
 	{ text = tr.job_menu_safehouse_raid, callback = function() M_custom_safehouse:spawn_safehouse_combat_contract() end},
 --	{},
-	{ text = tr.job_menu_crew_finder, callback = crewfinder_menu},
 	{},
 	{ text = tr.job_menu_escapes, callback = escapes_menu },
 --	{},
