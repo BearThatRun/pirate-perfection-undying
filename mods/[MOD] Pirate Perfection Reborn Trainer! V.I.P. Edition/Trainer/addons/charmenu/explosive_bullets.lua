@@ -23,14 +23,6 @@ function MAIN()
 		return r
 	end)
 
-	hijack(backuper, "NewShotgunBase._fire_raycast",function( o, self, ... )
-		local old_class = self._bullet_class
-		self._bullet_class = InstantExplosiveBulletBase
-		local r = o( self, ...)
-		self._bullet_class = old_class
-		return r
-	end)
-
 	hijack(backuper, "ShotgunBase._fire_raycast",function( o, self, ... )
 		local old_class = self._bullet_class
 		self._bullet_class = InstantExplosiveBulletBase
@@ -42,7 +34,6 @@ end
 
 function UNLOAD()
 	restore(backuper, "NewRaycastWeaponBase._fire_raycast")
-	restore(backuper, "NewShotgunBase._fire_raycast")
 	restore(backuper, "ShotgunBase._fire_raycast")
 end
 

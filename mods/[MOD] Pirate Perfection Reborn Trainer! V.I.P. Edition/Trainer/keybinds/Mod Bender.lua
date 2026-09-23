@@ -541,7 +541,7 @@ if inGame() then
 									{ text = "Meth", callback = chatdatshit, data= "01101101011001010111010001101000" },
 									{ text = "Gold", callback = chatdatshit, data= "01100111011011110110110001100100" },
 									{ text = "Ammo", callback = chatdatshit, data= "01100001011011010110110101101111" },
-									{ text = "Money menu \[F8\]", callback = callchamoneymenu },
+									{ text = "Money menu [F8]", callback = callchamoneymenu },
 	}
 else
 -- ROOT MENU INGAME

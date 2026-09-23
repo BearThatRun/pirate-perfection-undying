@@ -571,8 +571,8 @@ if inGame() then
 	audioopt = audioopt or {
 	{ text = "Exit", is_cancel_button = true},
 	{},
-	{ text = "Sound effects \[menu\]", callback = calleffectsmenu },
-	{ text = "Music \[menu\]", callback = calltubemenu },
+	{ text = "Sound effects [menu]", callback = calleffectsmenu },
+	{ text = "Music [menu]", callback = calltubemenu },
 	{},
 	{ text = "Payday Soundtrack", callback = pdost },
 	{ text = "Payday 2 Soundtrack", callback = pd2ost },
@@ -583,9 +583,9 @@ if inGame() then
 	audioopt = audioopt or {
 	{ text = "Exit", is_cancel_button = true},
 	{},
-	{ text = "Sound effects \[menu\]", callback = calleffectsmenu },
-	{ text = "Music \[menu\]", callback = calltubemenu },
-	{ text = "Media \[menu\]", callback = callmediamenu },
+	{ text = "Sound effects [menu]", callback = calleffectsmenu },
+	{ text = "Music [menu]", callback = calltubemenu },
+	{ text = "Media [menu]", callback = callmediamenu },
 	}
 end
 if not arootmenu then

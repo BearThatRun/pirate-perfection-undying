@@ -403,8 +403,8 @@ end
 
 local mvec_to = Vector3()
 local mvec_spread_direction = Vector3()
-local NewShotgunBase_fire_raycast = backuper:backup("NewShotgunBase._fire_raycast")
-function NewShotgunBase:_fire_raycast( user_unit, from_pos, direction, dmg_mul, shoot_player, spread_mul, autohit_mul, suppr_mul, shoot_through_data )
+local NewShotgunBase_fire_raycast = backuper:backup("ShotgunBase._fire_raycast") -- x64 port: NewShotgunBase is gone
+function ShotgunBase:_fire_raycast( user_unit, from_pos, direction, dmg_mul, shoot_player, spread_mul, autohit_mul, suppr_mul, shoot_through_data )
 	local spread = self:_get_spread( user_unit )
    
 	mvector3.set( mvec_spread_direction, direction )
