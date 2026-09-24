@@ -168,14 +168,6 @@
 											"run_in_game"		:	true,
 											"localized"			:	false
 										},
-										{	"keybind_id"		:	"Poco_Menu",
-											"name"				:	"Poco Menu",
-											"description"		:	"Poco Menu",
-											"script_path"		:	"Trainer/keybinds/Poco Menu.LUA",
-											"run_in_menu"		:	true,
-											"run_in_game"		:	true,
-											"localized"			:	false
-										},
 										{	"keybind_id"		:	"Replenish",
 											"name"				:	"Replenish",
 											"description"		:	"replenish player's health and ammo + restores standard state once script activated and if player is alive.",
