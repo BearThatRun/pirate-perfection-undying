@@ -21,8 +21,15 @@ end
 
 local force_ready = function(ready)
 	local readyNum = ready and 1 or 0
+	local s = M_network:session() -- Undying: read the session now, not when the file was first loaded
 	if not s then
 		return
+	end
+	-- Undying: also set yourself (the old code only looped over the other players)
+	local mc = managers.menu_component
+	local briefing = mc and mc._mission_briefing_gui
+	if briefing and briefing.on_ready_pressed then
+		pcall( briefing.on_ready_pressed, briefing, ready )
 	end
 	for _, peer in pairs(s._peers) do
 		local peer_id = peer:id()

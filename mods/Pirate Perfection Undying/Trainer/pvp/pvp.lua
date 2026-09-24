@@ -489,11 +489,13 @@ function HuskPlayerMovement:_get_max_move_speed()
 	return 1500
 end
 
-tweak_data.grenades.frag.damage = 100
-tweak_data.grenades.frag.player_damage = 100
-tweak_data.grenades.launcher_frag.player_damage = 100
-tweak_data.grenades.launcher_frag.range = 500
-tweak_data.grenades.launcher_frag.init_timer = 2
+if tweak_data.grenades then -- x64: tweak_data.grenades is gone in the current game
+	tweak_data.grenades.frag.damage = 100
+	tweak_data.grenades.frag.player_damage = 100
+	tweak_data.grenades.launcher_frag.player_damage = 100
+	tweak_data.grenades.launcher_frag.range = 500
+	tweak_data.grenades.launcher_frag.init_timer = 2
+end
 
 function ContourExt:add() end
 function ContourExt:update() end

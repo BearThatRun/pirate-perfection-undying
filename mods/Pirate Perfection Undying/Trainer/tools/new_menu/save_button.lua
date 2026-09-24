@@ -21,6 +21,9 @@ function SaveButton:save()
 	
 	if callback and value then
 		callback( value )
+		if show_hint then
+			show_hint( "Saved: " .. tostring( value ) )
+		end
 	end
 end
 

@@ -129,7 +129,7 @@ function MAIN()
 	end
 	if ppr_config.DebugNavDraw then
 		managers.navigation._debug = true
-		managers.navigation:set_debug_draw_state { quads = true, doors = true, vis_graph = true, coarse_graph = true, blockers = true, covers = true, pos_rsrv = true, nav_links = true }
+		pcall( managers.navigation.set_debug_draw_state, managers.navigation, { quads = true, doors = true, vis_graph = true, coarse_graph = true, blockers = true, covers = true, pos_rsrv = true, nav_links = true } ) -- x64: not in the release game
 	end
 	if managers.debug then
 		managers.debug:set_enabled_all(true, true)
@@ -191,10 +191,11 @@ function MAIN()
 end
 
 function UNLOAD()
-	managers.groupai:state():set_drama_draw_state( false )
-	managers.groupai:state():set_debug_draw_state( false )
-	managers.mission:set_persistent_debug_enabled( false )
-	managers.navigation:set_debug_draw_state( false )
+	-- x64: each call on its own, so one missing debug function no longer stops the rest (debug HUD couldn't be turned off)
+	pcall( function() managers.groupai:state():set_drama_draw_state( false ) end )
+	pcall( function() managers.groupai:state():set_debug_draw_state( false ) end )
+	pcall( function() managers.mission:set_persistent_debug_enabled( false ) end )
+	pcall( function() managers.navigation:set_debug_draw_state( false ) end )
 	backuper:restore("GroupAIStateBase.update")
 	backuper:restore("MissionManager.update")
 	backuper:restore("MissionScript._debug_draw")

@@ -28,6 +28,7 @@ local load_plugin = load_plugin( path )
 local cfg = ppr_config
 
 ppr_require("Trainer/addons/weap_fix1")
+ppr_require("Trainer/addons/undying_fixes")
 
 ppr_dofile('Trainer/Setup/auto_config')
 

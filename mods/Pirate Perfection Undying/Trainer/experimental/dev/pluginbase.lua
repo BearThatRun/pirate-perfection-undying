@@ -17,7 +17,7 @@ local m_log_vs = m_log_vs
 
 local function check_config( key, val ) --Macro that changes config's value, if it exists.
 	local config = game_config
-	if rawget( config, key ) ~= nil then
+	if type( config ) == "table" and rawget( config, key ) ~= nil then -- x64/Undying: game_config is nil in the main menu
 		config[key] = val
 	end
 end

@@ -208,10 +208,14 @@ end
 mask_menu = function(mask, peer)
 	local items = {
 		{'masks', mask.mask_id},
-		{'materials', mask.blueprint.material.id},
-		{'textures', mask.blueprint.pattern.id},
-		{'colors', mask.blueprint.color.id},
+		{'materials', mask.blueprint.material and mask.blueprint.material.id},
+		{'textures', mask.blueprint.pattern and mask.blueprint.pattern.id},
 	}
+	-- x64: current masks store color_a / color_b instead of one color
+	local bp = mask.blueprint or {}
+	if bp.color and bp.color.id then
+		items[#items + 1] = {'colors', bp.color.id}
+	end
 	local addable_items = deep_clone(items)
 	local data
 	if items[1][2] == "character_locked" then
@@ -225,13 +229,13 @@ mask_menu = function(mask, peer)
 			{text = tr['want_that_add_mask']..":  "..mask_name, callback = add_single_item, data = addable_items[1], switch_back = true},
 			{},
 		}
-		if addable_items[2][2] == 'plastic' then
+		if not addable_items[2][2] or addable_items[2][2] == 'plastic' then
 			addable_items[2] = nil
 		end
-		if addable_items[3][2] == 'no_color_no_material' or addable_items[3][2] == 'no_color_full_material' then
+		if not addable_items[3][2] or addable_items[3][2] == 'no_color_no_material' or addable_items[3][2] == 'no_color_full_material' then
 			addable_items[3] = nil
 		end
-		if addable_items[4][2] == 'nothing' then
+		if addable_items[4] and addable_items[4][2] == 'nothing' then
 			addable_items[4] = nil
 		end
 		local labels = {[2] = tr['want_that_add_mat'], [3] = tr['want_that_add_pat'], [4] = tr['want_that_add_color']}

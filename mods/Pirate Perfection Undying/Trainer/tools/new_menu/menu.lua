@@ -514,9 +514,11 @@ function Menu:button_pressed( button_index, alt )
 		return --And stop here
 	end
 		
-	if button.type == "save_button" then
+	-- Undying: Save keeps the menu open and can be pressed again (it used to close the menu
+	-- and clear its own callback, so values looked like they weren't saved)
+	local is_save = button.type == "save_button"
+	if is_save then
 		button.save_button:save()
-		button.callback = nil
 	end
 	
 	local have_plugin = button.plugin
@@ -526,7 +528,7 @@ function Menu:button_pressed( button_index, alt )
 		load_plugin( have_plugin )
 	end
 	
-	local btn_callback = button.callback
+	local btn_callback = not is_save and button.callback
 	if btn_callback then
 		local data = button.data
 		if type(data) == 'table' then
@@ -544,7 +546,7 @@ function Menu:button_pressed( button_index, alt )
 	--if btn_callback then
 	if not switch_back then
 		--Very dirty fix
-		if button.type ~= 'input' then
+		if button.type ~= 'input' and not is_save then
 			self:close()
 		end
 	elseif type( switch_back ) == "function" then

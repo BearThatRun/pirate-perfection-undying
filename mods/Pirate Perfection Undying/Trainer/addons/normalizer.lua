@@ -41,6 +41,7 @@ local function restore()
 	if plugins then
 		plugins:unload_except_by_cat("no_reload", true)
 	end
+	if show_hint then show_hint("Trainer changes turned off") end -- Undying: say that something happened
 	
 	--[[local restore_hacked_upgrades = M_player.restore_hacked_upgrades
 	if ( restore_hacked_upgrades ) then
@@ -51,7 +52,7 @@ end
 local function reboot()
 	restore()
 	ppr_dofile('Trainer/Setup/auto_config') --Thank you Simplity, your idea made it easier
-	show_mid_text("Successfully rebooted", "Pirate Perfection Reborn Trainer!", 3)
+	show_mid_text("Successfully rebooted", "Pirate Perfection Undying", 3)
 end
 
 local main

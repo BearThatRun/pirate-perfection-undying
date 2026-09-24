@@ -106,7 +106,14 @@ local save_settings = function()
 end
 
 local get_configs_list = function()
-	return rlist_files( "Trainer/configs", "lua" )
+	-- Undying: rlist_files also lists sub folders (secret_skills/skills_config), which are not configs
+	local out = {}
+	for _, name in pairs( rlist_files( "Trainer/configs", "lua" ) or {} ) do
+		if file_exists( "Trainer/configs/" .. name .. ".lua" ) then
+			insert( out, name )
+		end
+	end
+	return out
 	--local list = io_popen("@echo OFF & cd Trainer/configs & for /r %f in (*.lua) do echo %~nf"):read("*all")
 	--if ( list ~= "" ) then
 	--	list = str_split(list, '\n')

@@ -60,13 +60,26 @@ local speedometer_y = 0.68518518518518518518518518518519 -- 740
 
 local speedometer_size = 0.03125 -- 60
 
+-- Undying: put the player on the vehicle every frame (you used to fall off when it stood still)
+local ids_glass = Idstring("g_glass")
+local function keep_player()
+	player = M_player:player_unit()
+	if not alive( unit ) or not alive( player ) then
+		return
+	end
+	local obj = nil
+	local pos = obj and obj:position() or ( unit:position() + Vector3(0, 0, 100) )
+	M_player:warp_to( pos, player:camera():rotation() )
+end
+
 local function move_car(pos, rot)
 	pos = pos or unit:position()
 	rot = rot or unit:rotation()
 	local nav = M_nav:create_nav_tracker( pos )
 	W_delete_unit( World, unit )
 	unit = W_spawn_unit( World, Idstring(unit_name), Vector3(pos.x, pos.y, nav:field_z() - 25), rot)
-	M_player:warp_to( unit:position() + Vector3(0,0,100), player:camera():rotation() )
+	M_nav:destroy_nav_tracker( nav ) -- Undying: trackers were never freed
+	keep_player()
 end
 
 local function move_forward()
@@ -181,6 +194,7 @@ end
 
 
 local function update_input()
+	keep_player()
 	if kb_down( kb, Idstring("up") ) then 
 		move_forward()
 		speed_up = true
@@ -202,6 +216,7 @@ local function update_input()
 end
 
 function MAIN()
+	player = M_player:player_unit()
 	-- Load unit
 	local unit_names = { "units/payday2/vehicles/str_vehicle_car_police_washington/str_vehicle_car_police_washington",
 						 "units/payday2/vehicles/str_vehicle_car_taxi/str_vehicle_car_taxi", "units/payday2/vehicles/str_vehicle_suburban_fbi/str_vehicle_suburban_fbi",

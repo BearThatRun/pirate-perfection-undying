@@ -33,6 +33,7 @@ function MAIN()
 			local local_peer_id = session:local_peer():id()
 			throw_projectile(--[[2]] 'frag', from_pos, mvec_spread_direction, local_peer_id )
 		end
+		return {} -- x64: fire() reads the result; returning nothing logged an error on every shot
 	end
 end
 

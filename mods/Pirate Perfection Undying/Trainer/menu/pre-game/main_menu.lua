@@ -51,26 +51,39 @@ local path = "Trainer/addons/main_menu/"
 
 -- Functions
 -- Level
+-- Undying: redraw the profile box in the main menu so new money/level/points show right away
+local function refresh_profile()
+	local mc = managers.menu_component
+	if mc and mc.refresh_player_profile_gui then
+		pcall( mc.refresh_player_profile_gui, mc )
+	end
+end
+
 local function change_level( level )
 	M_experience:_set_current_level( level )
+	refresh_profile()
 end
 
 local function add_exp( value )
 	M_experience:debug_add_points( value, false )
+	refresh_profile()
 end
 
 -- Money
 local function add_money( value )
 	M_money:_add_to_total( value )
+	refresh_profile()
 end
 
 local function reset_money()
 	M_money:reset()
+	refresh_profile()
 end
 
 -- Skill points
 local function set_skillpoints( value )
 	M_skilltree:_set_points( value )
+	refresh_profile()
 end
 
 local function unlock_all_skills()
@@ -89,6 +102,7 @@ end
 local function set_perk_points( points )
 	G_specs.total_points = points
 	G_specs.points = points
+	refresh_profile()
 end
 
 local function reset_perks()
@@ -98,10 +112,12 @@ end
 -- Infamy
 local function set_infamy_level(level)
 	M_experience:set_current_rank(level)
+	refresh_profile()
 end
 
 local function set_infamy_points(value)
 	M_infamy:_set_points(value)
+	refresh_profile()
 end
 
 -- Inventory
@@ -273,7 +289,7 @@ local function toggle_skill(skill, level)
 	end
 end
 
-local function create_secret_skills_sub_menu(name, skilltree)
+local function create_secret_skills_sub_menu(name, skilltree, back_f)
 	local data = {}
 	for _, row in pairs(skilltree.tiers) do
 		for _, skill in pairs(row) do
@@ -288,7 +304,7 @@ local function create_secret_skills_sub_menu(name, skilltree)
 			end
 		end
 	end
-	Menu_open(Menu, {title = name, button_list = data, back = secret_skills_menu})
+	Menu_open(Menu, {title = name, button_list = data, back = back_f or secret_skills_menu}) -- Undying: back goes to the tree, not the top menu
 end
 
 local function create_secret_skills_menu(tree)
@@ -301,7 +317,7 @@ local function create_secret_skills_menu(tree)
 		tab_insert(data, {
 			text = name,
 			callback = create_secret_skills_sub_menu,
-			data = {name, skilltree},
+			data = {name, skilltree, function() create_secret_skills_menu(tree) end},
 			menu = true,
 		})
 	end
