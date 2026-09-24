@@ -26,9 +26,7 @@ main_menu = function()
 		{ text = tr['mod_driver'], plugin = "driver", host_only = true },
 		{ text = tr['mod_helicopter'], plugin = "helicopter", host_only = true },
 		{ text = tr['mod_aimbot'], plugin = "aimbot" },
-		{ text = tr['mod_pvp'], callback = function() ppr_require("Trainer/pvp/pvp.lua")() end },
 		{ text = tr['mod_wavehouse'], plugin = "wavehouse", host_only = true },
-		{ text = tr['mod_TerminatorHUD'], plugin = "TerminatorHUD" },		
 	}
 	
 	Menu_open( Menu, { title = tr['mod_menu'], button_list = data, plugin_path = path } )

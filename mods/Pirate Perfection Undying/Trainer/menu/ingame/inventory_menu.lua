@@ -40,7 +40,7 @@ local T_carry = tweak_data.carry
 local T_levels = tweak_data.levels
 local T_equipments = tweak_data.equipments
 --local T_money = tweak_data.money_manager
-local T_M_bag_values = tweak_data.money_manager.bag_values
+local M_money = managers.money
 local T_E_specials = T_equipments.specials
 local KeyInput = KeyInput
 local edit_key = KeyInput.edit_key
@@ -103,37 +103,39 @@ local add_item = function( name )
 	add_special( M_player, { name = name, silent = true, amount = 1 } )
 end
 
+-- Undying rewrite: the old code picked a *value category* name (tweak_data.money_manager.bag_values)
+-- and passed it as a bag id, and ran the numbers through digest_value (they are plain numbers now).
+-- Now: the carry id with the highest bag value, then secure it up to the map's bag limit.
 local BEST_BAG = false
 
 local get_the_most_expensive_bag = function()
-	local best_val = 0
-	local best_bag = ''
-	local A = Application
-	local digest_value = digest_value
-	for name,val in pairs(T_M_bag_values) do
-		val = digest_value( A, val, false ) --Why OVERKILL do that ?
-		if ( val>best_val ) then
-			best_val = val
-			best_bag = name
+	local best_val, best_bag = -1, nil
+	local small_loot = tweak_data.carry.small_loot or {}
+	for carry_id, data in pairs( tweak_data.carry ) do
+		if type( data ) == "table" and data.bag_value and data.name_id and not data.is_vehicle
+			and not small_loot[ carry_id ] and data.type ~= "being" and not data.is_unique_loot then
+			local ok, val = pcall( M_money.get_bag_value, M_money, carry_id, 1 )
+			if ok and type( val ) == "number" and val > best_val then
+				best_val, best_bag = val, carry_id
+			end
 		end
 	end
-	if ( best_bag == '' ) then
-		m_log_error('{inventory_menu.lua}->get_the_most_expensive_bag()', 'best_bag is empty string. Mustn\'t happen actually.')
-		best_bag = 'hope_diamond'
-	end
-	BEST_BAG = best_bag --Preload to don't iterate over again
-	return best_bag
+	BEST_BAG = best_bag or "gold"
+	return BEST_BAG
 end
 
 local secure_rupies = function()
 	local level = G_game_settings.level_id
 	if ( level ) then
-		local bag_limit = T_levels[level].max_bags or 20 --This will be pointless to secure more than limit
-		local best_bag = BEST_BAG or get_the_most_expensive_bag() --Detects the most expensive bag. Better than rechecking tweak datas again after update
+		local bag_limit = T_levels[level] and T_levels[level].max_bags or 20 --This will be pointless to secure more than limit
+		local best_bag = BEST_BAG or get_the_most_expensive_bag()
 		local secure = M_loot.secure
+		local count = 0
 		for i = get_secured_bonus_bags_amount(M_loot) + 1, bag_limit do --To prevent oversecuring
 			secure(M_loot, best_bag, 1, true)
+			count = count + 1
 		end
+		show_hint( "Secured " .. count .. " bag(s) of " .. tostring( best_bag ) )
 	end
 end
 
@@ -143,7 +145,11 @@ local change_equipment = function( name )
 	add_equipment(M_player, { equipment = name })
 end
 
+-- Undying: the slider only changes throw force while the toggle above it is on
 local set_bag_throw_distance = function( new_distance )
+	if not plugins:g_loaded( 'bag_throw_force' ) then
+		return
+	end
 	local types = tweak_data.carry.types
 	
 	for carry_type in pairs( types ) do
@@ -177,12 +183,22 @@ add_some_cash = function()
 	for i = 1, 25 do
 		secure_small_loot(M_loot, "gen_atm", 3)
 	end
+	-- Round 3: say how much was added (small loot is paid out at the end of the heist)
+	local ok, each = pcall( function()
+		local mul = managers.player:upgrade_value_by_level( "player", "small_loot_multiplier", 3, 1 )
+		return M_money:get_bag_value( "gen_atm", mul )
+	end )
+	if ok and type( each ) == "number" then
+		show_hint( "Instant cash: 25 small loot secured, about $" .. tostring( each * 25 ) .. " at payout" )
+	else
+		show_hint( "Instant cash: 25 small loot secured (paid at the end of the heist)" )
+	end
 end
 
 money_menu = function()
 	local data = {
-		{ text = tr.inventory_give_cash, callback = add_some_cash },
-		{ text = tr.secure_turrets_lg, host_only = true, callback = secure_rupies },
+		{ text = tr.inventory_give_cash, callback = add_some_cash, switch_back = true },
+		{ text = tr.secure_turrets_lg, host_only = true, callback = secure_rupies, switch_back = true },
 	}
 	
 	Menu_open( Menu,  { title = tr.inventory_money_title, button_list = data, back = main_menu } )
@@ -205,7 +221,10 @@ end
 
 modifiers_menu = function()
 	local data = {
-		{ text = tr.bag_throw_force, type = "slider", slider_data = { name = "bag_throw_power", value = game_config['bag_throw_power'], max = 30 }, plugin = 'bag_throw_force', slider_callback = set_bag_throw_distance, switch_back = true },
+		-- Undying: toggle and slider are separate buttons now. As one button, a left click
+		-- turned the plugin on/off and only a right click moved the slider.
+		{ text = tr.bag_throw_force, plugin = 'bag_throw_force', switch_back = true },
+		{ text = tr.bag_throw_force .. " (x):", type = "slider", slider_data = { name = "bag_throw_power", value = game_config['bag_throw_power'] or 2, max = 30 }, slider_callback = set_bag_throw_distance, switch_back = true },
 		--{ text = tr.sync_bag_throw_force, plugin = 'sync_bag_throw_force', host_only = true, switch_back = true }, **BROKEN**
 		{ text = tr.bag_no_speed_penalty, plugin = 'bag_no_penalty', switch_back = true },
 		{ text = tr.explosive_bags, plugin = 'explosive_bags', switch_back = true },

@@ -393,7 +393,6 @@ patch_menu = function()
 		{},
 		{ text = tr.patch_instant_intimidation, plugin = 'instant_intimidation', host_only = true, switch_back = true },
 		{},
-		{ text = tr.patch_instant_lootpile, plugin = 'instant_lootpile', host_only = true, switch_back = true },
 		{ text = tr.patch_int_reboard, plugin = 'reboard', switch_back = true },
 		{ text = tr.patch_int_team, plugin = 'interact_team', switch_back = true },
 		{ text = tr.patch_noone_downs, plugin = 'noone_shall_down', switch_back = true },

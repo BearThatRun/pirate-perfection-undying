@@ -1,52 +1,46 @@
 -- Always dismember cops
+-- Undying rewrite: the old version passed "head"/"body" as plain strings where the game
+-- needs an Idstring (error on every death) and replaced _check_special_death_conditions
+-- with an old copy. Now: every enemy that dies loses its head or upper body, if its model
+-- has that dismember sequence (not every enemy model has one). Local visual only.
 
 plugins:new_plugin('always_dismember')
 
-VERSION = '1.0'
+VERSION = '2.0'
 
 local backuper = backuper
-local restore = backuper.restore
 local random = math.random
 
-function MAIN()
-	local dismembers = {"head","body"}
-	
-	backuper:backup('CopDamage._dismember_condition')
-	function CopDamage:_dismember_condition() return true end
-	
-	local die = backuper:backup('CopDamage.die')
-	function CopDamage:die( attack_data )
-		if not attack_data.body_name then
-			attack_data.body_name = dismembers[random(#dismembers)]
-		end
-		self:_dismember_body_part( attack_data )
-		
-		return die( self, attack_data )
-	end
+local parts = { Idstring("head"), Idstring("body") }
 
-	backuper:backup('CopDamage._check_special_death_conditions')
-	function CopDamage:_check_special_death_conditions(variant, body, attacker_unit)
-		local special_deaths = self._unit:base():char_tweak().special_deaths
-		if not special_deaths or not special_deaths[variant] then
+local function try_dismember( self, attack_data )
+	local dmg = self._unit:damage()
+	if not dmg then
+		return
+	end
+	local part = parts[ random( #parts ) ]
+	local seq = part == parts[1] and "dismember_head" or "dismember_body_top"
+	if not dmg:has_sequence( seq ) then
+		part = part == parts[1] and parts[2] or parts[1]
+		seq = part == parts[1] and "dismember_head" or "dismember_body_top"
+		if not dmg:has_sequence( seq ) then
 			return
-		end
-		local body_data = special_deaths[variant][body:name():key()]
-		if not body_data then
-			return
-		end
-		if self._unit:damage():has_sequence(body_data.sequence) then
-			self._unit:damage():run_sequence_simple(body_data.sequence)
-		end
-		if body_data.special_comment and attacker_unit == managers.player:player_unit() then
-			return body_data.special_comment
 		end
 	end
+	self:_dismember_body_part( { body_name = part } )
+end
+
+function MAIN()
+	backuper:hijack('CopDamage.die', function( o, self, attack_data, ... )
+		if not self._dead then
+			pcall( try_dismember, self, attack_data )
+		end
+		return o( self, attack_data, ... )
+	end)
 end
 
 function UNLOAD()
-	backuper:restore('CopDamage._dismember_condition')
 	backuper:restore('CopDamage.die')
-	backuper:restore('CopDamage._check_special_death_conditions')
 end
 
 FINALIZE()

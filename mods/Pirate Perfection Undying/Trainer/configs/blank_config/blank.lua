@@ -54,7 +54,6 @@ return {
 	infinite_distance = false,				-- Interact with anything at any distance
 	interact_and_look = false,				-- You can look anywhere you want, while interacting with something
 	interact_with_all = false,				-- Interact with anything, don't requires equipments and/or skills
-	instant_lootpile = false,				-- Toggle Instant Lootpile
 	reboard = false,							-- Toggle reboarding (V.I.P. Only)
 	interact_team = false,					-- Instant interaction for Team (V.I.P. Only)
 	noone_shall_down = false,				-- Noone shall down
@@ -80,7 +79,7 @@ return {
 -- From mission menu
 	waypoints = false,						-- Toggle objects waypoints
 	debug_hud = false,						-- Toggle Debug HUD
-	trigger_recorder = false,				-- Toggle Trigger Recorder
+	trigger_recorder = true,				-- Toggle Trigger Recorder (Undying test phase: ON, turn OFF before publishing)
 	intimidator = false,						-- instant intimidator
 	shutdown_dialogs = false,				-- Shutdown all dialogs
 	reduce_ai_health = false,				-- Reduce AI health

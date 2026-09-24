@@ -9,13 +9,14 @@ local types = tweak_data.carry.types
 
 VERSION = '1.0'
 
-local distance = game_config['bag_throw_power'] or 4
-
 function MAIN()
+	-- Undying: read the slider value when turned on, not once when the file loads
+	local distance = togg_vars['bag_throw_power'] or game_config['bag_throw_power'] or 2
 	for carry_type in pairs( types ) do
 		carry_type = types[carry_type]
-		local throw_distance = carry_type.throw_distance_multiplier
-		carry_type._throw_distance_multiplier = throw_distance -- backup
+		if carry_type._throw_distance_multiplier == nil then
+			carry_type._throw_distance_multiplier = carry_type.throw_distance_multiplier or 1 -- backup (only once)
+		end
 		carry_type.throw_distance_multiplier = distance
 	end
 end

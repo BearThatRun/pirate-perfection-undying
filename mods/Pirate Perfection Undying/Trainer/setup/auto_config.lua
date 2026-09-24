@@ -262,9 +262,6 @@ if cfg.instant_intimidation and is_server then
 	load_plugin( 'interactions/instant_intimidation' )
 end
 
-if cfg.instant_lootpile then 
-	load_plugin( 'interactions/instant_lootpile' )
-end
 
 if cfg.reboard then 
 	load_plugin( 'interactions/reboard' )

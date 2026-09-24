@@ -100,7 +100,7 @@ main_menu = function()
 		{ text = tr.grenade_bullets, plugin = 'grenade_weapon', switch_back = true },
 		{ text = tr.annoyer_mode, plugin = 'nodelaytalk', switch_back = true },
 		{},
-		{ text = tr.hacked_maskoff, callback = ppr_dofile, data = path .. 'hacked_maskoff' },
+		{ text = tr.hacked_maskoff, plugin = 'hacked_maskoff', switch_back = true },
 	}
 	
 	if get_my_carry_data(M_player) then

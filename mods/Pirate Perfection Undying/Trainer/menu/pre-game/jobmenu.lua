@@ -113,6 +113,7 @@ contact_menu = function(contact)
 				tab_insert(data, { text = _text(M_localization, job_name_id)..(job.region == "professional" and tr.tpro or ''), callback = callback_func })
 			end
 		end
+		table.sort(data, function(a, b) return a.text < b.text end)
 		data = { title = _text(M_localization, T_N_contacts[contact].name_id), button_list = data, back = main }
 		contact_menus[contact] = data
 	end
@@ -182,10 +183,32 @@ local main_menu_data = {
 	--{ text = tr.job_menu_contacts, callback = contact_menu },
 }
 
-for contact_name,contact in pairs(T_N_contacts) do
-	local name_id = contact.name_id
-	if name_id and locale_exists(M_localization, name_id) then
-		tab_insert(main_menu_data, { text = locale_text(M_localization, name_id), callback = contact_menu, data = contact_name })
+-- Round 3: only list contacts that have at least one playable job (an empty "Bain" entry showed up
+-- next to the real one), sort them, and add the internal name when two contacts share a display name.
+do
+	local job_count = {}
+	for job_name, job in pairs(T_N_jobs) do
+		if job.contact and job.name_id and locale_exists(M_localization, job.name_id) and job_name ~= "welcome_to_the_jungle_wrapper" then
+			job_count[job.contact] = (job_count[job.contact] or 0) + 1
+		end
+	end
+	local list, seen = {}, {}
+	for contact_name,contact in pairs(T_N_contacts) do
+		local name_id = contact.name_id
+		if name_id and locale_exists(M_localization, name_id) and (job_count[contact_name] or 0) > 0 then
+			local text = locale_text(M_localization, name_id)
+			seen[text] = (seen[text] or 0) + 1
+			tab_insert(list, { text = text, callback = contact_menu, data = contact_name })
+		end
+	end
+	for _, item in ipairs(list) do
+		if seen[item.text] > 1 then
+			item.text = item.text .. " (" .. item.data .. ")"
+		end
+	end
+	table.sort(list, function(a, b) return a.text < b.text end)
+	for _, item in ipairs(list) do
+		tab_insert(main_menu_data, item)
 	end
 end
 

@@ -67,7 +67,7 @@ local load_config = function( name )
 	ppr_config.DefaultConfig = name
 	ppr_dofile('Trainer/Setup/auto_config')
 	
-	show_hint("Config loaded")
+	ppu_feedback("Config loaded: " .. tostring(name))
 end
 
 local delete_config = function( name )
@@ -77,10 +77,10 @@ local delete_config = function( name )
 		ppr_config.DefaultConfig = "default_config"
 		ppr_config()
 	end
-	show_hint("Config deleted: " .. name)
 	if delete_config_menu then
 		delete_config_menu()
 	end
+	ppu_feedback("Config deleted: " .. name)
 end
 
 local rename_config = function( name, new_name )
@@ -102,7 +102,7 @@ end
 
 local save_settings = function()	
 	game_config() -- write changed settings into the active config file
-	show_hint("Settings saved to " .. tostring(ppr_config.DefaultConfig))
+	ppu_feedback("Settings saved to " .. tostring(ppr_config.DefaultConfig))
 end
 
 local get_configs_list = function()
@@ -154,7 +154,7 @@ load_config_menu = function()
 	local configs_list = get_configs_list()
 	for _, name in pairs( configs_list ) do
 		if name ~= "blank" then
-			insert( data, { text = tr['load'] .. " - '".. name .."'", callback = load_config, data = name } )
+			insert( data, { text = tr['load'] .. " - '".. name .."'", callback = load_config, data = name, switch_back = true } )
 		end
 	end
 	
@@ -195,7 +195,13 @@ delete_config_menu = function()
 	local configs_list = get_configs_list()
 	for _, name in pairs( configs_list ) do
 		if name ~= "default_config" and name ~= "blank" then
-			insert( data, { text = tr['delete'] .. " - '".. name .."'", callback = delete_config, data = name } )
+			-- Undying: ask before deleting
+			insert( data, { text = tr['delete'] .. " - '".. name .."'", callback = function()
+				Menu_open( Menu, { title = tr['config_delete'], description = tr['delete'] .. " '" .. name .. "'?", button_list = {
+					{ text = tr.except_yes, callback = delete_config, data = name },
+					{ text = tr.except_no, callback = delete_config_menu },
+				}, back = delete_config_menu } )
+			end, menu = true } )
 		end
 	end
 	
@@ -229,7 +235,7 @@ end
 
 reload_ppr_config = function()
 	ppr_config()
-	show_hint("Default config: " .. tostring(ppr_config.DefaultConfig))
+	ppu_feedback("Default config: " .. tostring(ppr_config.DefaultConfig))
 end
 
 local main_menu_data = {
@@ -244,8 +250,8 @@ local main_menu_data = {
 	{ text = tr['config_load'], callback = load_config_menu, menu = true },
 	{},
 	{ text = tr['config_save_into_new'], callback = save_settings_create_config, menu = true },
-	{ text = tr['config_save_all'], callback = save_settings },
-	{ text = tr['config_save_default'], callback = reload_ppr_config },
+	{ text = tr['config_save_all'], callback = save_settings, switch_back = true },
+	{ text = tr['config_save_default'], callback = reload_ppr_config, switch_back = true },
 }
 
 main_menu = function()
@@ -257,7 +263,7 @@ main_menu = function()
 			list[#list + 1] = main_menu_data[i]
 		end
 	end
-	Menu_open( Menu, { title = tr['config_menu'], description = tr['config_current']..': '..ppr_config.DefaultConfig, button_list = list } )
+	Menu_open( Menu, { title = tr['config_menu'], description = tr['config_current']..': '..ppr_config.DefaultConfig .. ". " .. tr['config_what'], button_list = list } )
 end
 
 return main_menu

@@ -43,6 +43,7 @@ local save = function()
 	end
 	
 	file:close()
+	show_hint("Waypoints saved")
 end
 
 local toggle_icon = function( id )
@@ -57,8 +58,9 @@ end
 
 main_menu = function()
 	local data = {
-		{ text = tr.wp_show_all, type = "toggle", toggle = "all_waypoints", callback = function() togg_vars.all_waypoints = not togg_vars.all_waypoints end },
-		{ text = tr.save, callback = save },
+		-- Undying: both buttons keep the menu open; the toggle reopens it so the list updates.
+		{ text = tr.wp_show_all, type = "toggle", toggle = "all_waypoints", callback = function() togg_vars.all_waypoints = not togg_vars.all_waypoints end, switch_back = function() main_menu() end },
+		{ text = tr.save, callback = save, switch_back = true },
 		{},
 	}
 	

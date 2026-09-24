@@ -128,8 +128,7 @@ function MAIN()
 		console.CreateConsole()
 	end
 	if ppr_config.DebugNavDraw then
-		managers.navigation._debug = true
-		pcall( managers.navigation.set_debug_draw_state, managers.navigation, { quads = true, doors = true, vis_graph = true, coarse_graph = true, blockers = true, covers = true, pos_rsrv = true, nav_links = true } ) -- x64: not in the release game
+		-- Round 3: navigation debug drawing is not in the release game (errors in the log), removed
 	end
 	if managers.debug then
 		managers.debug:set_enabled_all(true, true)
@@ -195,7 +194,6 @@ function UNLOAD()
 	pcall( function() managers.groupai:state():set_drama_draw_state( false ) end )
 	pcall( function() managers.groupai:state():set_debug_draw_state( false ) end )
 	pcall( function() managers.mission:set_persistent_debug_enabled( false ) end )
-	pcall( function() managers.navigation:set_debug_draw_state( false ) end )
 	backuper:restore("GroupAIStateBase.update")
 	backuper:restore("MissionManager.update")
 	backuper:restore("MissionScript._debug_draw")

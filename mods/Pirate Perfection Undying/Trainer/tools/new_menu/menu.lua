@@ -576,6 +576,41 @@ function Menu:close()
 	end
 end
 
+-- Round 3: live feedback inside the open menu. HUD hints don't exist in the main menu,
+-- so actions there looked like they did nothing.
+function Menu:set_description( text )
+	local d = self.desc_panel
+	if d and self._ws then
+		d:set_text( text or "" )
+	end
+end
+
+function Menu:set_button_text( button, text )
+	for i, b in ipairs( self._data.button_list or {} ) do
+		if b == button then
+			b.text = text
+			local panel = self.buttons_panel and self.buttons_panel:child( "button_text_" .. i )
+			local t = panel and panel:child( "text" )
+			if t then
+				t:set_text( text )
+				local _,_,w,h = t:text_rect()
+				t:set_size( math.max( w, t:w() ), h )
+			end
+			return
+		end
+	end
+end
+
+function ppu_feedback( msg )
+	local m = tweak_data.menu_active
+	if m and m.set_description then
+		m:set_description( msg )
+	end
+	if managers.hud and show_hint then
+		show_hint( msg )
+	end
+end
+
 function Menu:stop_loops()
 	StopLoopIdent("menu_update")
 	

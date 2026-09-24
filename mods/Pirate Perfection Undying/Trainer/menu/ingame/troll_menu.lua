@@ -5,7 +5,7 @@ end
 local ppr_require = ppr_require
 ppr_require 'Trainer/tools/new_menu/menu'
 
-local main_menu, interaction_with_other, interaction_with_id_menu, release_player, interaction_with_self, activate_elements, trigger_alarm_menu, interaction_with_team, give_equipments, give_bags, give_items, activate_triggers
+local main_menu, interaction_with_other, interaction_with_id_menu, release_player, interaction_with_self, activate_elements, interaction_with_team, give_equipments, give_bags, give_items, activate_triggers
 
 local path = "Trainer/addons/troll_menu/"
 
@@ -111,20 +111,52 @@ local delete_units = function()
 	end
 end
 
+-- Undying: only states that can be entered from anywhere. jerry1/jerry2 (skydive, parachute)
+-- crash when you leave them on a map without the parachute unit; carry, bipod, turret,
+-- driving and custody need something the menu can't give them.
+local self_states = { "standard", "mask_off", "clean", "civilian", "tased", "incapacitated", "arrested" }
+
 local change_own_state = function(state)
-	if alive( GetPlayerUnit() ) then
-		M_player:set_player_state(state)
-	else
+	local player = GetPlayerUnit()
+	if not alive( player ) then
 		m_log_error('change_own_state()','You are dead.')
+		return
 	end
+	if state == "tased" then
+		-- Non-lethal tase: you recover after a few seconds instead of going down.
+		player:movement():on_non_lethal_electrocution(1)
+		return
+	end
+	M_player:set_player_state(state)
 end
 
-
+-- Undying: FireManager:add_doted_enemy now takes one data table (U248).
 local set_cops_on_fire = function()
-	local weapon_unit = GetPlayerUnit():inventory():unit_by_selection(1)
-	local all_enemies = M_enemy:all_enemies()
-	for u_key, u_data in pairs( all_enemies ) do
-		M_fire:add_doted_enemy( u_data.unit, G_timer:time(), weapon_unit, 10, 10 )
+	local player = GetPlayerUnit()
+	if not alive(player) then
+		return
+	end
+	local dot_tweak = tweak_data.dot and tweak_data.dot:get_dot_data("default_fire")
+	if not dot_tweak then
+		m_log_error('set_cops_on_fire()','no default_fire dot data')
+		return
+	end
+	local dot_data = deep_clone(dot_tweak)
+	dot_data.dot_length = 10
+	dot_data.dot_trigger_chance = nil
+	dot_data.dot_trigger_max_distance = nil
+	local weapon_unit = player:inventory():equipped_unit()
+	for _, u_data in pairs( M_enemy:all_enemies() ) do
+		local unit = u_data.unit
+		if alive(unit) and unit:character_damage() and not unit:character_damage():dead() then
+			pcall( M_fire.add_doted_enemy, M_fire, {
+				unit = unit,
+				dot_data = dot_data,
+				weapon_unit = weapon_unit,
+				attacker_unit = player,
+				hurt_animation = true,
+			} )
+		end
 	end
 end
 
@@ -192,10 +224,6 @@ end
 
 
 
-local invisible_spooks = function()
-	run_element("dismember_body_top")
-	run_element("dismember_head")
-end
 
 
 local reduce_damage_all = function()
@@ -255,12 +283,42 @@ local function dmg_melee(unit)
 	end
 end
 
-local launch_cops = function()
-	run_element("activate_ragdoll_right_leg")
-
-	for _,ud in pairs(M_enemy:all_enemies()) do
-		pcall(dmg_melee,ud.unit)
+-- Undying: kill every enemy, then push the ragdolls up (same physics effect explosions use).
+-- Ragdolls are not synced, so other players see the bodies drop normally.
+local body_explosion = Idstring("physic_effects/body_explosion")
+local push_up = function(unit)
+	if not alive(unit) then
+		return
 	end
+	local mov = unit:movement()
+	local action = mov and mov._active_actions and mov._active_actions[1]
+	if action and action.type and action:type() == "hurt" and action.force_ragdoll then
+		action:force_ragdoll(true)
+	end
+	local rot_acc = Vector3(1 - math.rand(2), 1 - math.rand(2), 1 - math.rand(2)) * 10
+	for i = 0, unit:num_bodies() - 1 do
+		local body = unit:body(i)
+		if body and body:enabled() and body:dynamic() then
+			local vel = Vector3(math.rand(-150, 150), math.rand(-150, 150), 1400)
+			World:play_physic_effect(body_explosion, body, vel, body:mass(), body:position(), rot_acc, 1)
+		end
+	end
+end
+
+local launch_cops = function()
+	local launched = {}
+	for _,ud in pairs(M_enemy:all_enemies()) do
+		if alive(ud.unit) then
+			table.insert(launched, ud.unit)
+			pcall(dmg_melee,ud.unit)
+		end
+	end
+	-- The ragdoll only exists a moment after death.
+	DelayedCalls:Add("ppu_launch_cops", 0.15, function()
+		for _, unit in ipairs(launched) do
+			pcall(push_up, unit)
+		end
+	end)
 end
 
 local open_menu
@@ -335,25 +393,24 @@ give_items = function( id, back_f )
 	open_menu( { title = tr['troll_give_bags'], button_list = data, back = back_f } )
 end
 
-local data_access = {
-	M_groupAI:state():get_unit_type_filter("civilians_enemies"),
-	M_navigation:convert_access_flag("teamAI1")
-}
 
-local panic_alarm = function(typ, act)
-	for _, group in pairs({M_enemy:all_civilians(), M_enemy:all_enemies()}) do
-		for _, unit in pairs(group or {}) do
-			M_groupAI:state():propagate_alert({typ, unit.m_pos, 10000, act == 3 and unit.so_access or data_access[act], act == 2 and M_player:player_unit() or act == 3 and unit.unit or nil, act == 2 and unit.m_pos or nil})
-		end
+-- Round 3: one button that raises the alarm directly (host only). The 4 'report' alerts
+-- only made guards/civilians react and did nothing once everyone was tied up.
+local raise_alarm = function()
+	local state = M_groupAI:state()
+	if not state:enemy_weapons_hot() then
+		state:on_police_called("alarm_pager_not_answered")
+		show_hint("Alarm raised")
+	else
+		show_hint("The alarm is already going")
 	end
 end
 
 interaction_with_self = function()
 	local data = {}
-	for _,state in pairs( M_player:player_states() ) do
-		if state ~= "fatal" and state ~= "bleed_out" and state ~= "bipod" and state ~= "driving" then
-			tab_insert(data, { text = state, callback = change_own_state, data = state })
-		end
+	for _,state in ipairs( self_states ) do
+		local label = tr['troll_state_' .. state]
+		tab_insert(data, { text = (label and label ~= "" and label ~= ('troll_state_' .. state)) and label or state, callback = change_own_state, data = state })
 	end
 	
 	open_menu( { title = tr['troll_change_own_state'], button_list = data, back = main_menu } )
@@ -435,13 +492,6 @@ activate_elements = function()
 		{ text = tr['troll_open_van_doors'], callback = run_element, data = "anim_door_rear_both_open" },
 		{ text = tr['troll_close_van_doors'], callback = run_element, data = "state_door_rear_both_close" },
 		{},
-		{ text = tr['troll_remove_head'], callback = run_element, data = "activate_ragdoll_head" },
-		{ text = tr['troll_Remove_body'], callback = run_element, data = "activate_ragdoll_spine" },
-		{ text = tr['troll_Remove_legs'], callback = run_element, data = "activate_ragdoll_legs" },
-		{ text = tr['troll_Freeze_ragdoll'], callback = run_element, data = "freeze_ragdoll" },
-		{},
-		{ text = tr['troll_invisible_spooks'], callback = invisible_spooks },
-		{ text = tr['troll_launch_cars'], callback = run_element, data = "not_driving" },
 		{ text = tr['troll_Upgrade_cameras'], callback = run_element, data = "deathwish" },
 		{ text = tr['troll_fill_deposits_money'], callback = spawn_deposit_money_box, box = true },
 	}
@@ -451,25 +501,13 @@ end
 
 activate_triggers = function()
 	local data = {
-		{ text = tr['troll_Enable_units'], callback = run_trigger, data = "ElementEnableUnit" },
-		{ text = tr['troll_Disable_units'], callback = run_trigger, data = "ElementDisableUnit" },
+		-- Round 3: Enable/Disable units removed (Disable switched off every map object, floors too)
 		{ text = tr['troll_End_mission'], callback = run_trigger, data = "ElementMissionEnd" },
 	}
 	
 	open_menu( { title = tr['troll_activate_triggers'], button_list = data, back = main_menu } )
 end
 
--- Alert all people with different calls, by Davy Jones
-trigger_alarm_menu = function()
-	local data = {
-		{ text = tr['troll_alarm_crim'], callback = panic_alarm, data = {"aggression", 1} },
-		{ text = tr['troll_alarm_gun'], callback = panic_alarm, data = {"bullet", 2} },
-		{ text = tr['troll_alarm_exp'], callback = panic_alarm, data = {"explosion", 1} },
-		{ text = tr['troll_alarm_mon'], callback = panic_alarm, data = {"vo_intimidate", 3} },
-	}
-
-	open_menu( { title = tr['troll_alarm'], button_list = data, back = main_menu } )
-end
 
 local ppr_dofile = ppr_dofile
 
@@ -479,7 +517,7 @@ main_menu = function()
 		{ text = tr['troll_change_own_state'], callback = interaction_with_self, menu = true },
 		{ text = tr['troll_activate_elements'], callback = activate_elements, host_only = true, menu = true},
 		{ text = tr['troll_activate_triggers'], callback = activate_triggers, menu = true},
-		{ text = tr['troll_alarm'], callback = trigger_alarm_menu, menu = true },
+		{ text = tr['troll_raise_alarm'], callback = raise_alarm, host_only = true },
 		{},
 		{ text = tr['troll_cops_to_bulld'], host_only = true, plugin = "cops_to_bulld", switch_back = true },
 		{ text = tr['troll_replace_cops'], host_only = true, plugin = "replace_cops", switch_back = true },
@@ -491,14 +529,6 @@ main_menu = function()
 		{ text = tr['troll_set_cops_on_fire'], callback = set_cops_on_fire },
 		{ text = tr['Launch_cops_to_air'], callback = launch_cops },
 	}
-	
-	-- Undying: these turn drills, sentries or bots against the crew, so they only show when no other human player is in the game.
-	if not other_players_present() then
-		tab_insert( data, {} )
-		tab_insert( data, { text = tr['troll_drill'], plugin = 'trolldrills', switch_back = true } )
-		tab_insert( data, { text = tr['troll_sentries_team'], plugin = 'evil_sentries', host_only = true, switch_back = true } )
-		tab_insert( data, { text = tr['troll_evil_criminals'], plugin = 'evil_criminals', host_only = true, switch_back = true } )
-	end
 	
 	open_menu( { title = tr['troll_menu'], plugin_path = path, button_list = data } )
 end

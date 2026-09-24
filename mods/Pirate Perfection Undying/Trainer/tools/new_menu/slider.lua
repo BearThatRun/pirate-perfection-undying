@@ -75,9 +75,16 @@ function Slider:on_slider( x )
 	
 	local where = ( x - slider:world_left() ) / ( slider:world_right() - slider:world_left() )
 	
+	-- Undying: clamp, and snap the outer 3% to the exact min / max (they were almost impossible to hit)
+	if where <= 0.03 then
+		where = 0
+	elseif where >= 0.97 then
+		where = 1
+	end
+	
 	slider_bg:set_w( slider:w() * where )
 	
-	self.value = ceil( self.max * where )
+	self.value = math.floor( self.max * where + 0.5 )
 	self:safe_set_text( self.value )
 	
 	self:do_callback()
@@ -107,6 +114,11 @@ end
 
 function Slider:callback_button()
 	togg_vars[ self.name ] = self.value
+	
+	local callback_func = self.button.slider_callback -- Undying: live callback for non-plugin sliders too
+	if callback_func then
+		callback_func( self.value )
+	end
 	
 	if game_config then
 		game_config[ self.name ] = self.value

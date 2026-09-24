@@ -38,10 +38,18 @@ local function restore()
 		end
 	end
 		
+	-- Round 3: count what gets turned off, so it is clear something happened. Only toggled
+	-- features (plugins) can be turned off; money, levels, unlocks etc. are saved changes.
+	local count = 0
 	if plugins then
+		for _, p in pairs( plugins.plugins or {} ) do
+			if p.loaded and p.cat ~= "no_reload" then
+				count = count + 1
+			end
+		end
 		plugins:unload_except_by_cat("no_reload", true)
 	end
-	if show_hint then show_hint("Trainer changes turned off") end -- Undying: say that something happened
+	ppu_feedback("Turned off " .. count .. " trainer feature(s). Saved changes (money, level, unlocks) stay.")
 	
 	--[[local restore_hacked_upgrades = M_player.restore_hacked_upgrades
 	if ( restore_hacked_upgrades ) then
@@ -52,14 +60,14 @@ end
 local function reboot()
 	restore()
 	ppr_dofile('Trainer/Setup/auto_config') --Thank you Simplity, your idea made it easier
-	show_mid_text("Successfully rebooted", "Pirate Perfection Undying", 3)
+	ppu_feedback("Trainer changes turned off, config loaded again")
 end
 
 local main
 
 local menu_data = {
-	{ text = tr.normalizer_restore, callback = restore },
-	{ text = tr.normalizer_reboot, callback = reboot },
+	{ text = tr.normalizer_restore, callback = restore, switch_back = true },
+	{ text = tr.normalizer_reboot, callback = reboot, switch_back = true },
 }
 menu_data = { title = tr.Normalizer, description = tr.Normalizer_desc, button_list = menu_data, w_mul = 2.5, h_mul = 3.2 }
 

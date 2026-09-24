@@ -29,22 +29,32 @@ local activate_element = function( unit, name )
 	end
 end
 
+-- Undying: say why nothing opens instead of failing silently.
+local no_sequences = function()
+	show_hint("Sequencer: aim at an object (door, window, vault, car...) and press 9")
+end
+
 local open_menu = function()
 	local ray = get_ray()
-	if not ray or not ray.unit then
-		return
+	if not ray or not alive(ray.unit) then
+		return no_sequences()
 	end
 
 	local unit = ray.unit
 	local elem = unit.damage and unit:damage() and unit:damage()._unit_element
-	if not elem then
-		return
+	local elements = elem and elem._sequence_elements
+	if not elements or not next(elements) then
+		return no_sequences()
 	end
 	
-	local data = {{ text = "Single Object?", type = "toggle", toggle = "seq_single", callback = function() togg_vars.seq_single = not togg_vars.seq_single end, switch_back = true}, {}}
+	local data = {{ text = "Only this object (off = every object with the same sequence)", type = "toggle", toggle = "seq_single", callback = function() togg_vars.seq_single = not togg_vars.seq_single end, switch_back = true}, {}}
 
-	local elements = elem._sequence_elements
+	local ids = {}
 	for id in pairs( elements ) do
+		insert(ids, id)
+	end
+	table.sort(ids)
+	for _, id in ipairs( ids ) do
 		insert(data, { text = id, callback = activate_element, data = {unit, id}, switch_back = true })
 	end
 

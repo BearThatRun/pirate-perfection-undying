@@ -70,9 +70,21 @@ local function add_exp( value )
 end
 
 -- Money
+-- Round 3: all of it goes to spending cash (the game's _add_to_total splits it with offshore
+-- like a heist payout). Offshore has its own slider.
 local function add_money( value )
-	M_money:_add_to_total( value )
+	value = math.floor( tonumber( value ) or 0 )
+	M_money:_set_total( M_money:total() + value )
+	M_money:_set_total_collected( M_money:total_collected() + value )
 	refresh_profile()
+	ppu_feedback( "Spending cash: $" .. tostring( M_money:total() ) )
+end
+
+local function add_offshore( value )
+	value = math.floor( tonumber( value ) or 0 )
+	M_money:_set_offshore( M_money:offshore() + value )
+	refresh_profile()
+	ppu_feedback( "Offshore: $" .. tostring( M_money:offshore() ) )
 end
 
 local function reset_money()
@@ -141,7 +153,8 @@ local unlock_items = function( item_type )
 end
 
 local function delete_items()
-	ppr_require ( path .. 'clear_inventory' )
+	-- Undying: ppr_require only runs a file once per session, so the 2nd click did nothing
+	ppr_dofile ( path .. 'clear_inventory' )
 end
 
 local clear_slots = function( category )
@@ -154,13 +167,6 @@ local remove_exclamation = function()
 	Global.blackmarket_manager.new_drops = {}
 end
 
--- Unlock Achievemtents
-local function unlock_achievements()
-	local _award = M_achievement.award
-	for id in pairs(M_achievement.achievments) do
-		_award(M_achievement, id)
-	end
-end
 
 -- Lock Achievemtents
 local function lock_achievements()
@@ -342,6 +348,16 @@ local function save_skills()
 	save_file:close()
 end
 
+-- Undying: destructive buttons ask first (menus no longer close after a click)
+local function confirm( text, fn, arg, back )
+	return function()
+		Menu_open(Menu, { title = tr.except_title_warn, description = text .. "?", button_list = {
+			{ text = tr.except_yes, callback = function() fn( arg ); if back then back() end; ppu_feedback( text .. ": done" ) end, menu = true },
+			{ text = tr.except_no, callback = back, menu = true },
+		}, back = back } )
+	end
+end
+
 -- Menu
 level_menu = function()	
 	local data = { 
@@ -359,22 +375,25 @@ end
 
 money_menu = function()
 	local data = { 
-		{ text = tr['add_money_1'], callback = function() add_money(5000000) end },
-		{ text = tr['add_money_2'], callback = function() add_money(50000000) end },
-		{ text = tr['add_money_3'], callback = function() add_money(500000000) end },
+		{ text = tr['add_money_1'], callback = function() add_money(5000000) end, switch_back = true },
+		{ text = tr['add_money_2'], callback = function() add_money(50000000) end, switch_back = true },
+		{ text = tr['add_money_3'], callback = function() add_money(500000000) end, switch_back = true },
 		{},
-		{ text = tr['add_money_4'], callback = function() add_money(5000000000) end },
-		{ text = tr['add_money_5'], callback = function() add_money(50000000000) end },
-		{ text = tr['add_money_6'], callback = function() add_money(500000000000) end },
+		{ text = tr['add_money_4'], callback = function() add_money(5000000000) end, switch_back = true },
+		{ text = tr['add_money_5'], callback = function() add_money(50000000000) end, switch_back = true },
+		{ text = tr['add_money_6'], callback = function() add_money(500000000000) end, switch_back = true },
 		{},
-		{ text = tr['add_money_7'], callback = function() add_money(9999999999999) end },
+		{ text = tr['add_money_7'], callback = function() add_money(9999999999999) end, switch_back = true },
 		{},
 		{ text = tr['add_money'] .. ":", type = "slider", slider_data = { name = "add_money", value = 0, max = 5000000 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = add_money, name = "add_money" },
 		{},
+		{ text = tr['add_offshore'] .. ":", type = "slider", slider_data = { name = "add_offshore", value = 0, max = 50000000 }, switch_back = true },
+		{ text = tr['save'], type = "save_button", callback = add_offshore, name = "add_offshore" },
+		{},
 		--{ text = tr['add_money'] ..":", type = "input", callback_input = function() add_money() end, switch_back = true },
 		{},
-		{ text = tr['reset_money'], callback = reset_money },
+		{ text = tr['reset_money'], callback = reset_money, switch_back = true },
 	}
 	
 	Menu_open(Menu,  { title = tr['money_title'], description = tr['money_desc'], button_list = data, back = main_menu } )
@@ -382,21 +401,21 @@ end
 
 skill_menu = function()
 	local data = {
-		{ text = tr['unlock_all_skills'], callback = function() for i = 1, 2 do unlock_all_skills() end end },
-		{ text = tr['unlock_tiers'], callback = ppr_dofile, data = path .. "unlock_tiers" },
+		{ text = tr['unlock_all_skills'], callback = function() for i = 1, 2 do unlock_all_skills() end end, switch_back = true },
+		{ text = tr['unlock_tiers'], callback = ppr_dofile, data = path .. "unlock_tiers", switch_back = true },
 		{},
 		{ text = tr['set_points'] .. ":", type = "slider", slider_data = { name = "skill_points", value = 0, max = 690 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_skillpoints, name = "skill_points" },
 		{},
-		{ text = tr['reset_points'], callback = set_skillpoints, data = 0 },
+		{ text = tr['reset_points'], callback = set_skillpoints, data = 0, switch_back = true },
 		{},
-		{ text = tr['unlock_perks'], callback = function() ppr_dofile(path..'unlock_all_specs') end },
-		{ text = tr['lock_perks'], callback = reset_perks },
+		{ text = tr['unlock_perks'], callback = function() ppr_dofile(path..'unlock_all_specs') end, switch_back = true },
+		{ text = tr['lock_perks'], callback = reset_perks, switch_back = true },
 		{},
 		{ text = tr['set_perks'] .. ":", type = "slider", slider_data = { name = "perk_points", value = 0, max = 205500 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_perk_points, name = "perk_points" },
 		{},
-		{ text = tr['reset_perk_points'], callback = function() G_specs.points = 0 end },
+		{ text = tr['reset_perk_points'], callback = function() G_specs.points = 0 end, switch_back = true },
 	}
 	
 	Menu_open(Menu,  { title = tr['skill_title'], description = tr['skill_desc'], button_list = data, back = main_menu } )
@@ -413,7 +432,7 @@ infamy_menu = function()
 		{ text = tr['set_inf_points'] .. ':', type = "slider", slider_data = { name = "inf_points", value = 0, max = 25 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_infamy_points, name = "inf_points" },
 		{},
-		{ text = tr['reset_inf'], callback = function() set_infamy_level(0) end },
+		{ text = tr['reset_inf'], callback = function() set_infamy_level(0) end, switch_back = true },
 	}
 		
 	Menu_open(Menu,  { title = tr['inf_title'], description = tr['inf_desc'], button_list = data, back = main_menu } )
@@ -426,16 +445,16 @@ inventory_menu = function()
 		{ text = tr['remove_exclamation'], callback = remove_exclamation, switch_back = true},
 		{ text = tr['no_weap_mod_limit'], plugin = "no_weap_mod_limit", switch_back = true},
 		{},
-		{ text = tr['unlock_slots'], callback = unlock_slots },
-		{ text = tr['unlock_all'], callback = unlock_items, data = "all" },
+		{ text = tr['unlock_slots'], callback = unlock_slots, switch_back = true },
+		{ text = tr['unlock_all'], callback = unlock_items, data = "all", switch_back = true },
 		{},
-		{ text = tr['unlock_weapons'], callback = unlock_items, data = "weapons" },
-		{ text = tr['unlock_weap_mods'], callback = unlock_items, data = "weapon_mods" },
+		{ text = tr['unlock_weapons'], callback = unlock_items, data = "weapons", switch_back = true },
+		{ text = tr['unlock_weap_mods'], callback = unlock_items, data = "weapon_mods", switch_back = true },
 		{},
-		{ text = tr['unlock_masks'], callback = unlock_items, data = "masks" },
-		{ text = tr['unlock_materials'], callback = unlock_items, data = "materials" },
-		{ text = tr['unlock_textures'], callback = unlock_items, data = "textures" },
-		{ text = tr['unlock_colors'], callback = unlock_items, data = "colors" },
+		{ text = tr['unlock_masks'], callback = unlock_items, data = "masks", switch_back = true },
+		{ text = tr['unlock_materials'], callback = unlock_items, data = "materials", switch_back = true },
+		{ text = tr['unlock_textures'], callback = unlock_items, data = "textures", switch_back = true },
+		{ text = tr['unlock_colors'], callback = unlock_items, data = "colors", switch_back = true },
 		{},
 		{ text = tr['clear_inventory_menu'], callback = remove_items_menu, menu = true },
 	}
@@ -445,15 +464,15 @@ end
 
 remove_items_menu = function()
 	local data = {
-		{ text = tr['lock_all_items'], callback = delete_items },
+		{ text = tr['lock_all_items'], callback = confirm( tr['lock_all_items'], delete_items, nil, remove_items_menu ), menu = true },
 		{},
-		{ text = tr['clear_all_slots'], callback = clear_slots, data = "all" },
+		{ text = tr['clear_all_slots'], callback = confirm( tr['clear_all_slots'], clear_slots, "all", remove_items_menu ), menu = true },
 		{},
-		{ text = tr['clear_primaries_slots'], callback = clear_slots, data = "primaries" },
+		{ text = tr['clear_primaries_slots'], callback = confirm( tr['clear_primaries_slots'], clear_slots, "primaries", remove_items_menu ), menu = true },
 		{},
-		{ text = tr['clear_secondaries_slots'], callback = clear_slots, data = "secondaries" },
+		{ text = tr['clear_secondaries_slots'], callback = confirm( tr['clear_secondaries_slots'], clear_slots, "secondaries", remove_items_menu ), menu = true },
 		{},
-		{ text = tr['clear_masks_slots'], callback = clear_slots, data = "masks" },
+		{ text = tr['clear_masks_slots'], callback = confirm( tr['clear_masks_slots'], clear_slots, "masks", remove_items_menu ), menu = true },
 	}
 
 	Menu_open(Menu,  { title = tr['clear_inventory_menu'], description = tr['clear_inventory_desc'], button_list = data, back = inventory_menu } )
@@ -461,14 +480,14 @@ end
 
 safehouse_menu = function()
 	local data = {
-		{ text = tr['unlock_achievements'], callback = unlock_achievements },
-		{ text = tr['lock_achievements'], callback = lock_achievements },
+		-- Round 3: 'Unlock all achievements' removed (fake achievements on the Steam profile)
+		{ text = tr['lock_achievements'], callback = confirm( tr['lock_achievements'], lock_achievements, nil, safehouse_menu ), menu = true },
 		{},
-		{ text = tr['Auto_Complete_All_Challenges'], callback = Auto_Complete_All_Challenges },
-		{ text = tr['Auto_Complete_Safehouse_Challenge'], callback = Auto_Complete_Safehouse_Challenge },
+		{ text = tr['Auto_Complete_All_Challenges'], callback = Auto_Complete_All_Challenges, switch_back = true },
+		{ text = tr['Auto_Complete_Safehouse_Challenge'], callback = Auto_Complete_Safehouse_Challenge, switch_back = true },
 		{},
-		{ text = tr['unlock_safehouse_trophies'], callback = unlock_safehouse_trophies },
-		{ text = tr['unlock_tier_3_rooms'], callback = max_rooms_tier },
+		{ text = tr['unlock_safehouse_trophies'], callback = unlock_safehouse_trophies, switch_back = true },
+		{ text = tr['unlock_tier_3_rooms'], callback = max_rooms_tier, switch_back = true },
 		{},
 		{ text = tr['set_continental_coins'] .. ':', type = "slider", slider_data = { name = "set_continental_coins", value = 0, max = 1000 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_continental_coins, name = "set_continental_coins" },
@@ -477,19 +496,21 @@ safehouse_menu = function()
 	Menu_open(Menu,  { title = tr['safehouse_title'], description = tr['safehouse_desc'], button_list = data, back = main_menu } )
 end
 
+-- Round 3: the game has no maximum spree level; 1000 is our own cap. Catch-up bonus is capped
+-- at 100 by the game itself (tweak_data.crime_spree.catchup_limit).
 crimespree_menu = function()
 	local data = {
 		{},
-		{ text = tr['set_crimespree_spree_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_spree_level", value = 0, max = 10000 }, switch_back = true },
+		{ text = tr['set_crimespree_spree_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_spree_level", value = 0, max = 1000 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_crimespree_spree_level, name = "set_crimespree_spree_level" },
 		{},
-		{ text = tr['set_crimespree_reward_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_reward_level", value = 0, max = 10000 }, switch_back = true },
+		{ text = tr['set_crimespree_reward_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_reward_level", value = 0, max = 1000 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_crimespree_reward_level, name = "set_crimespree_reward_level" },
 		{},
-		{ text = tr['set_crimespree_catchup_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_catchup_bonus", value = 0, max = 10000 }, switch_back = true },
+		{ text = tr['set_crimespree_catchup_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_catchup_bonus", value = 0, max = 100 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_crimespree_catchup_bonus, name = "set_crimespree_catchup_bonus" },
 		{},
-		{ text = tr['set_crimespree_winning_streak_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_winning_streak_bonus", value = 0, max = 10000 }, switch_back = true },
+		{ text = tr['set_crimespree_winning_streak_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_winning_streak_bonus", value = 0, max = 1000 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_crimespree_winning_streak_bonus, name = "set_crimespree_winning_streak_bonus" },
 	}
 

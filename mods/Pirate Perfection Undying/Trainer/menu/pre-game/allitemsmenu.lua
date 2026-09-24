@@ -34,8 +34,29 @@ do
 end
 
 local __add_to_inventory = M_blackmarket.add_to_inventory
-local function add_item( special, category, name )
+-- Round 3: show how many you now have (in the menu description and in the button label)
+local function item_amount( special, category, name )
+	local ok, n = pcall( M_blackmarket.get_item_amount, M_blackmarket, special or 'normal', category or 'masks', name, true )
+	return ok and n or 0
+end
+
+local function label( text, special, category, name )
+	return text .. "  [x" .. tostring( item_amount( special, category, name ) ) .. "]"
+end
+
+local function add_item( special, category, name, text )
 	__add_to_inventory( M_blackmarket, special or 'normal', category or 'masks', name )
+	local n = item_amount( special, category, name )
+	local m = tweak_data.menu_active
+	if m and text then
+		for _, b in ipairs( m._data.button_list or {} ) do
+			if b.data and b.data[3] == name and b.data[2] == category then
+				m:set_button_text( b, text .. "  [x" .. tostring( n ) .. "]" )
+				break
+			end
+		end
+	end
+	ppu_feedback( tostring( text or name ) .. ": you now have " .. tostring( n ) )
 end
 
 local function is_special(e)
@@ -49,7 +70,9 @@ weapon_platform_mods_menu = function(weapon_id, name)
 	for _, part_id in pairs(T_W_Factory[T_upgrades.definitions[weapon_id].factory_id].uses_parts) do
 		local part_data = T_B_weapon_mods[part_id]
 		if not part_data.unatainable and part_data.pcs then
-			tab_insert(data, {text = locale_text(M_localization, part_data.name_id)..(part_data.dlc and "    -    "..locale_text(M_localization, T_L_global_values[part_data.dlc].name_id) or ""), callback = add_item, data = {is_special(part_data), 'weapon_mods', part_id}, switch_back = true})
+			local txt = locale_text(M_localization, part_data.name_id)..(part_data.dlc and T_L_global_values[part_data.dlc] and "    -    "..locale_text(M_localization, T_L_global_values[part_data.dlc].name_id) or "")
+			local gv = is_special(part_data)
+			tab_insert(data, {text = label(txt, gv, 'weapon_mods', part_id), callback = add_item, data = {gv, 'weapon_mods', part_id, txt}, switch_back = true})
 		end
 	end
 
@@ -75,7 +98,9 @@ weapon_mods_menu = function( part_type )
 		local name_id = part_data.name_id
 		
 		if name_id and T_W_F_parts[ part_id ].type == part_type and locale_exists( M_localization, name_id ) then
-			tab_insert( data, { text = locale_text( M_localization, name_id ), callback = add_item, data = { is_special( part_data ), 'weapon_mods', part_id }, switch_back = true} )
+			local txt = locale_text( M_localization, name_id )
+				local gv = is_special( part_data )
+				tab_insert( data, { text = label( txt, gv, 'weapon_mods', part_id ), callback = add_item, data = { gv, 'weapon_mods', part_id, txt }, switch_back = true} )
 		end
 	end
 	
@@ -108,7 +133,9 @@ specific_menu = function( name, disp_name )
 	for v_name, v_data in pairs( T_blackmarket[ name ] ) do
 		local name_id = v_data.name_id
 		if name_id and locale_exists( M_localization, name_id ) then
-			tab_insert( data, { text = locale_text( M_localization, name_id ), callback = add_item, data = { is_special( v_data ), name, v_name }, switch_back = true} )
+			local txt = locale_text( M_localization, name_id )
+			local gv = is_special( v_data )
+			tab_insert( data, { text = label( txt, gv, name, v_name ), callback = add_item, data = { gv, name, v_name, txt }, switch_back = true} )
 		end
 	end
 	

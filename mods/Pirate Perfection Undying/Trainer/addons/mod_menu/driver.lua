@@ -61,14 +61,21 @@ local speedometer_y = 0.68518518518518518518518518518519 -- 740
 local speedometer_size = 0.03125 -- 60
 
 -- Undying: put the player on the vehicle every frame (you used to fall off when it stood still)
-local ids_glass = Idstring("g_glass")
+-- Round 3: stand on the roof (top of the vehicle's bounding box). +100 from the origin put you
+-- inside taller vehicles like the escape van, so you were stuck in it.
 local function keep_player()
 	player = M_player:player_unit()
 	if not alive( unit ) or not alive( player ) then
 		return
 	end
-	local obj = nil
-	local pos = obj and obj:position() or ( unit:position() + Vector3(0, 0, 100) )
+	local pos
+	local ok, oobb = pcall( unit.oobb, unit )
+	if ok and oobb then
+		local c, size = oobb:center(), oobb:size()
+		pos = Vector3( c.x, c.y, c.z + size.z / 2 + 5 )
+	else
+		pos = unit:position() + Vector3(0, 0, 250)
+	end
 	M_player:warp_to( pos, player:camera():rotation() )
 end
 
@@ -231,11 +238,13 @@ function MAIN()
 
 	if not unit_name then
 		m_log_error('Driver', 'Unit cannot be spawn on this map.')
+		show_hint( "Driver: no usable vehicle model is loaded on this map." )
 		return
 	end
 	
 	unit = W_spawn_unit( World, Idstring(unit_name), player:position(), player:camera():rotation() )
-	M_player:warp_to( unit:position() + Vector3(0,0,300), player:camera():rotation() )
+	keep_player()
+	show_hint( "Driver: arrow keys to drive. Turn Driver off in F11 to get off." )
 	
 	local RunNewLoopIdent = RunNewLoopIdent
 	RunNewLoopIdent('driver_car_update', car_update)
