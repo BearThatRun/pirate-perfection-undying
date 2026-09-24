@@ -112,14 +112,6 @@
 											"run_in_game"		:	true,
 											"localized"			:	false
 										},
-										{	"keybind_id"		:	"Media_Mod",
-											"name"				:	"Media Mod",
-											"description"		:	"Media Mod",
-											"script_path"		:	"Trainer/keybinds/Media Mod.LUA",
-											"run_in_menu"		:	true,
-											"run_in_game"		:	true,
-											"localized"			:	false
-										},
 										{	"keybind_id"		:	"Menu_Change_Equipment",
 											"name"				:	"Menu Change Equipment",
 											"description"		:	"Menu Change Equipment",
