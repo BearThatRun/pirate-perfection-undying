@@ -32,7 +32,7 @@ function MAIN()
 end
 
 function UNLOAD()
-	StopLoopIdent('initmidator')
+	StopLoopIdent('intimidator') -- Undying: was misspelled, so it could never be turned off
 end
 
 FINALIZE()

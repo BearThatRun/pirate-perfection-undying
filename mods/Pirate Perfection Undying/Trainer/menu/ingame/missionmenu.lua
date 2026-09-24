@@ -234,12 +234,12 @@ main = function()
 		data[#data+1] = { text = tr.spawn_plan, callback = spawn_plan, host_only = true }
 	end
 
-	if Global.game_settings.difficulty == "overkill_145" or Global.game_settings.difficulty == "easy_wish" or Global.game_settings.difficulty == "overkill_290" or Global.game_settings.difficulty == "sm_wish" and current_level == "red2" --[[and is_server]] then
+	if ( Global.game_settings.difficulty == "overkill_145" or Global.game_settings.difficulty == "easy_wish" or Global.game_settings.difficulty == "overkill_290" or Global.game_settings.difficulty == "sm_wish" ) and current_level == "red2" --[[and is_server]] then
 		data[#data+1] = { text = tr.overdrill, callback = overdrill, host_only = true }
 		data[#data+1] = { text = tr.overdrillwaypoints, callback = overdrillwaypoints, host_only = true }
 	end
 
-	if Global.game_settings.difficulty == "overkill_145" or Global.game_settings.difficulty == "easy_wish" or Global.game_settings.difficulty == "overkill_290" or Global.game_settings.difficulty == "sm_wish" and current_level == "vit" --[[and is_server]] then
+	if ( Global.game_settings.difficulty == "overkill_145" or Global.game_settings.difficulty == "easy_wish" or Global.game_settings.difficulty == "overkill_290" or Global.game_settings.difficulty == "sm_wish" ) and current_level == "vit" --[[and is_server]] then
 		data[#data+1] = { text = tr.Overlever, callback = Overlever, host_only = true }
 		data[#data+1] = { text = tr.Overlevergate, callback = Overlevergate, host_only = true }
 	end
