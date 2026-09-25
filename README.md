@@ -2,10 +2,15 @@
 
 An x64 port of **Pirate Perfection Reborn Trainer V.I.P. Edition v2.0.0** for PAYDAY 2 after the Diesel 3.0 (64-bit) update. It targets SuperBLT 64-bit, with BeardLib as a dependency.
 
-- **x64 port:** [BearThatRun](https://github.com/BearThatRun). AI-assisted: the analysis, scripts and edits were made together with Claude (Anthropic), and every change is in the git history.
-- **Original trainer:** Baddog-11 and the Pirate Perfection Developer Crew. Edited with permission from the Pirate Perfection forum admin.
+> Status: **v0.01 Unique Edition**. Tested in game in single-player, feature by feature, against a checklist. Features that need a second human player haven't been tested yet.
 
-> Status: **v0.01 Unique Edition** (early test build: loads in game, menus and cleanup still being tested).
+## Credits and permission
+
+- **Original trainer:** Baddog-11 and the Pirate Perfection Developer Crew. All credit for the original trainer is theirs. The full original credits are kept in `Read Me!.txt` and in the in-game Help menu (F1).
+- **x64 port:** [BearThatRun](https://github.com/BearThatRun). Icon artwork: BearThatRun.
+- **AI-assisted:** the analysis, scripts and edits for this port were made together with Claude (Anthropic). Every change is in the git history.
+
+**Permission:** I don't have permission from the original authors. I tried to reach them through the Pirate Perfection forum, but the admin never replied, and the forum and the team are gone. The base files come from the [Ietu/pirate-perfection](https://github.com/Ietu/pirate-perfection) repository on GitHub. If you are one of the original authors and want this changed or taken down, please contact me through GitHub.
 
 ## Requirements
 
@@ -21,19 +26,40 @@ An x64 port of **Pirate Perfection Reborn Trainer V.I.P. Edition v2.0.0** for PA
 2. Copy `mods/Pirate Perfection Undying` into `PAYDAY 2\mods\`.
 3. Don't copy any old 32-bit `WSOCK32.dll`, `IPHLPAPI.dll` or `mods/base` into the game folder. They break the 64-bit game.
 
+Keys: F1 opens the Help menu with the full key list. Extra keys (fly, X-ray, replenish, teleport and so on) have no default key; set them in SuperBLT's Options > Mod Keybinds.
+
+## What's not in this port
+
+These parts of the original were removed on purpose and won't come back:
+
+- DLC unlocker and paid skin unlocks
+- Anticheat and ownership-check bypasses
+- Hiding the mod from other players, the "not modded" lobby, name spoofing and loot card spoofing
+- Fake stats, including "unlock all achievements"
+- Anything that acts against, or spoofs, other human players (the F5 Troll menu only works on yourself and on AI)
+
 ## What changed from the original
 
 The history is split so every step can be reviewed on its own (`git log -p`):
 
 | Commit | What |
 | --- | --- |
-| Baseline | Original V.I.P. v2.0.0 trainer folder, unmodified. The author's broken `.lnk` shortcuts are left out. |
-| Phase 1 | Packaged for SuperBLT 64-bit. BeardLib dependency. Dead update block removed. |
-| Phase 2 | Removed features that unlock paid content, bypass the game's ownership/cheat checks, hide the mod from other players, spoof names or loot, or grief other players (29 files). |
-| Phase 3 | Hard-coded mod path replaced by `ModPath`. `io.popen` + `cmd.exe` file listing replaced by SuperBLT's `file` API. |
-| Audit fixes | Hooks that pointed at missing classes/functions, wrong backup targets, invalid Lua escapes, broken keybind paths. |
-| Rename | Renamed to Pirate Perfection Undying, credits added. |
-| UI cleanup | No first-launch greeting, version text, banner, RSS feed, update checker, announcements, donation ticker, loading tip, in-world watermark or forum links. Menus fixed for ultrawide. BeardLib `main.xml` and new `icon.png`. |
+| `74d4b8e` Baseline | Original V.I.P. v2.0.0 trainer folder, unmodified. The author's broken `.lnk` shortcuts are left out. |
+| `5e6a4bd` Phase 1 | Packaged for SuperBLT 64-bit. BeardLib dependency. Dead update block removed. |
+| `172989a` Phase 2 | Removed the features listed above. |
+| `0f5a515` Phase 3 | Hard-coded mod path replaced by `ModPath`. `io.popen` + `cmd.exe` file listing replaced by SuperBLT's `file` API. |
+| `617761d` Audit fixes | Hooks that pointed at missing classes/functions, wrong backup targets, invalid Lua escapes, broken keybind paths. |
+| `7cb8426` Rename | Renamed to Pirate Perfection Undying, credits added. |
+| `19da0ba` UI cleanup | No first-launch greeting, version text, banner, RSS feed, update checker, announcements, donation ticker, loading tip, in-world watermark or forum links. Menus fixed for ultrawide. BeardLib `main.xml`. |
+| `bcc53fd` `bb3c56a` | New icon, version set to v0.01 Unique Edition. |
+| `d54cde0` | Crash fix for weapon fire rate on x64. |
+| `d792912` | F5 Troll menu back, limited to yourself and AI. |
+| `3f84245` to `ffad26e` | In-game test rounds 1 to 6: crash fixes, broken features fixed or removed, menu fixes, BLT keybind fixes, dead files removed. The commit messages list every change. |
+| Round 7 | Text pass: credits and permission statement, this README, `Read Me!.txt`, and the translation files fixed so they load (see below). |
+
+## Translations
+
+English is the main language. The other language files only have strings for features that still exist; anything missing falls back to English. In round 7, six language files that didn't load at all (syntax errors) were fixed, and three were converted to UTF-8. Nothing was re-translated.
 
 ## Tools
 
@@ -47,8 +73,9 @@ The history is split so every step can be reviewed on its own (`git log -p`):
 
 ## Known open items
 
-- Not tested in game yet.
-- `Shotgun Physics.LUA` has been dead code since before x64 (`NewShotgunBase` is gone). It needs a rewrite against `ShotgunBase`.
-- `Media Mod.lua` loads media from `mods/Pirate Perfection Reborn/…`, which isn't part of this package.
-- Throw Flash Grenade overrides `QuickFlashGrenade.destroy`, which build 248.1 no longer has.
-- Next phase: move hooks, keybinds, options and translations to BeardLib (`main.xml` already lists the mod in BeardLib's mod manager). The F1–F12 menus stay on the trainer's own menu system.
+- The Meth auto-cooker doesn't support Lab Rats yet.
+- `Shotgun Physics.LUA` is dead code (`NewShotgunBase` no longer exists). It needs a rewrite against `ShotgunBase`.
+- The aimbot aims at an odd angle in first person.
+- The PPR Setup menu still has options that need checking.
+- Features that need a second human player are untested.
+- Later: move hooks, keybinds, options and translations to BeardLib. The F1–F12 menus stay on the trainer's own menu system.

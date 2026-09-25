@@ -79,8 +79,6 @@ Rotellina del mouse - teletrasporto
 	inv_title = "Menu inventario",
 	main_menu_title = "Menu di pre-gioco principale",
 	unlock_slots = "Sblocca tutti gli slot",
-	other_title = "Altro",
-	unlock_achievements = "Sblocca tutti gli achievements",
 	add_exp = "Aggiungi %s punti esperienza",
 	clear_inventory_menu = "Rimuovi oggetti dall'inventario",
 	lock_all_items = "Blocca tutti gli oggetti",
@@ -89,7 +87,6 @@ Rotellina del mouse - teletrasporto
 	clear_secondaries_slots = "Rimuovi tutte le armi secondarie",
 	clear_masks_slots = "Rimuovi tutte le maschere",
 	no_weap_mod_limit = "Rimuovi limite di accessori installati",
-	level_revolver = "Revolver livello",
 	lock_achievements = "Blocca tutti gli achievements",
 	
 	--Specific inventory
@@ -105,7 +102,6 @@ Rotellina del mouse - teletrasporto
 	inv_spec_materials_title = 'Tutti i materiali',
 	inv_spec_textures_title = 'Tutti i motivi',
 	inv_spec_weapon_mods_title = 'Tutti gli accessori delle armi',
-	inv_spec_choose = 'Scegli cosa aggiungere',
 	
 	--Character menu
 	char_menu = 'Menu Personaggio',
@@ -145,7 +141,6 @@ Rotellina del mouse - teletrasporto
 	
 	--Interaction menu
 	intm_title = "7 diversi tipi di interazione",
-	intm_description = "Istantaneamente!",
 	speedy_the_robber = 'Ruba velocemente',
 	ecm_kiddie = 'Apri tutti gli ATM',
 	opn_all_vaults = "Apri tutte le casseforti e le cassette",
@@ -192,9 +187,7 @@ Rotellina del mouse - teletrasporto
 	people_dont_call_police = "Abilita le persone non chiamano la polizia",
 	prevent_panic_buttons = "Previeni pulsanti antipanico",
 	lobotomize_ai = "Lobotomizza tutti gli NPC sulla mappa",
-	dont_shout_at_tied = "Le guardie non vedono i civili legati",
 	invisible_player = "Renditi invisibile ai non-umani",
-	change_fov = "Cambia Campo Di Vista (FOV)",
 	
 	--Job menu
 	job_menu_title = 'Menu Lavori',
@@ -204,65 +197,23 @@ Rotellina del mouse - teletrasporto
 	job_menu_diff = 'Cambia difficoltà',
 	job_menu_diff_c = ' (Attuale: %s)',
 	job_menu_diff_t = 'Scegli nuova difficoltà',
-	diff_easy = 'Facile',
-	diff_normal = 'Normale',
-	diff_hard = 'Difficile',
-	diff_vhard = 'Molto difficile',
-	diff_overkill = 'Overkill',
-	diff_deathwish = 'Apocalisse',
 	
 	-- Spoof name menu
 	spoof_menu = "Menu parodia nomi (OBSOLETO)",
-	change_name = "Cambia il tuo nome",
-	spoof_standard_names = "Nomi standard",
-	spoof_donors_names = "Nomi donatori",
-	spoof_pirates_names = "Nomi pirati",
 	
 	-- Inventory menu
 	inventory_menu = "Menu inventario",
 	inventory_menu_desc = "Scegli quale borsone generare",
-	add_items_menu = "Aggiungi oggetti all'\inventario",
+	add_items_menu = "Aggiungi oggetti all'inventario",
 	togg_rain_bags = "Abilita pioggia di borsoni",
 	inventory_give_cash = 'Regala un po\' di soldi',
 	inventory_money_title = 'Menu soldi',
 	secure_turrets_lg = 'Sicura torrette',
-	spawn_ammo = "Genera borsa munizioni",
-	spawn_artifact_statue = "Genera artefatto statua",
-	spawn_cage_bag = "Genera gabbia",
-	spawn_circuit = "Spawn circuito",
-	spawn_coke = "Genera borsone di cocaina",
-	spawn_diamonds = "Genera borsone di diamanti",
-	spawn_engine = "Genera motore",
-	spawn_gold = "Genera borsone d'oro",
-	spawn_grenades = "Genera borsone di granate",
-	spawn_lance_bag = "Genera trapano termico",
-	spawn_lance_bag_large = "Genera la bestia",
-	spawn_meth = "Genera borsone di metanfetamina",
-	spawn_money = "Genera borsone di denaro",
-	spawn_painting = "Genera dipinto",
-	spawn_person = "Genera sacco di cadavere",
-	spawn_samurai_suit = "Genera armatura da samurai",
-	spawn_turret = "Genera borsone di torretta",
-	spawn_weapon = "Genera borsone con un'arma",
-	spawn_weapons = "Genera borsone di armi",
 	modifiers = "Menu modifiche",
 	bag_throw_force = "Aumenta forza di lancio dei borsoni",
 	bag_no_speed_penalty = "Nessuna penalità di movimento con i borsoni",
 	explosive_bags = "Rendi tutti i borsoni esplosivi",
 	-- Items
-	lance_part = "Aggiungi parte di lancia",
-	crowbar = "Aggiungi piede di porco",
-	planks = "Aggiungi assi",
-	lance = "Aggiungi lancia",
-	acid = "Aggiungi acido",
-	bank_manager_key = "Aggiungi scheda magnetica",
-	thermite_paste = "Aggiungi pasta termica",
-	keychain = "Aggiungi portachiavi",
-	boards = "Aggiungi tavole",
-	hydrogen_chloride = "Aggiungi acido cloridrico",
-	caustic_soda = "Aggiungi soda caustica",
-	cable_tie = "Aggiungi fascette",
-	chavez_key = "Aggiungi chiave chavez",
 
 	-- Spawn menu
 	spawn_menu = "Menu genera",
@@ -287,22 +238,14 @@ Rotellina del mouse - teletrasporto
 	spawn_ene_anim_menu = "Animazione dei nemici generati",
 	spawn_other_anim_menu = "Altre animazioni NPC generati",
 	spawn_props_menu = "Genera oggetti di scena (sperimentale)",
-	spawn_props_menu_desc = "Mostando le unità generate sulla mappa e sono sincronizzate col network\nAlcune di queste unità potrebbero farti crashare!",
 	spawn_gage_package = "Genera pacchetti di Gage",
 	
 	-- Tips
-	spawn_menu_tips = {
-		"Suggerimento: per salvare le impostazioni, modifica il file di configurazione",
-		"Suggerimento: unità da te generate",
-		"Suggerimento: carica il pacchetto per generare più unità",
-	},
-	mod_menu_tip = "Suggerimento: usa una sola mod alla volta",
 	
 	--Equipment menu
 	equip_menu_title = 'Menu equipaggiamento',
 	equip_sentry_infammo = 'Abilita munizioni infinite della torretta',
 	equip_sentry_inv = 'Abilita invulnerabilità torretta',
-	equip_sentry_nades = 'Abilita torretta lancia granate',
 	equip_infinite_bags = 'Abilita equipaggiamenti infiniti',
 	equip_drill_service = 'Abilita auto riparazione dei trapani',
 	equip_drill_instant = 'Abilita trapanazione istantanea',
@@ -310,11 +253,6 @@ Rotellina del mouse - teletrasporto
 	equip_instant_deployments = "Distribuzione equipaggiamenti immediata",
 	
 	-- Lego menu
-	lego_Abilita = "Registratore %s",
-	lego_choose_file = "Scegli file per scrivere",
-	lego_load_file = "Carica file",
-	lego_clear_file = "Pulisci file",
-	lego_menu = "Menu lego",
 	
 	--Exception messages
 	except_ok = 'OK',
@@ -335,36 +273,11 @@ Rotellina del mouse - teletrasporto
 	troll_interaction_with_other = "Interazioni con altri giocatori",
 	troll_interact_with = "Interagisci con %s (id - %s)",
 	troll_no_players = "Nessun altro giocatore presente sulla mappa",
-	troll_spawn_gold_on_tm = "Fai cadere borse di oro sulla squadra",
-	troll_spawn_money_on_tm = "Fai cadere borse di denaro sulla squadra",
-	troll_spawn_ammo_on_tm = "Fai cadere borse di munizioni sulla squadra",
 	troll_teleport_to = "Teletrasportati dal giocatore",
-	troll_give_ammo_bag = "Dagli una sacca di munizioni",
-	troll_give_ammo_bag_to_tm = "Dai una sacca di munizioni alla squadra",
-	troll_give_ecm = "Dagli un jammer ecm",
-	troll_give_ecm_to_tm = "Dai un jammer ecm alla squadra",
-	troll_give_sentry = "Dagli delle munizioni per torretta",
-	troll_give_sentry_to_tm = "Dai munizioni per torretta alla squadra",
-	troll_give_tripmine = "Dagli una mina esplosiva",
-	troll_give_tripmine_to_tm = "Dai una mina esplosiva alla squadra",
-	troll_give_medic_bag = "Dagli un kit medico",
-	troll_give_medic_bag_to_tm = "Dai un kit medico alla squadra",
-	troll_spawn_gold_on_peer = "Fagli cadere addosso una borsa di oro",
-	troll_spawn_money_on_peer = "Fagli cadere addosso una borsa di denaro",
-	troll_spawn_ammo_on_peer = "Fagli cadere addosso una borsa di munizioni",
 	troll_change_spawn_pos = "Cambia posizione di generazione per i nuovi giocatori",
-	troll_send_peer_in_custody = "Manda giocatore in custodia",
 	troll_release_player = "Rilascia giocatore dalla custodia",
-	troll_tase_player = "Elettrifica giocatore",
-	troll_arrest_player = "Arresta giocatore",
-	troll_kill_player = "Uccidi giocatore",
 	troll_standart_player = "Cambia stato giocatore a standard",
-	troll_teleport_player = "Teletrasporta giocare alla tua posizione",
-	troll_send_tm_in_custody = "Manda la squadra in custodia",
 	troll_release_tm_from_jail = "Rilsacia la squadra dalla custodia",
-	troll_tase_tm = "Elettrifica squadra",
-	troll_arrest_tm = "Arresta la squadra",
-	troll_kill_tm = "Uccidi la squadra",
 	troll_standard_tm = "Cambia stato della squadra a standard",
 	troll_increase_ladder = "Aumenta larghezza e altezza scala",
 	troll_del_units = "Elimina tutte le unità sincronizzate dalla mappa",
@@ -374,10 +287,8 @@ Rotellina del mouse - teletrasporto
 	troll_close_doors = "Chiudi tutte le porte",
 	troll_open_vault = "Apri cassaforte",
 	troll_close_vault = "Chiudi cassaforte",
-	troll_remove_head = "Rimuovi teste dei nemici",
 	troll_fill_deposits_money = "Riempi i le cassette di sicurezza con i soldi",
 	troll_replace_cops = "Rimpiazza agenti della polizia con bulldozer",
-	troll_change_statistic = "Cambia le tue statistiche",
 	chance = "Chance",
 	
 	--Weapon menu
@@ -388,9 +299,7 @@ Rotellina del mouse - teletrasporto
 	
 	-- Mod menu
 	mod_menu = "Menu mod",
-	mod_superman = "Mod Superman",
 	mod_driver = "Mod guidatore",
-	mod_lego = "Mod lego",
 	mod_aimbot = "Mod aimbot",
 	
 	--Mission menu

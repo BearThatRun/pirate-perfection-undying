@@ -1,4 +1,4 @@
-﻿--[[
+--[[
 Translation file for Pirate Perfection.
 Language: tchinese
 Version: v0.98
@@ -12,7 +12,7 @@ Author: Translated by TheGamingLOL
 		exit = "退出",
 		next_page = "下一頁",
 		prev_page = "上一頁",
-		return = "回歸",
+		retrn = "回歸",
 		btn_off = ' [關]',
 		btn_on = ' [開]',
 		btn_close = '關閉',
@@ -87,8 +87,6 @@ Middle Mouse Button - 傳送
         inv_title = "解鎖菜單",
 		main_menu_title = "主菜單",
         unlock_slots = "解鎖所有檔位",
-		other_title = "其他",
-		unlock_achievements = "解鎖所有成就",
 		add_exp = "增加經驗",
         clear_inventory_menu = "移除庫存中的道具",
 		lock_all_items = "鎖上所有道具",
@@ -97,7 +95,6 @@ Middle Mouse Button - 傳送
 		clear_secondaries_slots = "移除所有副武器",
 		clear_masks_slots = "移除所有面具",
 		no_weap_mod_limit = "移除安裝后的修改限制",
-		level_revolver = "隨機等級",
 		lock_achievements = "鎖上所有成就",
 		unlock_tiers = "解鎖所有技能等级",
 		remove_exclamation = "移除感嘆標記",
@@ -119,7 +116,6 @@ Middle Mouse Button - 傳送
 		inv_spec_materials_title = '所有材料',
 		inv_spec_textures_title = '所有纹理',
 		inv_spec_weapon_mods_title = '所有武器',
-		inv_spec_choose = '選擇你想要添加的',
        
         --Character menu
         char_menu = '常用作弊菜單',
@@ -154,11 +150,11 @@ Middle Mouse Button - 傳送
 		grenade_bullets = "武器發射手榴彈",
 		
 		--Tools
-		unlock_all_preplaning=“解鎖所有規劃圖紙”，
-		unlock_all_assets=“解鎖所有資產”，
-		tools_menu=“工具菜單”
-		force_game_start='強制遊戲開始“，
-		spoof_detection_lvl='降低探測級別“，
+		unlock_all_preplaning="解鎖所有規劃圖紙",
+		unlock_all_assets="解鎖所有資產",
+		tools_menu="工具菜單",
+		force_game_start='強制遊戲開始',
+		spoof_detection_lvl='降低探測級別',
        
 		--Interaction menu
 		intm_title = "互動菜單",
@@ -216,13 +212,11 @@ Middle Mouse Button - 傳送
 		people_dont_call_police = "開關:人們無法呼叫警察",
 		prevent_panic_buttons = "防止恐慌按鈕",
 		lobotomize_ai = "關閉AI",
-		dont_shout_at_tied = "警衛變瞎子",
 		invisible_player = "使AI看不見你(隱身)",
-		change_fov = "改變FOV",
        
         --Job menu
         job_menu_title="工作菜單",
-		job_menu_description="所有可能玩的等級都在這裡',
+		job_menu_description="所有可能玩的等級都在這裡",
 		tpro="專業工作",
 		job_menu_single="切換為單人模式",
 		job_menu_diff="更換難度",
@@ -231,15 +225,15 @@ Middle Mouse Button - 傳送
 		job_menu_escapes="逃脫",
 		job_menu_permission="許可",
 		job_menu_kick_opt="踢出設置",
-		job_menu_no_kick="禁止踢出"
+		job_menu_no_kick="禁止踢出",
 		job_menu_kick="啟用踢出",
 		job_menu_vote_kick="投票踢出",
        
 		-- Inventory menu
 		inventory_menu = "物品菜單",
 		inventory_menu_desc = "選擇你想生成的袋子",
-		add_items_menu="添加道具到物品欄”
-		togg_rain_bags="開關：雨袋"
+		add_items_menu="添加道具到物品欄",
+		togg_rain_bags="開關：雨袋",
 		inventory_give_cash='給點即時現金',
 		inventory_money_title='金錢菜單',
 		secure_turrets_lg='即時保留所有包',
@@ -282,7 +276,6 @@ Middle Mouse Button - 傳送
 		equip_menu_title = '設備菜單',
 		equip_sentry_infammo = '開關:哨兵槍無限彈藥',
 		equip_sentry_inv = '開關:無敵哨兵槍',
-		equip_sentry_nades = '開關:哨兵槍發射榴彈',
 		equip_infinite_bags = '開關:設備用不完',
 		equip_drill_service = '開關:鑽頭永不壞',
 		equip_drill_instant = '開關:鑽頭秒開',
@@ -292,11 +285,6 @@ Middle Mouse Button - 傳送
 		equip_desc = "單擊右鍵綁定選項到自定按鈕",
 		
         -- Lego menu
-		lego_choose_file = "選擇文件",
-		lego_load_file = "加載文件",
-		lego_clear_file = "清理文件",
-		lego_create = "創建新文件",
-		lego_menu = "Lego菜單",
 		
 		--Exception messages
 		except_ok = '好',
@@ -304,7 +292,7 @@ Middle Mouse Button - 傳送
 		except_ignore_futher = '(不再給我這種警告)',
 		except_title_warn = '警告!!!',
 		except_equipment_warn = '你企圖生成更多設備或生成不同設備的行為已被阻止! 當你按下(好)這個鍵，將不再重複提示並且不會受到任何行為阻止,但之後你極有可能會被標記作弊者!如果在別人房間繼續進行該行為是無法起作用,同時你將會被標記為作弊者!',
-		except_gr​​enades_warn = '你嘗試擁有超過3顆手雷的行為已被阻止! 當你按下(好)這個鍵，將不再重複提示並且不會受到任何行為阻止,但之後你極有可能會被標記作弊者!',
+		except_grenades_warn = '你嘗試擁有超過3顆手雷的行為已被阻止! 當你按下(好)這個鍵，將不再重複提示並且不會受到任何行為阻止,但之後你極有可能會被標記作弊者!',
 		except_crash_title = '崩潰發現',
 		except_crash_warn = '遊戲似乎沒有以正確方式結束, 你想看崩潰日誌?',
 		except_yes = '是',
@@ -320,18 +308,9 @@ Middle Mouse Button - 傳送
 		troll_no_players = "地圖上沒有其他玩家",
 		troll_teleport_to = "傳送到玩家",
 		troll_change_spawn_pos = "更改出現新玩家的位置",
-		troll_send_peer_in_custody = "監禁玩家",
 		troll_release_player = "越獄玩家",
-		troll_tase_player = "眩暈玩家",
-		troll_arrest_player = "逮捕玩家",
-		troll_kill_player = "殺死玩家",
 		troll_standart_player = "玩家狀態更改為標準",
-		troll_teleport_player = "將玩家傳送到你的位​​置",
-		troll_send_tm_in_custody = "監禁所有人",
 		troll_release_tm_from_jail = "越獄所有人",
-		troll_tase_tm = "眩暈所有人",
-		troll_arrest_tm = "逮捕所有人",
-		troll_kill_tm = "殺死所有人",
 		troll_standard_tm = "所有人狀態更改為標準",
 		troll_increase_ladder = "增加梯子高度和寬度",
 		troll_del_units = "刪除地圖中所有同步單位",
@@ -341,10 +320,8 @@ Middle Mouse Button - 傳送
 		troll_close_doors = "鎖上所有門",
 		troll_open_vault = "打開保險庫",
 		troll_close_vault = "鎖上保險庫",
-		troll_remove_head = "除去敵人的頭",
 		troll_fill_deposits_money = "存款箱裡都是錢",
 		troll_replace_cops = "用裝甲警代替警察",
-		troll_change_statistic = "改變你的統計數據",
 		chance = "更改",
 		troll_team_god_mode = "給你的團隊開上帝模式",
 		troll_interact_team = "與團隊互動",
@@ -352,8 +329,6 @@ Middle Mouse Button - 傳送
 		troll_give = "給予",
 		troll_give_bags = "給予包",
 		troll_give_items = "給予道具",
-		troll_kick_player = "踢出玩家",
-		troll_kick_all_players = "踢出所有玩家",
 	
 		--Weapon menu
 		weapon_menu_title = '武器列表',
@@ -365,12 +340,9 @@ Middle Mouse Button - 傳送
 
 		-- Mod menu
 		mod_menu = "mod菜單",
-		mod_superman = "超人",
 		mod_driver = "司機",
-		mod_lego = "樂高",
 		mod_aimbot = "自動瞄準",
 		mod_wavehouse = "安全屋生存",
-		mod_pvp = "玩家vs玩家",
 		mod_helicopter = "直升機",
 
 		--Mission menu
@@ -405,7 +377,7 @@ Middle Mouse Button - 傳送
 		
 		--Normalizer
 		Normalizer = '關閉修改器',
-		Normalizer_desc = '"關閉所有修改" - 卸下所有已啟動的修改'\n"重啟修改" - 重啟修改,在你想重載其他已修改的插件或重啟修改器時有用。
+		Normalizer_desc = '"關閉所有修改" - 卸下所有已啟動的修改\n"重啟修改" - 重啟修改,在你想重載其他已修改的插件或重啟修改器時有用。',
 		normalizer_warn = '警告!!!',
 		Areyousure = '你確定你想要關閉所有修改功能? 你的遊戲可能會崩潰。 ',
 		normalizer_restore = "關閉所有修改",

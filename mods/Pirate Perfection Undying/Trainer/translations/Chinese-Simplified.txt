@@ -12,7 +12,7 @@ Author: y123ao6 for 3DM, edited by TheGamingLOL
 		exit = "退出",
 		next_page = "下一页",
 		prev_page = "上一页",
-		return = "回归",
+		retrn = "回归",
 		btn_off = ' [关]',
 		btn_on = ' [开]',
 		btn_close = '关闭',
@@ -87,8 +87,6 @@ Middle Mouse Button - 传送
         inv_title = "解锁菜单",
 		main_menu_title = "主菜单",
         unlock_slots = "解锁所有栏位",
-		other_title = "其他",
-		unlock_achievements = "解锁所有成就",
 		add_exp = "增加经验",
         clear_inventory_menu = "移除库存中的道具",
 		lock_all_items = "锁上所有道具",
@@ -97,7 +95,6 @@ Middle Mouse Button - 传送
 		clear_secondaries_slots = "移除所有副武器",
 		clear_masks_slots = "移除所有面具",
 		no_weap_mod_limit = "移除安装后的修改限制",
-		level_revolver = "随机等级",
 		lock_achievements = "锁上所有成就",
 		unlock_tiers = "解锁所有技能等级",
 		remove_exclamation = "移除感叹标记",
@@ -119,7 +116,6 @@ Middle Mouse Button - 传送
 		inv_spec_materials_title = '所有材料',
 		inv_spec_textures_title = '所有纹理',
 		inv_spec_weapon_mods_title = '所有武器',
-		inv_spec_choose = '选择你想要添加的',
        
         --Character menu
         char_menu = '常用作弊菜单',
@@ -216,9 +212,7 @@ Middle Mouse Button - 传送
 		people_dont_call_police = "开关:人们无法呼叫警察",
 		prevent_panic_buttons = "防止恐慌按钮",
 		lobotomize_ai = "关闭AI",
-		dont_shout_at_tied = "警卫变瞎子",
 		invisible_player = "使AI看不见你(隐身)",
-		change_fov = "改变FOV",
        
         --Job menu
         job_menu_title = '工作菜单',
@@ -282,7 +276,6 @@ Middle Mouse Button - 传送
         equip_menu_title = '设备菜单',
 		equip_sentry_infammo = '开关:哨兵枪无限弹药',
 		equip_sentry_inv = '开关:无敌哨兵枪',
-		equip_sentry_nades = '开关:哨兵枪发射榴弹',
 		equip_infinite_bags = '开关:设备用不完',
 		equip_drill_service = '开关:钻头永不坏',
 		equip_drill_instant = '开关:钻头秒开',
@@ -292,11 +285,6 @@ Middle Mouse Button - 传送
 		equip_desc = "单击右键绑定选项到自定按钮",
        
         -- Lego menu
-		lego_choose_file = "选择文件",
-		lego_load_file = "加载文件",
-		lego_clear_file = "清理文件",
-		lego_create = "创建新文件",
-		lego_menu = "Lego菜单",
        
         --Exception messages
         except_ok = '好',
@@ -320,18 +308,9 @@ Middle Mouse Button - 传送
 		troll_no_players = "地图上没有其他玩家",
 		troll_teleport_to = "传送到玩家",
 		troll_change_spawn_pos = "更改出现新玩家的位置",
-		troll_send_peer_in_custody = "监禁玩家",
 		troll_release_player = "越狱玩家",
-		troll_tase_player = "眩晕玩家",
-		troll_arrest_player = "逮捕玩家",
-		troll_kill_player = "杀死玩家",
 		troll_standart_player = "玩家状态更改为标准",
-		troll_teleport_player = "将玩家传送到你的位置",
-		troll_send_tm_in_custody = "监禁所有人",
 		troll_release_tm_from_jail = "越狱所有人",
-		troll_tase_tm = "眩晕所有人",
-		troll_arrest_tm = "逮捕所有人",
-		troll_kill_tm = "杀死所有人",
 		troll_standard_tm = "所有人状态更改为标准",
 		troll_increase_ladder = "增加梯子高度和宽度",
 		troll_del_units = "删除地图中所有同步单位",
@@ -341,10 +320,8 @@ Middle Mouse Button - 传送
 		troll_close_doors = "锁上所有门",
 		troll_open_vault = "打开保险库",
 		troll_close_vault = "锁上保险库",
-		troll_remove_head = "除去敌人的头",
 		troll_fill_deposits_money = "存款箱里都是钱",
 		troll_replace_cops = "用装甲警代替警察",
-		troll_change_statistic = "改变你的统计数据",
 		chance = "更改",
 		troll_team_god_mode = "给你的团队开上帝模式",
 		troll_interact_team = "与团队互动",
@@ -352,8 +329,6 @@ Middle Mouse Button - 传送
 		troll_give = "给予",
 		troll_give_bags = "给予包",
 		troll_give_items = "给予道具",
-		troll_kick_player = "踢出玩家",
-		troll_kick_all_players = "踢出所有玩家",
        
         --Weapon menu
         weapon_menu_title = '武器列表',
@@ -365,12 +340,9 @@ Middle Mouse Button - 传送
        
         -- Mod menu
         mod_menu = "mod菜单",
-		mod_superman = "超人",
 		mod_driver = "司机",
-		mod_lego = "乐高",
 		mod_aimbot = "自动瞄准",	
 		mod_wavehouse = "安全屋生存",
-		mod_pvp = "玩家vs玩家",
 		mod_helicopter = "直升机",
        
         --Mission menu
@@ -405,7 +377,7 @@ Middle Mouse Button - 传送
        
         --Normalizer
         Normalizer = '关闭修改器',
-		Normalizer_desc = '"关闭所有修改" - 卸下所有已启动的修改'\n"重启修改" - 重启修改,在你想重载其他已修改的插件或重启修改器时有用。
+		Normalizer_desc = '"关闭所有修改" - 卸下所有已启动的修改\n"重启修改" - 重启修改,在你想重载其他已修改的插件或重启修改器时有用。',
 		normalizer_warn = '警告!!!',
 		Areyousure = '你确定你想要关闭所有修改功能? 你的游戏可能会崩溃。',
 		normalizer_restore = "关闭所有修改",

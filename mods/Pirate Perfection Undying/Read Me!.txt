@@ -1,6 +1,12 @@
 Pirate Perfection Undying v0.01 Unique Edition - x64 port for PAYDAY 2 (Diesel 3.0, 64-bit)
-Port by BearThatRun (AI-assisted). Based on Pirate Perfection Reborn Trainer! V.I.P. Edition v2.0.0
-by Baddog-11 and the Pirate Perfection Developer Crew. Edited with permission.
+x64 port by BearThatRun. Based on Pirate Perfection Reborn Trainer! V.I.P. Edition v2.0.0
+by Baddog-11 and the Pirate Perfection Developer Crew. All credit for the original trainer is theirs.
+
+-- Permission :
+	I don't have permission from the original authors. I tried to reach them through the
+	Pirate Perfection forum, but the admin never replied, and the forum and the team are gone.
+	The base files come from the Ietu/pirate-perfection repository on GitHub.
+	If you are one of the original authors, please contact me: https://github.com/BearThatRun
 
 -- Requirements :
 	- PAYDAY 2 64-bit (update 247 or newer)
@@ -14,61 +20,58 @@ by Baddog-11 and the Pirate Perfection Developer Crew. Edited with permission.
 	Settings: press F2 in game, or edit Trainer/config.lua. Key bindings: Trainer/keyconfig.lua.
 
 -- Controls :
-	-- These Keybinds Work Both Main-Menu & In-Game
+	-- These keys work both in the main menu and in game
 
 		F1 : Help Menu
 		F2 : Configuration Menu
 		F3 : Main Pre-Game Menu / Character Menu
 		F4 : Job Menu / Stealth Menu
 
-		Page UP : Tools Menu
+		Page Up : Tools Menu
 		Page Down : Music Menu
 		Home : Normalizer Menu
 
-		Delete : User Self-made Script (Depends on your Script)
+		Delete : User Self-made Script (depends on your script)
 
-	-- These Keybinds Work Only In-Game
+	-- These keys work only in game
 
+		F5 : Troll Menu (yourself and AI only)
 		F6 : Interaction Menu
-		F7 : Mission Menu
-		F8 : Inventory Menu
-		F9 : Equipment Menu
-		F10 : Weapons Menu
+		F7 : Inventory Menu
+		F8 : Equipment Menu
+		F10 : Mission Menu
 		F11 : Mod Menu
 		F12 : Spawn Menu
+		(F9 is left free for the game's debug menu)
 
-		Insert = Carry Stacker Control (Enable; Push/pop bag)(frequently tap it in order to drop all stored bags)
-		End = Instant Win
+		End : Instant Win
 
-		X : X-Ray Vision
-		Z : Replenish
+	-- Keys you set yourself (SuperBLT: Options > Mod Keybinds)
 
-		5 : Equipment spawn menu
-		4 : Quick Spawn selected equipment
-
-		Middle Mouse Button : teleport
-		Extra Mouse Button 1 : Slow Motion
+		For example: Fly, Fly Up, Fly Down, God Mode, Aimbot, X-Ray Vision, Replenish, Slow Motion,
+		Teleport To Crosshair / To Bullet, Carry Stacker, equipment spawning,
+		grenade throwing and quick menus (Money, Skills, Music, Change Equipment).
+		None of these have a default key.
 
 -- Mods control :
-	Superman mod:	Page Up - Fly up.
-					Page Down - Fly down.
-
-	Driver mod:		arrow left/right/up/down - Move left/right/up/down.
-
+	Driver and Helicopter mods: arrow keys move left/right/up/down.
 
 -- Changes from the original v2.0.0 :
 	- Packaged for SuperBLT 64-bit, BeardLib is required and lists the mod in its mod manager
 	- Removed: DLC unlocker, paid skin unlocks, anticheat bypass, mod hiding,
-	  "not modded" lobby, name spoof, loot card spoof, troll menu (F5), stealth_v2
+	  "not modded" lobby, name spoof, loot card spoof, stealth_v2, fake stats
+	  (unlock all achievements), and anything that acts against other human players
+	- The F5 Troll menu is back, but it only works on yourself and on AI
 	- Removed: first-launch greeting, main-menu version text, scrolling banner, RSS feed,
 	  update checker, announcements, donation stock ticker, loading-screen tip,
 	  and all links to the old Pirate Perfection forum / site / Discord / Steam group
 	- Trainer menus work on ultrawide and other non-16:9 screens
-	- No more cmd.exe / hard-coded paths; several old bugs fixed
-	- The full original changelog and every change are in the git history
+	- No more cmd.exe / hard-coded paths; many old bugs and crashes fixed
+	- Language files fixed so they load; English is used for any missing string
+	- Every change is in the git history
 
 -- Credits :
-x64 port: BearThatRun (AI-assisted)
+x64 port: BearThatRun
 Icon artwork: BearThatRun
 
 Original trainer:

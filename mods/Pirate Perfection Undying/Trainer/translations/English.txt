@@ -39,7 +39,7 @@ and edit the Key bindings in "Trainer/keyconfig.lua" to your preference.
 
 -- Help dialog
 	help_title										=	"Help Menu",
-	help_desc										=	"Welcome to Pirate Perfection Reborn !\nClick this Buttons for more Informations about the Trainer",
+	help_desc										=	"Welcome to Pirate Perfection Undying!\nClick a button below for more information about the trainer.",
 	help_site										=	"Visit our forum",
 	help_title_t									=	"Help Menu",
 	help_nokey										=	"Not bound",

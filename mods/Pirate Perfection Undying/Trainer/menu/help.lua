@@ -88,7 +88,7 @@ credits = function()
 						{ text = tr.next_page, callback = keybinds }, 
 						--{ text = tr.btn_close }
 					}
-	open_menu({ title = tr.help_credits, description = "x64 port (Pirate Perfection Undying): BearThatRun (AI-assisted)\n\n" .. tr.help_credits_desc, button_list = data, w_mul = 2, h_mul = 2 })
+	open_menu({ title = tr.help_credits, description = "x64 port (Pirate Perfection Undying): BearThatRun\n\n" .. tr.help_credits_desc, button_list = data, w_mul = 2, h_mul = 2 })
 end
 
 return main

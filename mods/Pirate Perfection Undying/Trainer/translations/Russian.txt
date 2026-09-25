@@ -80,8 +80,6 @@ X - Подсветка НПС
         inv_title = "Инвентарь",
         main_menu_title = "Основное предигровое меню",
         unlock_slots = "Открыть все слоты",
-        other_title = "Другое",
-        unlock_achievements = "Открыть все достижения",
         add_exp = "Добавить %s опыта",
         clear_inventory_menu = "Очистить инвентарь",
 		lock_all_items = "Залочить все предметы",
@@ -90,7 +88,6 @@ X - Подсветка НПС
 		clear_secondaries_slots = "Удалить все дополнительное оружие",
 		clear_masks_slots = "Удалить все маски",
 		no_weap_mod_limit = "Убрать лимит установленных модификаций",
-		level_revolver = "Накрутка уровня",
 		lock_achievements = "Закрыть все достижения",
 		unlock_tiers = "Открыть все навыки",
 		remove_exclamation = "Убрать уведомление о новых предметах",
@@ -109,7 +106,6 @@ X - Подсветка НПС
         inv_spec_materials_title = 'Все материалы',
         inv_spec_textures_title = 'Все узоры',
         inv_spec_weapon_mods_title = 'Все модификации',
-        inv_spec_choose = 'Выберите, что хотите добавить',
        
         --Character menu
         char_menu = 'Персонаж',
@@ -149,7 +145,6 @@ X - Подсветка НПС
        
         --Interaction menu
         intm_title = "Разные ухищерения",
-        intm_description = "Моментально!",
         opn_all_vaults = "Открыть все ячейки",
         c4_doors = "Взорвать двери",
         remove_bags = "Убрать все сумки",
@@ -196,9 +191,7 @@ X - Подсветка НПС
         people_dont_call_police = "Нет полиции",
         prevent_panic_buttons = "Отключение экстренной кнопки",
         lobotomize_ai = "Отключить ИИ НПС",
-        dont_shout_at_tied = "Полиция не видит заложников",
 		invisible_player = "Вы невидимы для AI",
-		change_fov = "Изменить угол обзора",
        
         --Job menu
         job_menu_title = 'Меню миссий',
@@ -208,19 +201,9 @@ X - Подсветка НПС
         job_menu_diff = 'Сменить сложность',
         job_menu_diff_c = ' (Сейчас: %s)',
         job_menu_diff_t = 'Выберите новую сложность',
-        diff_easy = 'Легко',
-        diff_normal = 'Нормально',
-        diff_hard = 'Сложно',
-        diff_vhard = 'Очень Сложно',
-        diff_overkill = 'Overkill',
-        diff_deathwish = 'Deathwish',
        
         -- Spoof name menu
         spoof_menu = "Спуф имя",
-        change_name = "Смени своё имя",
-        spoof_standard_names = "Обычные",
-        spoof_donors_names = "Доноры",
-        spoof_pirates_names = "Пираты",
        
         -- Inventory menu
         inventory_menu = "Инвентарь",
@@ -230,25 +213,6 @@ X - Подсветка НПС
         inventory_give_cash = 'Получить немного денег',
         inventory_money_title = 'Деньги',
         secure_turrets_lg = 'Захватить все детали (Хост)',
-        spawn_ammo = "Заспавнить",
-        spawn_artifact_statue = "Заспавнить артефакт",
-        spawn_cage_bag = "Заспавнить клетку",
-        spawn_circuit = "Заспавнить сервер",
-        spawn_coke = "Заспавнить кокаин",
-        spawn_diamonds = "Заспавнить украшения",
-        spawn_engine = "Заспавнить движок",
-        spawn_gold = "Заспавнить золото",
-        spawn_grenades = "Заспавнить гранаты",
-        spawn_lance_bag = "Заспавнить термобур",
-        spawn_lance_bag_large = "Заспавнить the beast",
-        spawn_meth = "Заспавнить мет",
-        spawn_money = "Заспавнить Деньги",
-        spawn_painting = "Заспавнить картину",
-        spawn_person = "Заспавнить мешок с телом",
-        spawn_samurai_suit = "Заспавнить samurai suit",
-        spawn_turret = "Заспавнить детали",
-        spawn_weapon = "Заспавнить оружие",
-        spawn_weapons = "Заспавнить оружие",
 		modifiers = "Меню модификаций",
 		bag_throw_force = "Увеличить силу броска мешка",
 		bag_no_speed_penalty = "Без замедления с мешком",
@@ -257,24 +221,6 @@ X - Подсветка НПС
 		equipment_changer = "Изменить экипировку",
 		change_equipment = "Изменить экипировку на ",
         -- Items
-		bridge = "Добавить bridge",
-        lance_part = "Добавить lance part",
-        crowbar = "Добавить монтировку",
-        planks = "Добавить доски",
-        lance = "Добавить lance",
-        acid = "Добавить кислоту",
-		evidence = "Добавить данный(evidence)",
-		ticket = "Добавить билет(ticket) ",
-		files = "Добавить файлы(iles)",
-		harddrive = "Добавить жесткий диск(harddrive)",
-        bank_manager_key = "Добавить ключ-карту",
-        thermite_paste = "Добавить термит",
-        keychain = "Добавить ключи",
-        boards = "Добавить доски",
-        hydrogen_chloride = "Добавить Хлористый водород",
-        caustic_soda = "Добавить каустическую соду",
-        cable_tie = "Добавить наручники",
-        chavez_key = "Добавить ключ Чавеса",
  
         -- Spawn menu
         spawn_menu = "Спавн меню",
@@ -299,7 +245,6 @@ X - Подсветка НПС
         spawn_ene_anim_menu = "Анимация врагов",
         spawn_other_anim_menu = "Анимация остальных",
         spawn_props_menu = "Заспавнить предметы (эксперимент)",
-        spawn_props_menu_desc = "Всё ради науки. Некоторые предметы могут крашнуть вашу игру!",
         spawn_gage_package = "Заспавнить пакеты Гейджа",
 		spawn_on_random_point = "Установить спавн в случайном месте",
        
@@ -307,7 +252,6 @@ X - Подсветка НПС
         equip_menu_title = 'Экипировка',
         equip_sentry_infammo = 'Бесконечные патроны турели',
         equip_sentry_inv = 'Неуязвимость турели',
-        equip_sentry_nades = 'Турель с гранатами',
         equip_infinite_bags = 'Бесконечная экипировка',
         equip_drill_service = 'Авто-восстановление дрели',
         equip_drill_instant = 'Моментальаня дрель',
@@ -315,19 +259,14 @@ X - Подсветка НПС
         equip_instant_deployments = "Мгновенная установка снаряжения",
        
         -- Lego menu
-        lego_toggle = "Запись %s",
-        lego_choose_file = "Выберите файл для записи",
-        lego_load_file = "Загрузить файл",
-        lego_clear_file = "Очистить меню",
-        lego_menu = "Лего меню",
        
         --Exception messages
         except_ok = 'OK',
         except_cancel = 'Отмена',
         except_ignore_futher = ' (Больше не будут показыватся предупреждения)',
         except_title_warn = 'Предупреждение!!!',
-        except_equipment_warn = 'Вы\пытаетесь заспавнить больше снаряжения, или поставить другой тип экипировки, чем ограничено или стояло вначале игры!Эта попытка была разблокирована, но если вы\нажмёте OK, не более больше остановят вас и все действия будут отмечать вас как читера и если вы\играете с кем-нибудь другим\действия возможно будут отключены сервером и будут отмечать вас как читер',
-        except_grenades_warn = 'Вы\пытаетесь бросить больше 3-х гранат!Это действие было сейчас заблокировано, нажмите OK, что игнорировать это предупреждение и прекратить ограничение гранат. Последующие броски могут быть отклонены сервером и/или пометить вас как читер!',
+        except_equipment_warn = 'Вы пытаетесь заспавнить больше снаряжения, или поставить другой тип экипировки, чем ограничено или стояло вначале игры!Эта попытка была разблокирована, но если вы нажмёте OK, не более больше остановят вас и все действия будут отмечать вас как читера и если вы играете с кем-нибудь другим действия возможно будут отключены сервером и будут отмечать вас как читер',
+        except_grenades_warn = 'Вы пытаетесь бросить больше 3-х гранат!Это действие было сейчас заблокировано, нажмите OK, что игнорировать это предупреждение и прекратить ограничение гранат. Последующие броски могут быть отклонены сервером и/или пометить вас как читер!',
         except_crash_title = 'Обнаружен вылет',
         except_crash_warn = 'Кажется игры вылетела неожиданно,вы хотите увидеть журнал аварии(crash log)?',
         except_yes = 'Да',
@@ -340,36 +279,11 @@ X - Подсветка НПС
         troll_interaction_with_other = "Взаимодействовать с другими игроками",
         troll_interact_with = "Взаимодействовать с %s (id - %s)",
         troll_no_players = "Другие игроки не появляются на карте",
-        troll_spawn_gold_on_tm = "Сбросить на команду золото",
-        troll_spawn_money_on_tm = "Сбросить на команду деньги ",
-        troll_spawn_ammo_on_tm = "Сбросить на команду патроны",
         troll_teleport_to = "Телепортироваться к нему",
-        troll_give_ammo_bag = "Дать ему патроны",
-		troll_give_ammo_bag_to_tm = "Дать сумку с патронами команде",
-		troll_give_ecm = "Дать генератор помех",
-        troll_give_ecm_to_tm = "Дать генератор помех команде",
-        troll_give_sentry = "Дать турель",
-        troll_give_sentry_to_tm = "Дать турель команде",
-        troll_give_tripmine = "Дать C4",
-        troll_give_tripmine_to_tm = "Дать C4 команде",
-        troll_give_medic_bag = "Дать ему аптечку",
-        troll_give_medic_bag_to_tm = "Дать аптечку команде",
-        troll_spawn_gold_on_peer = "Сбросить на него золото",
-        troll_spawn_money_on_peer = "Сбросить на него сумку денег",
-        troll_spawn_ammo_on_peer = "Сбросить на него патроны",
         troll_change_spawn_pos = "Изменить место спавна для новых игроков",
-        troll_send_peer_in_custody = "Отправить игрока за решётку",
         troll_release_player = "Освободить игрока из заключения",
-        troll_tase_player = "Оглушить игрока",
-        troll_arrest_player = "Арестовать игрока",
-        troll_kill_player = "Убить игрока",
         troll_standart_player = "Изменить статус игрока на стандартный",
-        troll_teleport_player = "Отправить игрока к вам",
-        troll_send_tm_in_custody = "Отправить команду за решётку",
         troll_release_tm_from_jail = "Освободить команду из под ареста",
-        troll_tase_tm = "Оглушить команду",
-        troll_arrest_tm = "Арестовать команду",
-        troll_kill_tm = "Убить команду",
         troll_standard_tm = "Изменить статус команды на стандартный",
         troll_increase_ladder = "Увеличить ширину и высоту лестницы",
         troll_del_units = "Удалить всех НПС на карте",
@@ -379,10 +293,8 @@ X - Подсветка НПС
         troll_close_doors = "Закрыть все двери",
         troll_open_vault = "Открыть хранилище",
         troll_close_vault = "Закрыть хранилище",
-        troll_remove_head = "Убрать голову у врагов",
         troll_fill_deposits_money = "Заполнить депозитные ячейки деньгами",
 		troll_replace_cops = "Заменить копов на танков",
-		troll_change_statistic = "Изменить статистику",
 		chance = "Шанс",
        
         --Weapon menu
@@ -393,9 +305,7 @@ X - Подсветка НПС
        
         -- Mod menu
         mod_menu = "Мод меню",
-        mod_superman = "Супермен мод",
         mod_driver = "Водитель мод",
-        mod_lego = "Лего мод",
         mod_aimbot = "АимБот",
        
         --Mission menu
@@ -423,7 +333,7 @@ X - Подсветка НПС
                
         --Update dialog
         update_title = 'Доступно новое обновление!',
-        update_desc = 'Доступна новая версия (v. %s) , вы хотите посетить форум\Страницу загрузки ?',
+        update_desc = 'Доступна новая версия (v. %s) , вы хотите посетить форум/Страницу загрузки ?',
         update_goto = 'Посетить страницу загрузки',
        
         --Normalizer

@@ -1,5 +1,5 @@
 {	"name"					:	"Pirate Perfection Undying",
-	"description"			:	"Pirate Perfection Undying v0.01 Unique Edition\nx64 port of Pirate Perfection Reborn Trainer V.I.P. v2.0.0\nPort: BearThatRun (AI-assisted)\nOriginal: Baddog-11 & the Pirate Perfection Developer Crew\nRequires: SuperBLT 64-bit + BeardLib 5.1+",
+	"description"			:	"Pirate Perfection Undying v0.01 Unique Edition\nx64 port of Pirate Perfection Reborn Trainer V.I.P. v2.0.0\nPort: BearThatRun\nOriginal: Baddog-11 & the Pirate Perfection Developer Crew\nRequires: SuperBLT 64-bit + BeardLib 5.1+",
 	"author"					:	"BearThatRun (x64 port), Pirate Perfection Developer Crew (original)",
 	"contact"				:	"https://github.com/BearThatRun",
 	"version"				:	"0.01",

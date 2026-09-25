@@ -327,23 +327,6 @@ function retry_http_request( url, clbk, retry, id )
 	end
 end
 
---function baldwin(m)
-if managers.network:session() then
-	for _,peer in pairs(managers.network:session()._peers) do
-		if peer:name() == "Baldwin" or peer:name() == "baldwin" or peer:name() == "PirateCaptain" or peer:name() == "piratecaptain" or peer:name() == "[PP]Baddog-11[GER]" or peer:name() == "Baddog-11" then
-			io.stderr:write("Oh look, the mystic one is here\n")
-			SendMessage("blood island awaits!")
-			for i = 1, 4 do
-				if managers.network:game():member(i) and alive(managers.network:game():member(i):unit()) then
-					managers.network:game():member(i):unit():sound():say("g24", nil, true )
-				end
-			end
-			return
-		end
-	end
-io.stderr:write("The plot thickens, MYSTIC ...\n")
-end
-
 -- BEEP
 function beep()
 	if managers and managers.menu_component then
