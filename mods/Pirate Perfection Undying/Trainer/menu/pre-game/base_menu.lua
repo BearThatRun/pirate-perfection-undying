@@ -35,9 +35,6 @@ local is_legacy
 local prefix = "base_"
 
 local options = {
-	{name = "HUD_Announce_Sub", desc = true, sub = {
-		{name = "HUD"},
-	}},
 	{name = "General_Sub", desc = true, sub = {
 		{name = "Crosshair"},
 		{name = "NoStatsSynced"},

@@ -890,11 +890,6 @@ else
 	m_log_error('{init.lua}', 'Failed to init KeyInput!')
 end
 
---Hud stuff
-if ppr_config.HUD then
-	ppr_require('Trainer/hud/init')
-end
-
 --ppr_require left scripts now.
 ppr_require('Trainer/Setup/auto_init')
 

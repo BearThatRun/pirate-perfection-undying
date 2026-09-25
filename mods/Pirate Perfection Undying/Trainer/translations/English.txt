@@ -135,9 +135,6 @@ Spawning more than the allowed amount of equipment.]],
 	base_disable									=	"Disable",
 	base_menu_restart								=	"You will have to restart your Game\nfor all the changes to take effect!\n",
 
-	base_HUD_Announce_Sub						=	"HUD",
-	base_HUD_Announce_Sub_desc					=	"Show or hide the Pirate Perfection on-screen HUD.",
-	base_HUD											=	"Show PPR HUD",
 
 	base_General_Sub								=	"General",
 	base_General_Sub_desc						=	"Crosshair, free purchases and lobby options.",

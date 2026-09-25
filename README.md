@@ -57,6 +57,8 @@ The history is split so every step can be reviewed on its own (`git log -p`):
 | `3f84245` to `ffad26e` | In-game test rounds 1 to 6: crash fixes, broken features fixed or removed, menu fixes, BLT keybind fixes, dead files removed. The commit messages list every change. |
 | `ba6cbb7` Round 7 | Text pass: credits and permission statement, this README, `Read Me!.txt`. |
 | Languages | English only: the other 10 language files, the Localization menu and the Language option were removed. |
+| Round 8 | PPR Setup options reviewed against the current game: dead, risky and DLC-gated options removed or fixed; the empty "Show PPR HUD" option and its leftover HUD code removed. |
+| Round 9 | AimBot aims through the camera's own spin/pitch (gun and view stay lined up) and picks the enemy nearest the crosshair. Shotgun Physics rewritten (longer, stronger shotgun ragdoll push, no damage change). Trigger recorder: one file per heist, runs are appended, also logs dialogue, interactions and bags; wraps functions without breaking Bag Stacking or the meth auto-cooker. |
 
 ## Language
 
@@ -74,9 +76,7 @@ The trainer is English only. The original shipped 10 other languages, but most o
 
 ## Known open items
 
-- The Meth auto-cooker doesn't support Lab Rats yet.
-- `Shotgun Physics.LUA` is dead code (`NewShotgunBase` no longer exists). It needs a rewrite against `ShotgunBase`.
-- The aimbot aims at an odd angle in first person.
-- The PPR Setup menu still has options that need checking.
-- Features that need a second human player are untested.
+- The Meth auto-cooker doesn't support Lab Rats yet. It needs a recording of a full Lab Rats cook (the voice lines and steps there are different from Rats).
+- Features that need a second human player are untested (drop-in spawn position, teammate weapon switch).
 - Later: move hooks, keybinds, options and translations to BeardLib. The F1–F12 menus stay on the trainer's own menu system.
+- Planned: a restyle of the trainer's menu (same menu code and content, new look).

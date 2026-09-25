@@ -8,8 +8,6 @@ CATEGORY = 'mods'
 
 VERSION = '1.0'
 
-local aim_rotation
-
 local managers = managers
 local get_ray = get_ray
 local ppr_config = ppr_config
@@ -77,25 +75,45 @@ function auto_shoot( player )
 end
 
 function auto_aim( player )
+	-- Round 9: aim by setting the first-person camera's spin/pitch (what the mouse changes).
+	-- The old code forced the camera and the arms to one bare rotation after the game's own
+	-- update: the arms lost their stance offset (gun at a weird angle in first person) and the
+	-- view snapped back when the target was lost. It also took the FIRST enemy in the list,
+	-- even one behind you; now it takes the one closest to your crosshair.
+	local camera = player:camera()
+	local cam_base = camera and camera:camera_unit() and camera:camera_unit():base()
+	if not cam_base or not cam_base.set_spin or cam_base._limits then
+		return -- no camera, or a state with view limits (bipod, turret, vehicle)
+	end
+	local cam_pos = camera:position()
+	local cam_fwd = camera:forward()
+	local max_dist = ppr_config.MaxAimDist or 5000
+	local best_target, best_dot
 	for _,data in pairs( managers.enemy:all_enemies() ) do
 		local u = data.unit
-		local team = data.unit:movement():team()
-		local team_id = team.id
-		if team_id == "mobster1" or team_id == "law1" then
-			local u_pos = u:position()
-			local dist = mvector3.distance( player:position(), u_pos )
-			if dist < (ppr_config.MaxAimDist or 5000) and check_wall( u ) then
-				local char_damage = u:character_damage()
-				local body = char_damage and u:body(char_damage._head_body_name)
-				local head_pos = body and body:position()
-				local target = head_pos or u_pos
-				local camera = player:camera()
-				mvector3.subtract( target, camera:position() )
-				aim_rotation = Rotation:look_at( target, math.UP )
-				camera:set_rotation(aim_rotation) --Use this variant for silent and not annoying aimbot :-)
-				break
+		if alive( u ) then
+			local team_id = u:movement():team().id
+			if team_id == "mobster1" or team_id == "law1" then
+				local u_pos = u:position()
+				if mvector3.distance( player:position(), u_pos ) < max_dist and check_wall( u ) then
+					local char_damage = u:character_damage()
+					local body = char_damage and char_damage._head_body_name and u:body( char_damage._head_body_name )
+					local target = body and body:position() or u_pos
+					local dir = target - cam_pos
+					mvector3.normalize( dir )
+					local dot = mvector3.dot( dir, cam_fwd )
+					if not best_dot or dot > best_dot then
+						best_dot = dot
+						best_target = target
+					end
+				end
 			end
 		end
+	end
+	if best_target then
+		local polar = ( best_target - cam_pos ):to_polar()
+		cam_base:set_spin( polar.spin % 360 )
+		cam_base:set_pitch( math.clamp( polar.pitch, -85, 85 ) )
 	end
 end
 
@@ -117,18 +135,6 @@ function aimbot_update()
 end
 
 local function start_aimbot()
-	backuper:hijack('FPCameraPlayerBase._update_rot', function( o, self, ... )
-		--I made it shorter.
-		local ret = o(self, ...)
-		if aim_rotation then
-			self._parent_unit:camera():set_rotation( aim_rotation )
-			self:set_rotation( aim_rotation )
-			aim_rotation = nil
-		end
-		return ret
-	end)
-	
-	
 	local player = pmanager:player_unit()
 	if alive( player ) then
 		player:inventory():equipped_unit():base()._can_shoot_through_shield = true
@@ -142,7 +148,6 @@ local function start_aimbot()
 end
 
 local function stop_aimbot()
-	backuper:restore('FPCameraPlayerBase._update_rot')
 	StopLoopIdent( "aimbot" )
 end
 

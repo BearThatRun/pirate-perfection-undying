@@ -8,9 +8,6 @@ return {
 	DisableBindings = false,						-- Set to true in order to disable all binds (maybe usefull when you want to use only some stealth cheats, like no recoil)
 	keyconfig = 'Trainer/keyconfig.lua',		-- Key bindings configuration filename. Use "keyconfig" (or false) to load the default keyconfig.lua. Or Set up your own Key configuration and switch to it.
 
- -- HUD Texts
-	HUD = true,											-- Set to false in order to disable ALL Pirate Perfection hud elements
-
  -- Logging Option
 	LogErrorsToFile = true,							-- This will not only display PPR related errors into console, but will write them into errlog.log
 
