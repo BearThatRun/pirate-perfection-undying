@@ -112,14 +112,6 @@
 											"run_in_game"		:	true,
 											"localized"			:	false
 										},
-										{	"keybind_id"		:	"Menu_Levels",
-											"name"				:	"Menu Levels",
-											"description"		:	"Menu Levels",
-											"script_path"		:	"Trainer/keybinds/Menu Levels.LUA",
-											"run_in_menu"		:	true,
-											"run_in_game"		:	true,
-											"localized"			:	false
-										},
 										{	"keybind_id"		:	"Menu_Money",
 											"name"				:	"Menu Money",
 											"description"		:	"Menu Money",
@@ -140,14 +132,6 @@
 											"name"				:	"Menu Skills",
 											"description"		:	"Menu Skills",
 											"script_path"		:	"Trainer/keybinds/Menu Skills.LUA",
-											"run_in_menu"		:	true,
-											"run_in_game"		:	true,
-											"localized"			:	false
-										},
-										{	"keybind_id"		:	"Mod_Bender",
-											"name"				:	"Mod Bender",
-											"description"		:	"Mod Bender",
-											"script_path"		:	"Trainer/keybinds/Mod Bender.LUA",
 											"run_in_menu"		:	true,
 											"run_in_game"		:	true,
 											"localized"			:	false

@@ -44,7 +44,8 @@ function MAIN()
 	end
 	fh = ppr_io.open( file_name, 'w' )
 	if fh then
-		fh:write( "Heist: " .. tostring( Global.game_settings and Global.game_settings.level_id ) .. "  (started " .. os.date( "%Y-%m-%d %H:%M" ) .. ")\n" )
+		-- Round 6: no os.date here, the game's Lua has no 'os' library (it errored and nothing was recorded)
+		fh:write( "Heist: " .. tostring( Global.game_settings and Global.game_settings.level_id ) .. "\n" )
 		fh:flush()
 	end
 	backuper:hijack( 'MissionScriptElement.on_executed', function( o, self, ... )

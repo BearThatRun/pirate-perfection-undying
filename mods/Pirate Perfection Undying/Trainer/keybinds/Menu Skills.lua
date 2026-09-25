@@ -1,3 +1,5 @@
+-- Round 6: SimpleMenu used to exist only if the Money or Change Equipment key was pressed first
+if not SimpleMenu then ppr_dofile('Trainer/tools/simplemenu') end
 -- SKILL MENU SCRIPT v1.1
 
 -- OPEN MENU

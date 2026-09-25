@@ -76,22 +76,6 @@ local function verify_player_id(id) --Verify, that player in-game and entered it
 	return managers.network:session():peer(id) and managers.criminals:character_name_by_peer_id(id)
 end
 
--- Undying: true when another human player is connected
-function other_players_present()
-	local session = managers.network and managers.network:session()
-	if not session then
-		return false
-	end
-	local local_id = session:local_peer() and session:local_peer():id()
-	for _, peer in pairs( session:peers() ) do
-		if peer:id() ~= local_id then
-			return true
-		end
-	end
-	return false
-end
-local other_players_present = other_players_present
-
 local trigger_client = function(id)
 	M_net_session:send_to_host("to_server_mission_element_trigger", id, M_player:player_unit())
 end

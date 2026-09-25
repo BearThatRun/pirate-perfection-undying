@@ -85,10 +85,12 @@ function MAIN()
 					spawn_meth_pos = Vector3(pos.x + (level_id == 'alex_1' and -50 or 0), pos.y, pos.z + 10)
 				end
 				interaction:interact(_players[1])
+				-- Round 6: rotation must be a Rotation (was a Vector3) and the throw upgrade level 0 (was 100)
+				local rot = Rotation(random(-180, 180), 0, 0)
 				if is_client() then
-					GetNetSession():send_to_host('server_drop_carry', 'meth', 1, false, false, 1, spawn_meth_pos, Vector3(random(-180, 180), random(-180, 180), 0), UP, 100, nil)
+					GetNetSession():send_to_host('server_drop_carry', 'meth', 1, false, false, 1, spawn_meth_pos, rot, UP, 0, nil)
 				else
-					server_drop_carry(M_player, 'meth', 1, false, false, 1, spawn_meth_pos, Vector3(random(-180, 180), random(-180, 180), 0), UP, 100, nil)
+					server_drop_carry(M_player, 'meth', 1, false, false, 1, spawn_meth_pos, rot, UP, 0, nil)
 				end
 				clear_carry(M_player)
 			end

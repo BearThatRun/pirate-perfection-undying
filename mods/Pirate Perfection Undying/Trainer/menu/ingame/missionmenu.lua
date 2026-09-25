@@ -25,7 +25,8 @@ local path = "Trainer/addons/missionmenu/"
 
 local Global = Global
 local G_game_settings = Global.game_settings
-local current_level = G_game_settings.level_id
+-- Round 6: ask the job manager first (the value the game itself uses), fall back to game_settings
+local current_level = ( managers.job and managers.job.current_level_id and managers.job:current_level_id() ) or G_game_settings.level_id
 
 local main, customize_safehouse
 
@@ -90,7 +91,7 @@ function ppr_waypoints()
 end
 
 _toggleOverdrill = not _toggleOverdrill
-if _toggleOverdrill then ppr_waypoints() end
+-- Round 6: the early ppr_waypoints() call here ran before ppr_RefreshWaypoints existed (error in the log); the call below is enough
 
 managers.hud.__update_waypoints = managers.hud.__update_waypoints or managers.hud._update_waypoints 
 function HUDManager:_update_waypoints( t, dt ) 
@@ -247,7 +248,8 @@ main = function()
 	if current_level == "chill" and is_server then
 		data[#data+1] = { text = tr.base_custom_safehouse_Sub, callback = customize_safehouse, menu = true, host_only = true }
 	end
-	Menu_open( Menu, { title = tr.mission_menu_title, button_list = data, plugin_path = path } )
+	-- Round 6: show the map id, so map-only options are easy to check
+	Menu_open( Menu, { title = tr.mission_menu_title, description = "Map: " .. tostring( current_level ), button_list = data, plugin_path = path } )
 end
 
 return main
