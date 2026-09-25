@@ -36,32 +36,12 @@ if cfg.EnableDebug then
 end
 
 -- Fixes
-if cfg.CheckGhostBonus then
-	ppr_require 'Trainer/addons/fixes/Check Ghost Bonus'
-end
-
 if cfg.CheckLobbyHandler then
 	ppr_require 'Trainer/addons/fixes/Check Lobby Handler'
 end
 
 if cfg.CheckMeleeAttack then
 	ppr_require 'Trainer/addons/fixes/Check Melee Attack'
-end
-
-if cfg.CheckMissionDoorDevicePlaced then
-	ppr_require 'Trainer/addons/fixes/Check Mission Door device_placed'
-end
-
-if cfg.CrashFixer then
-	ppr_require 'Trainer/addons/fixes/Crash Fixer'
-end
-
-if cfg.LoopFireSounds then
-	ppr_require 'Trainer/addons/fixes/Loop Fire Sounds'
-end
-
-if cfg.SentryIgnoresShields then
-	ppr_require 'Trainer/addons/fixes/Sentry Ignores Shield'
 end
 
 -- Tweaks
@@ -101,40 +81,12 @@ if cfg.Ace_tweaks then
 	ppr_require 'Trainer/addons/tweaks/Throwable Weapons/Ace Tweaks'
 end
 
-if cfg.Frag_Grenade_tweaks then
-	ppr_require 'Trainer/addons/tweaks/Throwable Weapons/Frag Grenade Tweaks'
-end
-
-if cfg.Bipod_Freelook then
-	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Bipod Freelook'
-end
-
 if cfg.Bipod_Standing then
 	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Bipod Standing'
 end
 
-if cfg.Bullet_Penetration then
-	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Bullet Penetration'
-end
-
-if cfg.Drum_Magazine_Mod then
-	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Drum Magazine Mod'
-end
-
 if cfg.Gadget_Always_On then
 	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Gadget Always On'
-end
-
-if cfg.Improved_Tripmine then
-	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Improved Tripmine'
-end
-
-if cfg.Increased_Pickup_Ammo then
-	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Increased Pickup Ammo'
-end
-
-if cfg.LMG_Scopes then
-	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/LMG Scopes'
 end
 
 if cfg.projectiles_Tweaks then
@@ -155,10 +107,6 @@ end
 
 if cfg.Weapon_Parts_Tweaks then
 	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Weapon Parts Tweaks'
-end
-
-if cfg.Weapon_Tweaks then
-	ppr_require 'Trainer/addons/tweaks/General Weapon Tweaks/Weapon Tweaks'
 end
 
 if cfg.FreeAssets then

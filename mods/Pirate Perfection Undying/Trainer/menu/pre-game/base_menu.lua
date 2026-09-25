@@ -76,7 +76,7 @@ local options = {
 		{name = "equipment_place_key", type = "input"},
 	}},
 	{name = "Misc_Sub", desc = true, sub = {
-		{name = "Lasercolor", lasercolor = true, disable = true},
+		{name = "LaserColor", lasercolor = true, disable = true},
 		{},
 		{name = "SecureAll"},
 		{name = "NoCivilianPenality"},
@@ -150,8 +150,6 @@ local options = {
 		{name = "SmSpeed", type = "slider", max = 100},
 		{name = "SmSlowPlayer"},
 		{},
-		{name = "slowmo_protect"},
-		{name = "slowmo_reverse"},
 	}},
 	{name = "xray_sub", desc = true, sub = {
 		{name = "xray_Cams"},
@@ -199,13 +197,8 @@ local options = {
 	}},
 	{name = "Fixes_Tweaks_Sub", desc = true, sub = {
 		{name = "Fixes_Sub", desc = true, sub = {
-			{name = "CheckGhostBonus"},
 			{name = "CheckLobbyHandler"},
 			{name = "CheckMeleeAttack"},
-			{name = "CheckMissionDoorDevicePlaced"},
-			{name = "CrashFixer"},
-			{name = "LoopFireSounds"},
-			{name = "SentryIgnoresShields"},
 		}},
 		{name = "Tweaks_Sub", desc = true, sub = {
 			{name = "armor_tweaks_Sub", desc = true, sub = {
@@ -229,23 +222,15 @@ local options = {
 			},},
 			{name = "throwable_weapons_tweaks_Sub", desc = true, sub = {
 				{name = "Ace_tweaks"},
-				{name = "Frag_Grenade_tweaks"},
 			},},
 			{name = "general_weapons_tweaks_Sub", desc = true, sub = {
-				{name = "Bipod_Freelook"},
 				{name = "Bipod_Standing"},
-				{name = "Bullet_Penetration"},
-				{name = "Drum_Magazine_Mod"},
 				{name = "Gadget_Always_On"},
-				{name = "Improved_Tripmine"},
-				{name = "Increased_Pickup_Ammo"},
-				{name = "LMG_Scopes"},
 				{name = "projectiles_Tweaks"},
 				{name = "Rocket_Jump"},
 				{name = "Sentry_Gun_Tweaks"},
 				{name = "Shotgun_Physics"},
 				{name = "Weapon_Parts_Tweaks"},
-				{name = "Weapon_Tweaks"},
 			},},
 	},}, },}, },},
 	{name = "custom_safehouse_Sub", desc = true, sub = {

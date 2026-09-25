@@ -110,8 +110,6 @@ return {
  -- Slowmotion Options
 	SmSpeed = 20,										-- Slow motion speed
 	SmSlowPlayer = true,								-- Affects slow motion on player
-	slowmo_protect = true,							-- Prevents client from being slowed by forced code
-	slowmo_reverse = true,							-- Sends the effect back to the sender
 
  -- xray Options										-- Color format as Red, Green, Blue example: 0, 128, 0 will be dark green.
 	xray_Cams = true,									-- xray will highlight cameras
@@ -180,13 +178,8 @@ return {
 	LegacyMenu = false,								-- Use config file names in PPR Setup menu.
 
 -- Fixes - Doing Overkills Job
-	CrashFixer = false,								--
-	LoopFireSounds = false,							--
-	SentryIgnoresShields = false,					--
-	CheckGhostBonus = false,						-- Check if accumulated_ghost_bonus is not nil.
 	CheckLobbyHandler = false,						--
 	CheckMeleeAttack = false,						--
-	CheckMissionDoorDevicePlaced = false,		--
 
 -- Tweaks - For Advanced Users only!			-- Toggle here the Tweaks you want to enable.
 	armor_tweaks = false,							-- Edit the Values in the .lua files for fine tunning.
@@ -198,26 +191,18 @@ return {
 	ChinaPuff_tweaks = false,						--
 	Glock18c_tweaks = false,						--
 	Ace_tweaks = false,								--
-    Frag_Grenade_tweaks = false,					--
-	Bipod_Freelook = false,							--
 	Bipod_Standing = false,							--
-	Bullet_Penetration = false,					--
-	Drum_Magazine_Mod = false,						--
 	Gadget_Always_On = false,						--
-	Improved_Tripmine = false,						--
-	Increased_Pickup_Ammo = false,				--
-	LMG_Scopes = false,								--
 	projectiles_Tweaks = false,					--
 	Rocket_Jump = false,								--
 	Sentry_Gun_Tweaks = false,						--
 	Shotgun_Physics = false,						--
 	Weapon_Parts_Tweaks = false,					--
-	Weapon_Tweaks = false,							--
 
  -- Custom Safehouse
 	SafeHouseDoors = true,							-- Makes doors actually doors in the Safe House.
 	SafeHouseInvest = false,						-- Put your offshore money on the line to increase or decrease your funds.
-	SafeHouseInvestAmt = 500,						-- Amount of money to give to put on Safe House Investment.
+	SafeHouseInvestAmt = 1,							-- Safe House investment step: 1 = $1,000, 2 = $10,000 ... 7 = $1,000,000,000 (100 x 10^n).
 
 -- Enables Sub Menus for PPR Setup Menu		-- No need to Change something, this is just to prevent some errors getting logged in the console to reduce the lag caused by this.
 	announce_sub = nil,								-- 
@@ -235,7 +220,7 @@ return {
 	slow_sub = nil,									--
 	xray_sub = nil,									--
 	aimbot_sub = nil,									--
-	Lasercolor = nil,									--
+	LaserColor = nil,									--
 	xray_CamsCol = nil,								--
 	xray_CivCol = nil,								--
 	xray_CopsCol = nil,								--
