@@ -63,9 +63,15 @@ end
 
 function Slider:update()
 	local x, y = ppr_menu_mouse_pos()
+	local held = ( not self.button.plugin and mouse_down( mouse, left_click ) ) or mouse_down( mouse, right_click )
 	
-	if self.slider:inside( x, y ) and ( ( not self.button.plugin and mouse_down( mouse, left_click ) ) or mouse_down( mouse, right_click ) ) then
+	-- Round 4: once you press on the bar you keep dragging while the button is held, even
+	-- outside the bar, so dragging past either end gives the exact min / max.
+	if held and ( self.dragging or self.slider:inside( x, y ) ) then
+		self.dragging = true
 		self:on_slider( x )
+	elseif not held then
+		self.dragging = false
 	end
 end
 
@@ -75,10 +81,10 @@ function Slider:on_slider( x )
 	
 	local where = ( x - slider:world_left() ) / ( slider:world_right() - slider:world_left() )
 	
-	-- Undying: clamp, and snap the outer 3% to the exact min / max (they were almost impossible to hit)
-	if where <= 0.03 then
+	-- Round 4: no snap zone any more (it blocked values near the ends); just clamp.
+	if where < 0 then
 		where = 0
-	elseif where >= 0.97 then
+	elseif where > 1 then
 		where = 1
 	end
 	

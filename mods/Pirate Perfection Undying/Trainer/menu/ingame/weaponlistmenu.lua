@@ -294,9 +294,6 @@ main_menu = function()
 			{ text = tr.weapon_secondaries, callback = weapons_menu, data = "secondaries", menu = true },
 			{ text = tr.melee_weapons, callback = melee_weapons_menu, menu = true },
 			{ text = tr.armors, callback = armors_menu, menu = true },
-			{},
-			{ text = tr.always_dismember, plugin = "always_dismember", switch_back = true },
-			{},
 		}
 		Menu_open( Menu, { title = tr.weapon_menu_title, button_list = data, plugin_path = path } )
 	end

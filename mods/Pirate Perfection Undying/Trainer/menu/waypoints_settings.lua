@@ -43,6 +43,12 @@ local save = function()
 	end
 	
 	file:close()
+	-- Round 4: if waypoints are on, restart them so the new choice shows right away
+	if plugins:g_loaded( 'waypoints' ) then
+		local toggle = load_plugin( "Trainer/addons/missionmenu/" )
+		toggle( 'waypoints' ) -- off
+		toggle( 'waypoints' ) -- on again with the saved list
+	end
 	show_hint("Waypoints saved")
 end
 
@@ -58,6 +64,9 @@ end
 
 main_menu = function()
 	local data = {
+		-- Round 4: turn the waypoints on/off here too (same switch as F10 'Objects waypointing')
+		{ text = tr.way_pointing, plugin = 'waypoints', plugin_path = "Trainer/addons/missionmenu/", switch_back = true },
+		{},
 		-- Undying: both buttons keep the menu open; the toggle reopens it so the list updates.
 		{ text = tr.wp_show_all, type = "toggle", toggle = "all_waypoints", callback = function() togg_vars.all_waypoints = not togg_vars.all_waypoints end, switch_back = function() main_menu() end },
 		{ text = tr.save, callback = save, switch_back = true },

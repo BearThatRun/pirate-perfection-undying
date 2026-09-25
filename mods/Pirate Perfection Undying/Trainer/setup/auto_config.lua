@@ -355,9 +355,6 @@ if cfg.instantdrills and is_server then
 end
 
 -- Weapons menu
-if cfg.always_dismember then
-	load_plugin( 'weapon_menu/always_dismember' )
-end
 
 -- Tools menu
 if cfg.ReduceDetectionLevel then

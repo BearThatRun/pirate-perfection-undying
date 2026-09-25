@@ -65,7 +65,6 @@ return {
 	explosive_bags = false,					-- Makes all bags explosive.
 
 -- From inventory weapons menu
-	always_dismember = false,				-- Always run gore actions for everything
 	
 -- From equipment menu
 	inf_equipments = false,					-- Equipment no longer being consumed on use

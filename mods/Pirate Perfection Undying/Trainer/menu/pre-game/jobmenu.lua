@@ -175,7 +175,8 @@ local main_menu_data = {
 	index = #m_permissions,
 	switch_back = true },
 --	{},
-	{ text = tr.job_menu_safehouse_raid, callback = function() M_custom_safehouse:spawn_safehouse_combat_contract() end},
+	-- Round 4: Safe House Raid removed: CustomSafehouseManager:spawn_safehouse_combat_contract() is an
+	-- empty function in the current game, so the button did nothing (raids you saw came from the game itself).
 --	{},
 	{},
 	{ text = tr.job_menu_escapes, callback = escapes_menu },

@@ -5,7 +5,7 @@ end
 local ppr_require = ppr_require
 ppr_require 'Trainer/tools/new_menu/menu'
 
-local main_menu, interaction_with_other, interaction_with_id_menu, release_player, interaction_with_self, activate_elements, interaction_with_team, give_equipments, give_bags, give_items, activate_triggers
+local main_menu, interaction_with_other, interaction_with_id_menu, release_player, interaction_with_self, activate_elements, interaction_with_team, give_equipments, give_bags, give_items
 
 local path = "Trainer/addons/troll_menu/"
 
@@ -123,8 +123,24 @@ local change_own_state = function(state)
 		return
 	end
 	if state == "tased" then
-		-- Non-lethal tase: you recover after a few seconds instead of going down.
-		player:movement():on_non_lethal_electrocution(1)
+		-- Round 4: use the game's own self-tase (non-lethal, you recover after a few seconds).
+		-- The game only lets you be tased with the mask on, and not with god mode / while downed.
+		local cur = M_player:current_state()
+		if cur == "mask_off" or cur == "clean" or cur == "civilian" then
+			show_hint("Tase only works with your mask on")
+			return
+		end
+		local dmg = player:character_damage()
+		if dmg.can_be_tased and not dmg:can_be_tased() then
+			show_hint("Can't be tased right now (god mode on, downed, or already tased)")
+			return
+		end
+		if dmg.on_self_tased then
+			dmg:on_self_tased(1)
+		else
+			player:movement():on_non_lethal_electrocution(1)
+			M_player:set_player_state("tased")
+		end
 		return
 	end
 	M_player:set_player_state(state)
@@ -499,15 +515,6 @@ activate_elements = function()
 	open_menu( { title = tr['troll_activate_elements'], button_list = data, back = main_menu } )
 end
 
-activate_triggers = function()
-	local data = {
-		-- Round 3: Enable/Disable units removed (Disable switched off every map object, floors too)
-		{ text = tr['troll_End_mission'], callback = run_trigger, data = "ElementMissionEnd" },
-	}
-	
-	open_menu( { title = tr['troll_activate_triggers'], button_list = data, back = main_menu } )
-end
-
 
 local ppr_dofile = ppr_dofile
 
@@ -516,7 +523,7 @@ main_menu = function()
 		{ text = tr['troll_interaction_with_other'], callback = interaction_with_other, menu = true },
 		{ text = tr['troll_change_own_state'], callback = interaction_with_self, menu = true },
 		{ text = tr['troll_activate_elements'], callback = activate_elements, host_only = true, menu = true},
-		{ text = tr['troll_activate_triggers'], callback = activate_triggers, menu = true},
+		{ text = tr['troll_End_mission'], callback = run_trigger, data = "ElementMissionEnd" }, -- Round 4: straight here, no Triggers submenu
 		{ text = tr['troll_raise_alarm'], callback = raise_alarm, host_only = true },
 		{},
 		{ text = tr['troll_cops_to_bulld'], host_only = true, plugin = "cops_to_bulld", switch_back = true },

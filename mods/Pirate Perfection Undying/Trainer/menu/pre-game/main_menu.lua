@@ -363,7 +363,7 @@ level_menu = function()
 	local data = { 
 		{},
 		{},
-		{ text = tr['set_level'] .. ":", type = "slider", slider_data = { name = "set_level", value = 0, max = 255 }, switch_back = true },
+		{ text = tr['set_level'] .. ":", type = "slider", slider_data = { name = "set_level", value = 0, max = 100 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = change_level, name = "set_level" },
 		{},
 		{ text = tr['add_exp'] .. ":", type = "slider", slider_data = { name = "add_exp", value = 0, max = 1000000 }, switch_back = true },
@@ -496,21 +496,21 @@ safehouse_menu = function()
 	Menu_open(Menu,  { title = tr['safehouse_title'], description = tr['safehouse_desc'], button_list = data, back = main_menu } )
 end
 
--- Round 3: the game has no maximum spree level; 1000 is our own cap. Catch-up bonus is capped
+-- Round 4: back to 10000 on request (the game has no maximum spree level). Catch-up bonus is capped
 -- at 100 by the game itself (tweak_data.crime_spree.catchup_limit).
 crimespree_menu = function()
 	local data = {
 		{},
-		{ text = tr['set_crimespree_spree_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_spree_level", value = 0, max = 1000 }, switch_back = true },
+		{ text = tr['set_crimespree_spree_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_spree_level", value = 0, max = 10000 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_crimespree_spree_level, name = "set_crimespree_spree_level" },
 		{},
-		{ text = tr['set_crimespree_reward_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_reward_level", value = 0, max = 1000 }, switch_back = true },
+		{ text = tr['set_crimespree_reward_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_reward_level", value = 0, max = 10000 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_crimespree_reward_level, name = "set_crimespree_reward_level" },
 		{},
 		{ text = tr['set_crimespree_catchup_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_catchup_bonus", value = 0, max = 100 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_crimespree_catchup_bonus, name = "set_crimespree_catchup_bonus" },
 		{},
-		{ text = tr['set_crimespree_winning_streak_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_winning_streak_bonus", value = 0, max = 1000 }, switch_back = true },
+		{ text = tr['set_crimespree_winning_streak_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_winning_streak_bonus", value = 0, max = 10000 }, switch_back = true },
 		{ text = tr['save'], type = "save_button", callback = set_crimespree_winning_streak_bonus, name = "set_crimespree_winning_streak_bonus" },
 	}
 
