@@ -242,8 +242,6 @@ local main_menu_data = {
 	--TO DO: Improve menu class or create link between these 2, so user can press return and return to this menu.
 	{ text = tr['wp_title'], callback = ppr_require("Trainer/menu/waypoints_settings"), menu = true },
 	{},
-	{ text = tr['loc_menu'], callback = ppr_require("Trainer/menu/pre-game/loc_menu"), menu = true },
-	{},
 	{ text = tr['config_create'], callback = create_config_menu, menu = true },
 	{ text = tr['config_rename'], callback = rename_config_menu, menu = true },
 	{ text = tr['config_delete'], callback = delete_config_menu, menu = true },

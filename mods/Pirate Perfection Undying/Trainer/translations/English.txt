@@ -7,7 +7,6 @@ Author(s): Baddog-11
 {
 -- Common used strings
 	language											=	"English",
-	lan_version										=	"2.0.0",
 	back												=	"Back",
 	exit												=	"Exit",
 	next_page										=	"Next page",
@@ -147,9 +146,7 @@ Spawning more than the allowed amount of equipment.]],
 	base_RSSFeed									=	"Show PPR RSS Feed",
 
 	base_General_Sub								=	"General",
-	base_General_Sub_desc						=	"Language, crosshair, free purchases and lobby options.",
-	base_Language									=	"Language",
-	base_Language_desc							=	"Choose from the available languages",
+	base_General_Sub_desc						=	"Crosshair, free purchases and lobby options.",
 	base_StraightToMainMenu						=	"Straight to main menu",
 	base_NoDropinPause							=	"Disable Drop-in Pause",
 	base_FreeBlackMarket							=	"Free Black Market",
@@ -913,19 +910,6 @@ Usefull when you want to reload some modified plugin on fly or turn on cheats ag
 	wp_show_all										=	"Show all waypoints",
 
 -- Localization menu
-	loc_menu											=	"Localization Menu",
-	loc_menu_choose_local						=	"Change language",
-	loc_menu_choose_remote						=	"Download new languages",
-	loc_menu_update_locals						=	"Update",
-	menu_wait										=	"Wait",
-	loc_menu_wait_desc							=	"Downloading available languages list ...",
-	loc_menu_title									=	"Available languages",
-	loc_menu_desc									=	"Choose which language you want to download/update.\nYour current language: '%s'\nLanguage version: '%s'",
-	loc_menu_success								=	"Successfully updated",
-	loc_menu_succ_desc							=	"Do you want to change your language now ?\n(Changes will fully apply only on next game restart/heist start)",
-	loc_menu_no_locals						=	"No languages found",
-	loc_menu_fail									=	"Error!!!",
-	loc_menu_fail_desc							=	"Something went wrong when we tried to download translations, please check debug console (errlog.txt) for more details.",
 
 -- Music menu
 	music_menu_title								=	"Music Menu",

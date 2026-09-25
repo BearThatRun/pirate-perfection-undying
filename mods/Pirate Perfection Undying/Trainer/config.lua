@@ -18,9 +18,7 @@ return {
 	no_liberty_hook = false,						-- It's a Secret that only retired developers know about.
 
 -- General Options
- -- Language & Config Options
-	Language = 'english',							-- Current language. Available languages: English, German, Portuguese, Turkish, Russian, Italian, Spanish, Schinese, Tchinese. Set to false to automatically choose language.
-	check_language_updates = true,				-- Set to false to automatically check and announce you, when any update for your language available
+ -- Config Options
 	DefaultConfig = 'default_config',			-- Default config file, that is loaded automatically.
 
  -- Misc

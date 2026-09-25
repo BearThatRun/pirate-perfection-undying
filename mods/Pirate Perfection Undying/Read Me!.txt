@@ -67,7 +67,7 @@ by Baddog-11 and the Pirate Perfection Developer Crew. All credit for the origin
 	  and all links to the old Pirate Perfection forum / site / Discord / Steam group
 	- Trainer menus work on ultrawide and other non-16:9 screens
 	- No more cmd.exe / hard-coded paths; many old bugs and crashes fixed
-	- Language files fixed so they load; English is used for any missing string
+	- English only: the other language files and the language menus were removed
 	- Every change is in the git history
 
 -- Credits :

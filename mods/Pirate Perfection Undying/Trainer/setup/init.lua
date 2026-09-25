@@ -171,13 +171,10 @@ local required_plugins = plugins.required
 	Localization script for PPR menus and texts.
 	Use Localization.translate[text_id] to get translation.
 	Assign table above to local variable "tr" to follow our coding style.
-	---------------------------------------------------------------------
-	Localization:grab_list([ reply_clbk ]) --Gets lists of available translations. Calls reply_clbk with net_data table or false, depending on status.
-	Localization:download_translation( id[,reply_clbk]) --Downloads translations and saves it into translations under name of (name).txt. Calls reply_clbk with language id and downloaded translation or false, depending on status.
 ]]
 local localizator = ppr_require('Trainer/Setup/localizator')
 
-local my_language = ppr_config.Language or Steam:current_language()
+local my_language = 'english' --Only English is included
 local Localization = localizator:new(my_language) --Is steam language same as game language ? Confirm it please. @baldwin
 _G.Localization = Localization
 local tr = Localization.translate

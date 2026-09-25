@@ -55,11 +55,12 @@ The history is split so every step can be reviewed on its own (`git log -p`):
 | `d54cde0` | Crash fix for weapon fire rate on x64. |
 | `d792912` | F5 Troll menu back, limited to yourself and AI. |
 | `3f84245` to `ffad26e` | In-game test rounds 1 to 6: crash fixes, broken features fixed or removed, menu fixes, BLT keybind fixes, dead files removed. The commit messages list every change. |
-| Round 7 | Text pass: credits and permission statement, this README, `Read Me!.txt`, and the translation files fixed so they load (see below). |
+| `ba6cbb7` Round 7 | Text pass: credits and permission statement, this README, `Read Me!.txt`. |
+| Languages | English only: the other 10 language files, the Localization menu and the Language option were removed. |
 
-## Translations
+## Language
 
-English is the main language. The other language files only have strings for features that still exist; anything missing falls back to English. In round 7, six language files that didn't load at all (syntax errors) were fixed, and three were converted to UTF-8. Nothing was re-translated.
+The trainer is English only. The original shipped 10 other languages, but most of them didn't load (syntax errors), were missing many strings, or still described removed features, so they were removed along with the language menus.
 
 ## Tools
 

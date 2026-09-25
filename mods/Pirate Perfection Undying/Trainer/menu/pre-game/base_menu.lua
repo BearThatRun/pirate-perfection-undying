@@ -39,8 +39,6 @@ local options = {
 		{name = "HUD"},
 	}},
 	{name = "General_Sub", desc = true, sub = {
-		{name = "Language", menu = function() return rlist_files("Trainer/translations/", "txt") or {} end},
-		{},
 		{name = "Crosshair"},
 		{name = "NoStatsSynced"},
 		{name = "AllPerks"},

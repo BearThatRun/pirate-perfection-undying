@@ -17,10 +17,6 @@ local next = next
 local io_open = ppr_io.open
 local string = string
 local str_format = string.format
-local str_match = string.match
-local Steam = Steam
-local http_request = Steam.http_request
-local executewithdelay = executewithdelay
 local ppr_config = ppr_config
 
 local DEFAULT_LANGUAGE = 'english'
@@ -38,7 +34,7 @@ local available_languages = {
 
 local localizator = class()
 
-local init, mt_table, text, load_language, change_language, _load_language, grab_list, download_translation
+local init, mt_table, text, load_language, change_language, _load_language
 
 init = function(self, language)
 	self.lan = language or DEFAULT_LANGUAGE
@@ -111,76 +107,6 @@ load_language = function( self )
 	return true
 end
 localizator.load_language = load_language
-
-download_translation = function( self, language, reply )
-	local net_data = self.__net_data
-	if ( net_data ) then
-		local dl_data = net_data[language]
-		if ( dl_data ) then
-			local url = dl_data.u
-			if ( url ) then
-				local function clbk( s, data )
-					m_log_vs('localizator.lua http_request report in dl callback', 'Success?', s )
-					if (s) then
-						data = str_match( data, "{.*}" ) --Filter table contents only (to filter memory leaks from http_request)
-						if ( data ) then
-							--If loaded from network string returns table, then translation should be ok
-							local sanity = loadstring_execute( 'return '..data, {}, language..'.txt' )
-							if ( sanity ) then
-								local f = io_open( 'Trainer/translations/'..language..'.txt', 'wb' )
-								if ( f ) then
-									f:write( data )
-									f:close()
-									if ( reply ) then
-										reply( language, data )
-									end
-									return
-								end
-								m_log_error('localizator.lua on download callback', 'Failed to write to Trainer/translations/'..language..'.txt' )
-							end
-						end
-						m_log_error('localizator.lua on download callback', 'Data corrupted?')
-					end
-					if ( reply ) then
-						reply( false )
-					end
-				end
-				http_request( Steam, url, clbk )
-				return
-			end
-			m_log_error('localizator.lua download_translation', 'Failed to get url from', language)
-		end
-		m_log_error('localizator.lua download_translation', 'language id', language, 'wasn\'t found!')
-	end
-	if ( reply ) then
-		reply( false )
-	end
-end
-localizator.download_translation = download_translation
-
-
---Data format: { ['translation_id'] = { l = 'language name in english', l2 = 'language name on its language', u = 'url_to_translation', v = 'version_number' }, ... }
-grab_list = function( self, reply )
-	local retry_id
-	local function grab_clbk( s, data )
-		StopLoopIdent(retry_id)
-		m_log_vs('localizator.lua http_request report. Success ?', s, 'Data:\n==========\n', data, '\n==========')
-		if (s) then
-			local net_data = loadstring_execute( 'return '..data, {} )
-			if ( net_data ) then
-				self.__net_data = net_data
-				if ( reply ) then
-					reply( net_data )
-				end
-				return
-			end
-		end
-		reply( false )
-	end
-	http_request( Steam, "https://bitbucket.org/SoulHipHop/pirate-perfection/downloads/hiphop.txt", grab_clbk )
-	retry_id = executewithdelay( { func = grab_list, params = { self } }, 3.9 )
-end
-localizator.grab_list = grab_list
 
 change_language = function( self, language, saveme )
 	self.lan = language
