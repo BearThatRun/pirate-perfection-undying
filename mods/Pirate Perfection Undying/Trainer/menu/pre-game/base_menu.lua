@@ -185,7 +185,6 @@ local options = {
 		{},
 		{name = "DebugDramaDraw"},
 		{name = "DebugStateDraw"},
-		{name = "DebugNavDraw"},
 		{},
 		{name = "DebugAdditionalEsp"},
 		{name = "DebugMissionElements"},

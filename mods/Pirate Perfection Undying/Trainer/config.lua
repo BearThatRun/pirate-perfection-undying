@@ -15,7 +15,7 @@ return {
 	LogErrorsToFile = true,							-- This will not only display PPR related errors into console, but will write them into errlog.log
 
  -- Secert
-	no_liberty_hook = false,						-- It's a Secret that only retired developers know about.
+	no_liberty_hook = false,						-- Set to true to skip the startup check for an old 32-bit IPHLPAPI.dll in the game folder.
 
 -- General Options
  -- Config Options
@@ -170,7 +170,6 @@ return {
 	DebugDramaDraw = false,							-- Enable drama HUD.
 	DebugStateDraw = false,							-- Enable displaying state on unit.
 	DebugConsole = false,							-- Enable debug console.
-	DebugNavDraw = false,							-- Enable displaying debug navigation fields.
 	DebugAdditionalEsp = false,					-- Enable additional esp on units.
 	DebugMissionElements = false,					-- Enable drawing mission elements.
 	DebugElementsAdditional	= false,				-- Enable drawing additional mission elements.

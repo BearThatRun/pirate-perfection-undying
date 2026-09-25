@@ -127,9 +127,6 @@ function MAIN()
 		managers.mission:set_persistent_debug_enabled( true )
 		console.CreateConsole()
 	end
-	if ppr_config.DebugNavDraw then
-		-- Round 3: navigation debug drawing is not in the release game (errors in the log), removed
-	end
 	if managers.debug then
 		managers.debug:set_enabled_all(true, true)
 		managers.debug.macro._check_fps = true
@@ -147,6 +144,10 @@ function MAIN()
 		self:_upd_debug_draw_attentions()
 		if ppr_config.DebugAdditionalEsp then
 			self:_draw_enemy_importancies()
+		end
+		-- x64: the game's own update also moves bots that fall too far behind
+		if self.upd_team_AI_distance then
+			self:upd_team_AI_distance()
 		end
 	end
 
