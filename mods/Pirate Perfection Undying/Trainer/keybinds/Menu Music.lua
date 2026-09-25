@@ -66,4 +66,5 @@ local main_menu = function()
 	Menu_open(Menu, { title = tr.music_menu_title, button_list = data } )
 end
 
-return main_menu
+-- Round 5: a BLT keybind ignores a returned function, so open the menu here
+main_menu()

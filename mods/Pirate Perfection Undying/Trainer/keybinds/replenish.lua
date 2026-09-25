@@ -17,4 +17,7 @@ local function REPLENISH()
 	end
 end
 
-return REPLENISH
+-- Round 5: a BLT keybind ignores a returned function, so call it here
+if inGame() and isPlaying() and not inChat() then
+	REPLENISH()
+end

@@ -35,7 +35,7 @@ for line in lines( file_name ) do
 	waypoint_items[ line ] = true
 end
 
-local save = function()
+local save = function( quiet, turn_on )
 	local file = open_file( file_name, 'w' )
 	
 	for line in pairs( waypoint_items ) do
@@ -44,20 +44,27 @@ local save = function()
 	
 	file:close()
 	-- Round 4: if waypoints are on, restart them so the new choice shows right away
+	local toggle = load_plugin( "Trainer/addons/missionmenu/" )
 	if plugins:g_loaded( 'waypoints' ) then
-		local toggle = load_plugin( "Trainer/addons/missionmenu/" )
 		toggle( 'waypoints' ) -- off
 		toggle( 'waypoints' ) -- on again with the saved list
+	elseif turn_on then
+		toggle( 'waypoints' ) -- Round 5: ticking an item turns waypoints on
 	end
-	show_hint("Waypoints saved")
+	if not quiet then
+		show_hint("Waypoints saved")
+	end
 end
 
+-- Round 5: every tick is saved and shown right away (no need to press Save)
 local toggle_icon = function( id )
-	if waypoint_items[ id ] then
-		waypoint_items[ id ] = nil
-	else
+	local added = not waypoint_items[ id ]
+	if added then
 		waypoint_items[ id ] = true
+	else
+		waypoint_items[ id ] = nil
 	end
+	save( true, added )
 end
 
 -- Menu

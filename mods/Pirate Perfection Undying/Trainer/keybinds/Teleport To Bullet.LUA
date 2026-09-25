@@ -1,22 +1,23 @@
--- WARP TO BULLET
-
+-- WARP TO BULLET (BLT keybind)
+-- Round 5: the first press starts remembering where your bullets hit; every press after that
+-- teleports you to the last hit. The old version passed your position as the rotation.
 if inGame() and isPlaying() and not inChat() and not InOverlay() then
-	local rot0 = Rotation(0,0,0)
-	if not _lastBullet then
-		_lastBullet = nil 
-	end
-	if _lastBullet then
-		managers.player:warp_to(_lastBullet, managers.player:player_unit():position(), 1, rot0 )
-	end
-	if not _bulletCollision then
-		_bulletCollision = InstantBulletBase.on_collision 
-	end
-	function InstantBulletBase:on_collision( col_ray, weapon_unit, user_unit, damage, blank )
-		if user_unit == managers.player:player_unit() then
-			_lastBullet = col_ray.hit_position
+	if not _ppu_bullet_hooked then
+		_ppu_bullet_hooked = true
+		local orig = InstantBulletBase.on_collision
+		function InstantBulletBase:on_collision( col_ray, weapon_unit, user_unit, ... )
+			if user_unit == managers.player:player_unit() and col_ray and col_ray.hit_position then
+				_lastBullet = mvector3.copy( col_ray.hit_position )
+			end
+			return orig( self, col_ray, weapon_unit, user_unit, ... )
 		end
-		return _bulletCollision(self, col_ray, weapon_unit, user_unit, damage, blank)
 	end
-	show_mid_text("To Bullet","Teleport",0.25)
-	beep()
+	local ply = managers.player:player_unit()
+	if _lastBullet and alive( ply ) then
+		managers.player:warp_to( _lastBullet, ply:camera():rotation() )
+		show_mid_text("To Bullet","Teleport",0.25)
+		beep()
+	else
+		show_hint("Shoot somewhere first, then press again to teleport there")
+	end
 end
