@@ -12,5 +12,9 @@
 		<png path="guis/textures/ppu/font_s"/>
 		<png path="guis/textures/ppu/font_b"/>
 		<png path="guis/textures/ppu/shapes"/>
+		<png path="guis/textures/ppu/font_r_1x"/>
+		<png path="guis/textures/ppu/font_s_1x"/>
+		<png path="guis/textures/ppu/font_b_1x"/>
+		<png path="guis/textures/ppu/shapes_1x"/>
 	</AddFiles>
 </table>

@@ -2,3 +2,6 @@ Thumbs.db
 .DS_Store
 *.tgz
 __pycache__/
+
+# written by the menu at runtime (window size/position/scale)
+mods/Pirate Perfection Undying/Trainer/configs/menu_ui.lua

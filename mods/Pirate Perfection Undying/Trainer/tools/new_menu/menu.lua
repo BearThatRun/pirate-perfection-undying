@@ -175,6 +175,8 @@ local WHEEL_DOWN = Idstring('mouse wheel down')
 local K_UP, K_DOWN, K_LEFT, K_RIGHT = Idstring("up"), Idstring("down"), Idstring("left"), Idstring("right")
 local K_ENTER, K_BACK = Idstring("enter"), Idstring("backspace")
 local K_LSHIFT, K_RSHIFT = Idstring("left shift"), Idstring("right shift")
+local K_LCTRL, K_RCTRL = Idstring("left ctrl"), Idstring("right ctrl")
+local K_ZERO = Idstring("0")
 -- "/" has no key name used in the game's code; try likely names once, keep the ones accepted
 local K_SLASH = {}
 for _, n in ipairs( { "/", "num /" } ) do
@@ -218,6 +220,53 @@ local function fmt_num( n )
 	return neg .. int .. rest
 end
 
+---------------------------------------------------------------------------------------------
+-- Window state that survives restarts: UI scale, position (screen pixels), width, list height.
+-- Kept in its own small file so no user config is touched.
+---------------------------------------------------------------------------------------------
+local UI_FILE = "Trainer/configs/menu_ui.lua"
+local UI_MIN_SCALE, UI_MAX_SCALE = 0.75, 2
+
+local function load_ui_state()
+	if PPU_ui then return PPU_ui end
+	PPU_ui = { scale = 1 }
+	pcall( function()
+		local f = ppr_io.open( UI_FILE, "r" )
+		if not f then return end
+		local src = f:read( "*a" )
+		f:close()
+		local fn = loadstring( src )
+		local ok, t = pcall( fn )
+		if ok and type( t ) == "table" then
+			for k, v in pairs( t ) do
+				if type( v ) == "number" then PPU_ui[ k ] = v end
+			end
+		end
+	end )
+	PPU_ui.scale = math_max( UI_MIN_SCALE, math_min( PPU_ui.scale or 1, UI_MAX_SCALE ) )
+	PPU_win_w = PPU_win_w or PPU_ui.w
+	PPU_list_h = PPU_list_h or PPU_ui.list_h
+	return PPU_ui
+end
+
+local function save_ui_state()
+	local u = PPU_ui
+	if not u then return end
+	u.w, u.list_h = PPU_win_w, PPU_list_h
+	pcall( function()
+		local f = ppr_io.open( UI_FILE, "w" )
+		if not f then return end
+		local parts = {}
+		for _, k in ipairs( { "scale", "x", "y", "w", "list_h" } ) do
+			if u[ k ] then
+				parts[ #parts + 1 ] = string.format( "\t%s = %s,", k, tostring( u[ k ] ) )
+			end
+		end
+		f:write( "-- Pirate Perfection Undying menu window: size (UI px), position (screen px), scale.\n-- Written by the menu; delete this file to reset.\nreturn {\n" .. table.concat( parts, "\n" ) .. "\n}\n" )
+		f:close()
+	end )
+end
+
 local Menu = class()
 
 ---------------------------------------------------------------------------------------------
@@ -245,7 +294,8 @@ function Menu:init( data )
 
 	local ws = OverlayGui:create_screen_workspace()
 	self._ws = ws
-	managers.gui_data:layout_1280_workspace( ws )
+	load_ui_state()
+	self:layout_ws()
 	tweak_data.menu_active = self
 	self.close_clbks = {}
 	-- persistent object that receives typed text (the rest is redrawn often)
@@ -277,6 +327,61 @@ end
 
 -- Breadcrumb path (design: stack of opened menus). Row presses push, Back / crumbs pop,
 -- F-keys and tabs start a new path.
+-- One UI pixel = ui_scale screen pixels (1 = the design's size on screen, like a browser at 100%).
+-- The game's own menus use a 1280x720 layout stretched to the screen (1.5x at 1080p).
+function Menu:layout_ws()
+	local ws = self._ws
+	local s = PPU_ui.scale
+	local ok = pcall( function()
+		local res = RenderSettings.resolution
+		ws:set_screen( res.x / s, res.y / s, 0, 0, res.x )
+		self.res = { x = res.x, y = res.y }
+	end )
+	if not ok then
+		managers.gui_data:layout_1280_workspace( ws )
+		self.res = nil
+		s = 2
+	end
+	self.ui_scale = s
+	D.set_scale( s )
+end
+
+-- Mouse position in this workspace. The pointer lives in the game's fullscreen workspace.
+function Menu:mouse_pos()
+	local mp = managers.mouse_pointer
+	local x, y = mp._mouse:world_position()
+	if self.res then
+		local full = managers.gui_data:full_scaled_size()
+		local k = self.res.x / full.w / self.ui_scale
+		return x * k, y * k
+	end
+	return ppr_menu_mouse_pos()
+end
+
+-- Ctrl + mouse wheel over the window: make the whole menu smaller / bigger (0.75x - 2x)
+function Menu:change_scale( d )
+	local old = PPU_ui.scale
+	local new = math_floor( ( old + d ) * 20 + 0.5 ) / 20
+	new = math_max( UI_MIN_SCALE, math_min( new, UI_MAX_SCALE ) )
+	if new == old then return end
+	-- keep the window's top-left corner where it is on screen
+	local px = PPU_ui.x or ( self.win_x or 0 ) * old
+	local py = PPU_ui.y or ( self.win_y or 0 ) * old
+	PPU_ui.x, PPU_ui.y = math_floor( px + 0.5 ), math_floor( py + 0.5 )
+	PPU_ui.scale = new
+	self:layout_ws()
+	self.win_x, self.win_y = math_floor( px / new ), math_floor( py / new )
+	self:build()
+	self:set_description( "Menu size " .. math_floor( new * 100 + 0.5 ) .. "%  (Ctrl + mouse wheel, Ctrl + 0 resets)" )
+	save_ui_state()
+end
+
+function Menu:remember_position()
+	PPU_ui.x = math_floor( ( self.win_x or 0 ) * self.ui_scale + 0.5 )
+	PPU_ui.y = math_floor( ( self.win_y or 0 ) * self.ui_scale + 0.5 )
+	save_ui_state()
+end
+
 function Menu:update_nav_stack()
 	local data = self._data
 	local title = tostring( data.title or "" )
@@ -439,8 +544,14 @@ function Menu:build()
 
 	-- position: centred on first open, then kept (resizing grows right/down like the design)
 	if not self.win_x then
-		self.win_x = math_floor( ( root:w() - ( W + 2 ) ) / 2 )
-		self.win_y = math_floor( ( root:h() - ( H + 2 ) ) / 2 )
+		if PPU_ui.x and PPU_ui.y then
+			-- same place as last time (saved in screen pixels)
+			self.win_x = math_floor( PPU_ui.x / self.ui_scale )
+			self.win_y = math_floor( PPU_ui.y / self.ui_scale )
+		else
+			self.win_x = math_floor( ( root:w() - ( W + 2 ) ) / 2 )
+			self.win_y = math_floor( ( root:h() - ( H + 2 ) ) / 2 )
+		end
 	end
 	self.win_x = math_max( 0, math_min( self.win_x, root:w() - ( W + 2 ) ) )
 	self.win_y = math_max( 0, math_min( self.win_y, root:h() - ( H + 2 ) ) )
@@ -1230,8 +1341,12 @@ function Menu:on_mouse_press( button )
 	if button ~= WHEEL_UP and button ~= WHEEL_DOWN then
 		return
 	end
-	local x, y = ppr_menu_mouse_pos()
+	local x, y = self:mouse_pos()
 	local d = button == WHEEL_UP and -1 or 1
+	if self.main and self.main:inside( x, y ) and ( kb_down( keyboard, K_LCTRL ) or kb_down( keyboard, K_RCTRL ) ) then
+		self:change_scale( -d * 0.05 )
+		return
+	end
 	if self.tabs_panel and self.tabs_panel:inside( x, y ) then
 		self:scroll_tabs( d * 80 )
 	elseif self.list_clip and self.list_clip:inside( x, y ) then
@@ -1335,11 +1450,11 @@ function Menu:update()
 		self:update_tab_arrows()
 	end
 
-	local link = self:mouse_update()
+	local ptr = self:mouse_update()
 	if not self._ws then return end
 	self:keyboard_update()
 	if not self._ws then return end
-	M_mouse_pointer:set_pointer_image( link and "link" or "arrow" )
+	M_mouse_pointer:set_pointer_image( type( ptr ) == "string" and ptr or ( ptr and "link" or "arrow" ) )
 end
 
 function Menu:keyboard_update()
@@ -1356,6 +1471,11 @@ function Menu:keyboard_update()
 		return
 	end
 	local shift = kb_down( keyboard, K_LSHIFT ) or kb_down( keyboard, K_RSHIFT )
+	local ctrl = kb_down( keyboard, K_LCTRL ) or kb_down( keyboard, K_RCTRL )
+	if ctrl and kb_pressed( keyboard, K_ZERO ) then
+		self:change_scale( 1 - PPU_ui.scale ) -- Ctrl + 0: back to 100 %
+		return
+	end
 	if self:key_rep( K_UP ) then
 		self:move_focus( -1 )
 	elseif self:key_rep( K_DOWN ) then
@@ -1441,7 +1561,7 @@ function Menu:enter_button_pressed()
 end
 
 function Menu:mouse_update()
-	local x, y = ppr_menu_mouse_pos()
+	local x, y = self:mouse_pos()
 	local T = self.T
 	local clicked = mouse_pressed( mouse, left_click )
 	local rclicked = not clicked and mouse_pressed( mouse, right_click )
@@ -1470,6 +1590,29 @@ function Menu:mouse_update()
 			return true
 		end
 		self.resizing = nil
+		save_ui_state()
+	end
+	-- moving the window (drag the header)
+	if self.moving then
+		if held then
+			local mv = self.moving
+			local root = self._ws:panel()
+			local nx = math_max( 0, math_min( math_floor( mv.wx + x - mv.x0 ), root:w() - self.main:w() ) )
+			local ny = math_max( 0, math_min( math_floor( mv.wy + y - mv.y0 ), root:h() - self.main:h() ) )
+			if nx ~= self.win_x or ny ~= self.win_y then
+				local dx, dy = nx - self.win_x, ny - self.win_y
+				self.win_x, self.win_y = nx, ny
+				self.main:set_x( nx )
+				self.main:set_y( ny )
+				if self.shadow then
+					self.shadow:set_x( self.shadow:x() + dx )
+					self.shadow:set_y( self.shadow:y() + dy )
+				end
+			end
+			return "grab"
+		end
+		self.moving = nil
+		self:remember_position()
 	end
 	-- slider drag in progress
 	if self.drag_slider then
@@ -1577,6 +1720,17 @@ function Menu:mouse_update()
 			self.search_input:activate_input()
 		end
 		return true
+	end
+	if link then
+		return true
+	end
+	-- the rest of the header moves the window
+	if self.header_panel and self.header_panel:inside( x, y ) then
+		if clicked then
+			self.moving = { x0 = x, y0 = y, wx = self.win_x, wy = self.win_y }
+			return "grab"
+		end
+		return "hand"
 	end
 
 	-- footer buttons

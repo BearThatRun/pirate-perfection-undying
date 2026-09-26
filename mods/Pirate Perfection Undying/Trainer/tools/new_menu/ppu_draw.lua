@@ -7,9 +7,8 @@
 ppr_require 'Trainer/tools/new_menu/ppu_assets'
 
 local A = PPU_ASSETS
-local SC = A.scale
-local S = A.shapes
-local SHAPE_TEX = A.shape_tex
+-- current texture set (1x or 2x), picked from the UI scale by D.set_scale
+local SET, SC, S, SHAPE_TEX, FONTS
 local pairs, ipairs, type, tostring = pairs, ipairs, type, tostring
 local math_floor, math_max, math_min = math.floor, math.max, math.min
 local str_byte, str_gmatch, str_upper = string.byte, string.gmatch, string.upper
@@ -32,16 +31,36 @@ local function tex_ok( path )
 end
 -- Checked again on every menu draw until found: BeardLib may register the files after this
 -- file is loaded.
+local checked = {}
 function D.check()
-	if not D.fonts_ok then
-		D.fonts_ok = tex_ok( "guis/textures/ppu/font_r" ) and tex_ok( "guis/textures/ppu/font_s" ) and tex_ok( "guis/textures/ppu/font_b" )
+	local key = SC
+	local c = checked[ key ] or {}
+	checked[ key ] = c
+	if not c.fonts then
+		local ok = true
+		for _, w in ipairs( { "r", "s", "b" } ) do
+			ok = ok and tex_ok( FONTS[ w .. "16" ] and FONTS[ w .. "16" ].tex or "" )
+		end
+		c.fonts = ok
 	end
-	if not D.shapes_ok then
-		D.shapes_ok = tex_ok( SHAPE_TEX )
+	if not c.shapes then
+		c.shapes = tex_ok( SHAPE_TEX )
 	end
+	D.fonts_ok, D.shapes_ok = c.fonts, c.shapes
 	return D.fonts_ok, D.shapes_ok
 end
-D.check()
+
+-- UI scale = screen pixels per design pixel. Up to 1.25 uses the 1x textures (sharp at 1:1),
+-- above that the 2x ones. At scale 1 text is snapped to whole pixels like a browser at 100%.
+function D.set_scale( ui_scale )
+	D.ui_scale = ui_scale or 1
+	local want = ( D.ui_scale <= 1.25 ) and 1 or 2
+	SET = A.sets[ want ] or A.sets[ 2 ] or A.sets[ 1 ]
+	SC, S, SHAPE_TEX, FONTS = SET.scale, SET.shapes, SET.shape_tex, SET.fonts
+	D.snap = math.abs( D.ui_scale - 1 ) < 0.001
+	D.check()
+end
+D.set_scale( 1 )
 
 local GAME_FONT = tweak_data.menu.pd2_medium_font
 
@@ -91,6 +110,15 @@ local function round( v )
 	return math_floor( v + 0.5 )
 end
 
+-- whole pixels at UI scale 1 (sharp text), untouched otherwise
+local function snap( v )
+	if D.snap then
+		return math_floor( v + 0.5 )
+	end
+	return v
+end
+D.snap_value = snap
+
 -- Line box height and baseline, like Chrome: ascent/descent rounded to whole px (typo metrics),
 -- line-height "normal" = ascent + descent + gap, otherwise half-leading around the content box.
 function D.line_metrics( F, mult )
@@ -106,7 +134,7 @@ function D.lh( fkey, mult )
 end
 
 function D.font( key )
-	return A.fonts[ key ] or A.fonts.r16
+	return FONTS[ key ] or FONTS.r16
 end
 
 -- Width of text in a font, same rules as drawing (letter spacing in em, like CSS)
@@ -169,7 +197,7 @@ function D.text( parent, cfg )
 	self.F = D.font( self.fkey )
 	self.kern = A.kern[ self.fkey:sub( 1, 1 ) ] or {}
 	self.color = cfg.color or Color.white
-	self.panel = parent:panel( { name = cfg.name or "ppu_text", x = cfg.x or 0, y = cfg.y or 0, w = cfg.w or 10, h = 10, layer = cfg.layer or 3 } )
+	self.panel = parent:panel( { name = cfg.name or "ppu_text", x = snap( cfg.x or 0 ), y = snap( cfg.y or 0 ), w = cfg.w or 10, h = 10, layer = cfg.layer or 3 } )
 	if cfg.alpha then
 		self.panel:set_alpha( cfg.alpha )
 	end
@@ -237,7 +265,7 @@ function Text:set_text( text )
 			end
 			if gl[4] then
 				local b = panel:bitmap( { texture = tex, texture_rect = { gl[4], gl[5], gl[6], gl[7] },
-					x = x + gl[2], y = by + gl[3], w = gl[6] / SC, h = gl[7] / SC, color = self.color, layer = 1, blend_mode = "normal" } )
+					x = snap( x + gl[2] ), y = snap( by + gl[3] ), w = gl[6] / SC, h = gl[7] / SC, color = self.color, layer = 1, blend_mode = "normal" } )
 				self._glyphs[ #self._glyphs + 1 ] = b
 			end
 			x = x + gl[1] + ls
@@ -260,13 +288,13 @@ function Text:left() return self.panel:left() end
 function Text:right() return self.panel:right() end
 function Text:top() return self.panel:top() end
 function Text:bottom() return self.panel:bottom() end
-function Text:set_x( v ) self.panel:set_x( v ) end
-function Text:set_y( v ) self.panel:set_y( v ) end
-function Text:set_left( v ) self.panel:set_left( v ) end
-function Text:set_right( v ) self.panel:set_right( v ) end
-function Text:set_top( v ) self.panel:set_top( v ) end
-function Text:set_center_x( v ) self.panel:set_center_x( v ) end
-function Text:set_center_y( v ) self.panel:set_center_y( v ) end
+function Text:set_x( v ) self.panel:set_x( snap( v ) ) end
+function Text:set_y( v ) self.panel:set_y( snap( v ) ) end
+function Text:set_left( v ) self.panel:set_x( snap( v ) ) end
+function Text:set_right( v ) self.panel:set_x( snap( v - self.panel:w() ) ) end
+function Text:set_top( v ) self.panel:set_y( snap( v ) ) end
+function Text:set_center_x( v ) self.panel:set_x( snap( v - self.panel:w() / 2 ) ) end
+function Text:set_center_y( v ) self.panel:set_y( snap( v - self.panel:h() / 2 ) ) end
 function Text:set_visible( v ) self.panel:set_visible( v ) end
 function Text:visible() return self.panel:visible() end
 function Text:inside( x, y ) return self.panel:inside( x, y ) end
@@ -285,7 +313,7 @@ end
 -- Vertically centre the first line box on y (like align-items:center on a single line)
 function Text:center_line_on( y )
 	local lh = D.line_metrics( self.F, self.cfg.lh )
-	self.panel:set_y( y - lh / 2 )
+	self.panel:set_y( snap( y - lh / 2 ) )
 end
 
 ---------------------------------------------------------------------------------------------
@@ -388,7 +416,8 @@ function D.circle( parent, cfg )
 	local p = parent:panel( { name = cfg.name or "ppu_circle", x = cfg.x or 0, y = cfg.y or 0, w = d, h = d, layer = cfg.layer or 0 } )
 	self.panel = p
 	if D.shapes_ok then
-		self.parts[1] = sbitmap( p, "circle" .. ( d <= 14 and 14 or 16 ), 0, 0, d, d, cfg.color )
+		local key = S[ "circle" .. d ] and ( "circle" .. d ) or ( d <= 14 and "circle14" or "circle16" )
+		self.parts[1] = sbitmap( p, key, 0, 0, d, d, cfg.color )
 	else
 		self.parts[1] = p:rect( { color = cfg.color } )
 	end
