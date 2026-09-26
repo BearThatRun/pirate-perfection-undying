@@ -346,6 +346,11 @@ end
 
 -- Filled rounded box. cfg: x, y, w, h, r, color, layer, name
 function D.box( parent, cfg )
+	if D.snap then -- whole pixels at 100 %: 1 px lines stay sharp and don't vanish
+		cfg.x, cfg.y = snap( cfg.x or 0 ), snap( cfg.y or 0 )
+		if cfg.w then cfg.w = math_max( 1, snap( cfg.w ) ) end
+		if cfg.h then cfg.h = math_max( 1, snap( cfg.h ) ) end
+	end
 	local self = setmetatable( { parts = {}, color = cfg.color }, Shape )
 	local w, h = cfg.w, cfg.h
 	local p = parent:panel( { name = cfg.name or "ppu_box", x = cfg.x or 0, y = cfg.y or 0, w = w, h = h, layer = cfg.layer or 0 } )
@@ -376,6 +381,11 @@ end
 
 -- 1px rounded border. cfg: x, y, w, h, r, color, layer, bottom (bottom border width, e.g. 2 for key caps)
 function D.border( parent, cfg )
+	if D.snap then -- whole pixels at 100 %: 1 px lines stay sharp and don't vanish
+		cfg.x, cfg.y = snap( cfg.x or 0 ), snap( cfg.y or 0 )
+		if cfg.w then cfg.w = math_max( 1, snap( cfg.w ) ) end
+		if cfg.h then cfg.h = math_max( 1, snap( cfg.h ) ) end
+	end
 	local self = setmetatable( { parts = {}, color = cfg.color }, Shape )
 	local w, h = cfg.w, cfg.h
 	local p = parent:panel( { name = cfg.name or "ppu_border", x = cfg.x or 0, y = cfg.y or 0, w = w, h = h, layer = cfg.layer or 0 } )
@@ -411,6 +421,11 @@ end
 
 -- Circle of diameter 14 or 16
 function D.circle( parent, cfg )
+	if D.snap then -- whole pixels at 100 %: 1 px lines stay sharp and don't vanish
+		cfg.x, cfg.y = snap( cfg.x or 0 ), snap( cfg.y or 0 )
+		if cfg.w then cfg.w = math_max( 1, snap( cfg.w ) ) end
+		if cfg.h then cfg.h = math_max( 1, snap( cfg.h ) ) end
+	end
 	local self = setmetatable( { parts = {}, color = cfg.color }, Shape )
 	local d = cfg.d or 16
 	local p = parent:panel( { name = cfg.name or "ppu_circle", x = cfg.x or 0, y = cfg.y or 0, w = d, h = d, layer = cfg.layer or 0 } )

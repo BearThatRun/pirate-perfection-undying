@@ -66,7 +66,7 @@ end
 local main
 
 local menu_data = {
-	{ text = tr.normalizer_restore, callback = restore, switch_back = true },
+	{ text = tr.normalizer_restore, callback = restore, switch_back = true, ask = "Turn off all trainer features?", meta = "turns off all trainer features" },
 	{ text = tr.normalizer_reboot, callback = reboot, switch_back = true },
 }
 menu_data = { title = tr.Normalizer, description = tr.Normalizer_desc, button_list = menu_data, w_mul = 2.5, h_mul = 3.2 }

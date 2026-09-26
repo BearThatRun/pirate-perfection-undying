@@ -54,15 +54,64 @@ local function rgb( t, a )
 	return c
 end
 
-function ppu_theme()
-	-- rawget: ppr_config warns in the log for every missing key
-	local ok_s, saved = pcall( function() return ppr_config and rawget( ppr_config, "PPU_Theme" ) end )
-	saved = ok_s and saved or nil
-	local src = {}
-	for k, v in pairs( PPU_THEME_DEFAULT ) do
-		local s = type( saved ) == "table" and saved[k]
-		src[k] = ( type( s ) == "table" and #s == 3 ) and s or v
+-- Order and names from the design's Theme page
+PPU_THEME_ROLES = {
+	{ "bg", "Window background" }, { "surf", "Row highlight" }, { "text", "Text" },
+	{ "muted", "Secondary text" }, { "acc", "Accent" }, { "warn", "Warning" },
+}
+
+-- Saved in the active config as one string, because the config writer (configmt.lua) can
+-- only write strings, numbers and booleans: cfg.PPU_Theme = "7,9,12;22,38,54;..."
+local function theme_parse( s )
+	if type( s ) ~= "string" then return nil end
+	local out, i = {}, 0
+	for grp in s:gmatch( "[^;]+" ) do
+		i = i + 1
+		local r, g, b = grp:match( "^%s*(%d+)%s*,%s*(%d+)%s*,%s*(%d+)%s*$" )
+		local role = PPU_THEME_ROLES[ i ]
+		if not ( r and role ) then return nil end
+		out[ role[1] ] = { math.min( 255, tonumber( r ) ), math.min( 255, tonumber( g ) ), math.min( 255, tonumber( b ) ) }
 	end
+	return i == #PPU_THEME_ROLES and out or nil
+end
+
+local function theme_string( t )
+	local parts = {}
+	for i, role in ipairs( PPU_THEME_ROLES ) do
+		local c = t[ role[1] ]
+		parts[ i ] = c[1] .. "," .. c[2] .. "," .. c[3]
+	end
+	return table.concat( parts, ";" )
+end
+
+local function game_cfg()
+	return rawget( _G, "game_config" )
+end
+
+-- Current colours (copy): saved theme of the active config, else the defaults
+function ppu_theme_raw()
+	local saved
+	pcall( function()
+		local gc = game_cfg()
+		saved = theme_parse( gc and rawget( gc, "PPU_Theme" ) )
+		if not saved then
+			-- rawget: ppr_config warns in the log for every missing key
+			local old = ppr_config and rawget( ppr_config, "PPU_Theme" )
+			if type( old ) == "table" then saved = old end
+		end
+	end )
+	local src = {}
+	for _, role in ipairs( PPU_THEME_ROLES ) do
+		local k = role[1]
+		local s = saved and saved[ k ]
+		local v = ( type( s ) == "table" and #s == 3 ) and s or PPU_THEME_DEFAULT[ k ]
+		src[ k ] = { v[1], v[2], v[3] }
+	end
+	return src
+end
+
+function ppu_theme()
+	local src = ppu_theme_raw()
 	local T = { raw = src }
 	for k, v in pairs( src ) do
 		T[k] = rgb( v )
@@ -74,6 +123,57 @@ function ppu_theme()
 	T.tabbar = Color.black:with_alpha( 0.28 )
 	T.placeholder = rgb( src.muted, 0.8 )
 	return T
+end
+
+-- Change one channel (1-3) of one colour; the open menu redraws in the new colours
+function ppu_theme_set( role, ch, v )
+	local t = ppu_theme_raw()
+	if not t[ role ] then return end
+	t[ role ][ ch ] = math.max( 0, math.min( 255, math.floor( v + 0.5 ) ) )
+	local gc = game_cfg()
+	if gc then
+		rawset( gc, "PPU_Theme", theme_string( t ) )
+	end
+	local m = tweak_data.menu_active
+	if m and m.apply_theme then m:apply_theme() end
+end
+
+function ppu_theme_reset()
+	local gc = game_cfg()
+	if gc then
+		rawset( gc, "PPU_Theme", nil )
+	end
+	ppu_theme_save()
+	local m = tweak_data.menu_active
+	if m and m.apply_theme then m:apply_theme() end
+end
+
+-- Write only the PPU_Theme line into the active config file (the rest of the file is kept)
+function ppu_theme_save()
+	local gc = game_cfg()
+	local path = gc and rawget( gc, "auto_config" )
+	if type( path ) ~= "string" then return false end
+	local ok, err = pcall( function()
+		local f = ppr_io.open( path, "r" )
+		if not f then return end
+		local src = f:read( "*a" )
+		f:close()
+		local body = src:gsub( "\r?\n[ \t]*cfg%.PPU_Theme[ \t]*=[^\n]*", "" )
+		local value = rawget( gc, "PPU_Theme" )
+		if value then
+			local head, tail = body:match( "^(.*)(\r?\nend%s*)$" )
+			if not head then return end -- not the usual "return function( cfg ) ... end" file: leave it alone
+			body = head .. "\n\tcfg.PPU_Theme = " .. string.format( "%q", value ) .. tail
+		end
+		if body == src then return end
+		if not loadstring( body ) then return end -- never write a config that wouldn't load
+		local w = ppr_io.open( path, "w" )
+		if w then
+			w:write( body )
+			w:close()
+		end
+	end )
+	return ok
 end
 
 ---------------------------------------------------------------------------------------------
@@ -452,6 +552,7 @@ end
 -- kind: sp, tog, sld, cho, inp, sub, save, act
 local function row_kind( b )
 	if is_spacer( b ) then return "sp" end
+	if b.type == "rgb" then return "rgb" end
 	if b.type == "slider" then return "sld" end
 	if b.type == "multi_choice" then return "cho" end
 	if b.type == "input" then return "inp" end
@@ -744,6 +845,7 @@ function Menu:add_header( y )
 	local title = D.text( hp, { name = "title", text = tostring( data.title or "" ), font = "b23", upper = true, ls = 0.02, lh = 1.1,
 		color = T.text, x = PAD, y = hy, w = IW, wrap = true } )
 	hy = hy + title:h()
+	hy = math_floor( hy + 0.5 )
 
 	-- description
 	local desc = data.description
@@ -751,6 +853,7 @@ function Menu:add_header( y )
 		gap()
 		local dt = D.text( hp, { name = "description", text = tostring( desc ), font = "r14", lh = 1.4, color = T.muted, x = PAD, y = hy, w = IW, wrap = true } )
 		hy = hy + dt:h()
+		hy = math_floor( hy + 0.5 )
 	end
 
 	-- message line (Menu:set_description / ppu_feedback)
@@ -758,6 +861,7 @@ function Menu:add_header( y )
 		gap()
 		local mt = D.text( hp, { name = "msg", text = self.msg, font = "r14", color = T.acc, x = PAD, y = hy, w = IW, wrap = true } )
 		hy = hy + mt:h()
+		hy = math_floor( hy + 0.5 )
 	end
 
 	-- search (shown when there are more than 8 rows)
@@ -904,6 +1008,10 @@ function Menu:build_row( canvas, vi, v, y )
 		return self:build_slider_row( p, r )
 	elseif kind == "inp" and not r.locked then
 		return self:build_input_row( p, r )
+	elseif kind == "rgb" then
+		return self:build_rgb_row( p, r )
+	elseif b.ask and self.confirm == b and not r.locked then
+		return self:build_ask_row( p, r )
 	end
 
 	-- Line row: [lock] label ........ [switch | < value > | ›]
@@ -937,6 +1045,14 @@ function Menu:build_row( canvas, vi, v, y )
 	if kind == "save" then
 		b.save_button = SaveButton:new( p, b )
 	end
+	-- meta: small grey note on the right (design r.meta)
+	local meta
+	if b.meta and b.meta ~= "" then
+		meta = D.text( p, { name = "meta", text = tostring( b.meta ), font = "r13", color = T.muted, x = 0, y = 0, layer = 3 } )
+		right = right - meta:w()
+		meta:set_x( right )
+		right = right - 10
+	end
 
 	local lx = PAD
 	if r.locked then
@@ -969,6 +1085,9 @@ function Menu:build_row( canvas, vi, v, y )
 	end
 	if r.locked then
 		D.sbitmap( p, "lock", PAD, ( line_h - 12 ) / 2, 12, 12, T.muted, 3 )
+	end
+	if meta then
+		meta:center_line_on( line_h / 2 )
 	end
 
 	if parts.switch_x then
@@ -1005,6 +1124,139 @@ function Menu:build_row( canvas, vi, v, y )
 		at:center_line_on( line_h / 2 )
 	end
 	return r
+end
+
+
+-- Ask row (design "ask"): the row turns red and asks before a destructive action runs.
+function Menu:build_ask_row( p, r )
+	local T = self.T
+	local W = self.W
+	local b = r.button
+	local RH0 = ROW_H + 8 -- min-height 36 + padding 4 top/bottom
+	-- buttons: Yes (warn fill) and No (outline)
+	local nw = D.measure( "r14", "No" ) + 24 + 2
+	local yw = D.measure( "s14", "Yes" ) + 24 + 2
+	local bh = D.lh( "s14" ) + 4 + 2
+	local nx = W - PAD - nw
+	local yx = nx - 8 - yw
+	local q = D.text( p, { name = "ask_q", text = tostring( b.ask ), font = "r16", color = T.text, x = PAD, y = 0, w = math_max( 20, yx - 8 - PAD ), wrap = true, layer = 2 } )
+	local RH = math_max( ROW_H, q:h() ) + 8
+	if q:h() > ROW_H then q:set_y( 4 ) else q:center_line_on( RH / 2 ) end
+	local function btn( name, x, w, label, font, fill, border, color )
+		local bp = p:panel( { name = name, x = x, y = ( RH - bh ) / 2, w = w, h = bh, layer = 3 } )
+		if fill then
+			D.box( bp, { x = 0, y = 0, w = w, h = bh, r = 3, color = fill, layer = 0 } )
+		end
+		D.border( bp, { x = 0, y = 0, w = w, h = bh, r = 3, color = border, layer = 1 } )
+		D.text( bp, { text = label, font = font, color = color, x = 0, y = 2, w = w, align = "center", layer = 2 } )
+		return bp
+	end
+	r.ask_yes = btn( "ask_yes", yx, yw, "Yes", "s14", T.warn, T.warn, T.bg )
+	r.ask_no = btn( "ask_no", nx, nw, "No", "r14", nil, T.line2, T.text )
+	r.asking = true
+	-- red background and bar whether focused or not
+	r.focus_bg:set_color( T.warnsoft )
+	r.focus_bar:set_color( T.warn )
+	r.focus_bg:set_visible( true )
+	r.focus_bar:set_visible( true )
+	p:set_h( RH )
+	r.focus_bg:set_h( RH )
+	r.focus_bar:set_h( RH )
+	r.h = RH
+	return r
+end
+
+-- Colour row (design "trgb"): swatch, name, "r, g, b", ▸ / ▾; open shows R, G, B sliders.
+local CHANNELS = { "R", "G", "B" }
+function Menu:build_rgb_row( p, r )
+	local T = self.T
+	local W = self.W
+	local b = r.button
+	local c = T.raw[ b.role ] or { 0, 0, 0 }
+	local open = self.open_rgb == b
+	r.open = open
+	local line_h = ROW_H + 6
+
+	-- open rows sit on the surface colour (the focus colour wins when focused)
+	r.open_bg = p:rect( { name = "open_bg", color = T.surf, visible = open, layer = 0 } )
+
+	local x = PAD
+	D.box( p, { name = "swatch", x = x, y = ( line_h - 20 ) / 2, w = 20, h = 20, r = 3, color = rgb( c ), layer = 2 } )
+	D.border( p, { name = "swatch_border", x = x, y = ( line_h - 20 ) / 2, w = 20, h = 20, r = 3, color = T.line2, layer = 3 } )
+	x = x + 20 + 10
+	local arrow = D.text( p, { name = "arrow", text = open and "▾" or "▸", font = "r18", color = T.muted, x = 0, y = 0, layer = 3 } )
+	arrow:set_right( W - PAD )
+	arrow:center_line_on( line_h / 2 )
+	local meta = D.text( p, { name = "meta", text = c[1] .. ", " .. c[2] .. ", " .. c[3], font = "r13", color = T.muted, x = 0, y = 0, layer = 3 } )
+	meta:set_right( arrow:x() - 10 )
+	meta:center_line_on( line_h / 2 )
+	local label = D.text( p, { name = "text", text = label_of( b ), font = "r16", color = T.text, x = x, y = 0, layer = 2 } )
+	label:center_line_on( line_h / 2 )
+	r.line_h = line_h
+
+	local h = line_h
+	r.channels = {}
+	if open then
+		-- padding 2 16 12 44, three rows of 20 with 8 between
+		local cy = line_h + 2
+		for ci, name in ipairs( CHANNELS ) do
+			local rowp = p:panel( { name = "chan_" .. ci, x = 44, y = cy, w = W - 44 - PAD, h = 20, layer = 3 } )
+			local nm = D.text( rowp, { text = name, font = "s14", color = T.muted, x = 0, y = 0, layer = 1 } )
+			nm:center_line_on( 10 )
+			local val = D.text( rowp, { text = tostring( c[ ci ] ), font = "r14", color = T.text, x = 0, y = 0, w = 30, align = "right", layer = 1 } )
+			val:set_x( rowp:w() - 30 )
+			val:center_line_on( 10 )
+			local tx = 12 + 10
+			local tw = rowp:w() - 30 - 10 - tx
+			-- track panel is 10 px wider on each side so the knob isn't clipped at the ends
+			local TP = 10
+			local track = rowp:panel( { name = "track", x = tx - TP, y = 0, w = tw + TP * 2, h = 20, layer = 1 } )
+			local lo, hi = { c[1], c[2], c[3] }, { c[1], c[2], c[3] }
+			lo[ ci ], hi[ ci ] = 0, 255
+			-- gradient bar with rounded ends (solid end caps in the end colours)
+			D.box( track, { x = TP, y = 6, w = 4, h = 8, r = 4, color = rgb( lo ), layer = 0 } )
+			D.box( track, { x = TP + tw - 4, y = 6, w = 4, h = 8, r = 4, color = rgb( hi ), layer = 0 } )
+			track:gradient( { name = "grad", x = TP + 4, y = 6, w = tw - 8, h = 8, layer = 0,
+				gradient_points = { 0, rgb( lo ), 1, rgb( hi ) } } )
+			D.border( track, { x = TP, y = 6, w = tw, h = 8, r = 4, color = T.line, layer = 1 } )
+			local kx = TP + tw * c[ ci ] / 255 - 7
+			D.circle( track, { name = "ring", x = kx - 2, y = 1, d = 18, color = T.bg, layer = 2 } )
+			D.circle( track, { name = "knob", x = kx, y = 3, d = 14, color = T.text, layer = 3 } )
+			r.channels[ ci ] = { track = track, pad = TP, w = tw }
+			cy = cy + 20 + ( ci < 3 and 8 or 0 )
+		end
+		h = cy + 12
+	end
+	p:set_h( h )
+	r.focus_bg:set_h( h )
+	r.focus_bar:set_h( h )
+	r.open_bg:set_h( h )
+	r.h = h
+	return r
+end
+
+function Menu:toggle_rgb( r )
+	self.open_rgb = ( self.open_rgb ~= r.button ) and r.button or nil
+	self._dirty = true
+end
+
+-- Yes runs the row as usual (skipping the question), No just closes the question
+function Menu:answer_ask( r, yes )
+	self.confirm = nil
+	self._dirty = true
+	if yes then
+		local msg = self.msg
+		self:button_pressed( r.index, nil, true )
+		if tweak_data.menu_active == self and self._ws and self.msg == msg then
+			self:set_description( label_of( r.button ) .. ": done" )
+		end
+	end
+end
+
+function Menu:apply_theme()
+	self.T = ppu_theme()
+	_G.PPU_T = self.T
+	self._dirty = true
 end
 
 function Menu:set_switch( r, on, animate )
@@ -1278,9 +1530,12 @@ function Menu:refresh_focus()
 	end
 	for vi, r in ipairs( rows ) do
 		local on = vi == self.fi and r.focusable
-		if r.focus_bg then
+		if r.focus_bg and not r.asking then -- an ask row stays red
 			r.focus_bg:set_visible( on and true or false )
 			r.focus_bar:set_visible( on and true or false )
+		end
+		if r.open_bg then
+			r.open_bg:set_visible( r.open and not on )
 		end
 	end
 	self._focus_button = rows[ self.fi ] and rows[ self.fi ].index
@@ -1523,7 +1778,11 @@ end
 function Menu:row_enter()
 	local r = self.rows and self.rows[ self.fi ]
 	if not r or r.locked or not r.focusable then return end
-	if r.kind == "cho" then
+	if r.asking then
+		self:answer_ask( r, true )
+	elseif r.kind == "rgb" then
+		self:toggle_rgb( r )
+	elseif r.kind == "cho" then
 		r.choice:next_option()
 	elseif r.kind == "sld" then
 		self:apply_slider( r )
@@ -1631,6 +1890,33 @@ function Menu:mouse_update()
 		self:remember_position()
 	end
 	-- slider drag in progress
+	-- dragging a colour channel (Theme page)
+	if self.drag_rgb then
+		if held then
+			local d = self.drag_rgb
+			local ch
+			for _, nr in ipairs( self.rows or {} ) do
+				if nr.button == d.button and nr.channels then
+					ch = nr.channels[ d.ci ]
+				end
+			end
+			if ch then
+				local f = ( x - ch.track:world_x() - ch.pad ) / ch.w
+				local v = math_floor( math_max( 0, math_min( 1, f ) ) * 255 + 0.5 )
+				if v ~= d.last then
+					d.last = v
+					ppu_theme_set( d.button.role, d.ci, v )
+					self.theme_changed = true
+				end
+			end
+			return true
+		end
+		self.drag_rgb = nil
+		if self.theme_changed then
+			self.theme_changed = nil
+			ppu_theme_save()
+		end
+	end
 	if self.drag_slider and self.drag_gen ~= self._gen then
 		-- the window was redrawn while dragging: follow the same slider in the new rows
 		local b = self.drag_slider.button
@@ -1817,7 +2103,30 @@ function Menu:row_mouse( r, x, y, clicked, rclicked )
 		return false
 	end
 	local kind = r.kind
-	if kind == "cho" then
+	if r.asking then
+		local yes = r.ask_yes:inside( x, y )
+		local no = r.ask_no:inside( x, y )
+		if clicked and ( yes or no ) then
+			self:answer_ask( r, yes )
+		end
+		return yes or no
+	elseif kind == "rgb" then
+		for ci, ch in ipairs( r.channels or {} ) do
+			if ch.track:inside( x, y ) then
+				if clicked then
+					self.drag_rgb = { button = r.button, ci = ci, gen = self._gen }
+				end
+				return true
+			end
+		end
+		if y < r.panel:world_y() + r.line_h then
+			if clicked then
+				self:toggle_rgb( r )
+			end
+			return true
+		end
+		return false
+	elseif kind == "cho" then
 		local hit
 		for _, a in ipairs( { r.cho_prev, r.cho_next } ) do
 			local over = a.panel:inside( x, y )
@@ -1914,13 +2223,19 @@ end
 function Menu:disable_highlight_button()
 end
 
-function Menu:button_pressed( button_index, alt )
+function Menu:button_pressed( button_index, alt, confirmed )
 	local button = self._data.button_list[ button_index ]
 
 	if not button then
 		return
 	end
 	if button.host_only and is_client() then
+		return
+	end
+	-- rows with an "ask" question ask inside the row first (design: inline Yes / No)
+	if button.ask and not confirmed and not alt then
+		self.confirm = button
+		self._dirty = true
 		return
 	end
 

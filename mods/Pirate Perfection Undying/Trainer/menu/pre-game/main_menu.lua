@@ -348,14 +348,11 @@ local function save_skills()
 	save_file:close()
 end
 
--- Undying: destructive buttons ask first (menus no longer close after a click)
-local function confirm( text, fn, arg, back )
-	return function()
-		Menu_open(Menu, { title = tr.except_title_warn, description = text .. "?", button_list = {
-			{ text = tr.except_yes, callback = function() fn( arg ); if back then back() end; ppu_feedback( text .. ": done" ) end, menu = true },
-			{ text = tr.except_no, callback = back, menu = true },
-		}, back = back } )
-	end
+-- Undying: destructive buttons ask first. Redesign: the question is shown inside the row
+-- (Yes / No), so no separate "Are you sure?" menu. Returns the row.
+local function confirm( text, fn, arg, danger )
+	return { text = text, ask = text .. "?", danger = danger, switch_back = true,
+		callback = function() fn( arg ); ppu_feedback( text .. ": done" ) end }
 end
 
 -- Menu
@@ -393,7 +390,7 @@ money_menu = function()
 		{},
 		--{ text = tr['add_money'] ..":", type = "input", callback_input = function() add_money() end, switch_back = true },
 		{},
-		{ text = tr['reset_money'], callback = reset_money, switch_back = true },
+		{ text = tr['reset_money'], callback = reset_money, switch_back = true, ask = "Reset spending cash and offshore to 0?", danger = true },
 	}
 	
 	Menu_open(Menu,  { title = tr['money_title'], description = tr['money_desc'], button_list = data, back = main_menu } )
@@ -464,15 +461,15 @@ end
 
 remove_items_menu = function()
 	local data = {
-		{ text = tr['lock_all_items'], callback = confirm( tr['lock_all_items'], delete_items, nil, remove_items_menu ), menu = true },
+		confirm( tr['lock_all_items'], delete_items, nil, true ),
 		{},
-		{ text = tr['clear_all_slots'], callback = confirm( tr['clear_all_slots'], clear_slots, "all", remove_items_menu ), menu = true },
+		confirm( tr['clear_all_slots'], clear_slots, "all", true ),
 		{},
-		{ text = tr['clear_primaries_slots'], callback = confirm( tr['clear_primaries_slots'], clear_slots, "primaries", remove_items_menu ), menu = true },
+		confirm( tr['clear_primaries_slots'], clear_slots, "primaries", true ),
 		{},
-		{ text = tr['clear_secondaries_slots'], callback = confirm( tr['clear_secondaries_slots'], clear_slots, "secondaries", remove_items_menu ), menu = true },
+		confirm( tr['clear_secondaries_slots'], clear_slots, "secondaries", true ),
 		{},
-		{ text = tr['clear_masks_slots'], callback = confirm( tr['clear_masks_slots'], clear_slots, "masks", remove_items_menu ), menu = true },
+		confirm( tr['clear_masks_slots'], clear_slots, "masks", true ),
 	}
 
 	Menu_open(Menu,  { title = tr['clear_inventory_menu'], description = tr['clear_inventory_desc'], button_list = data, back = inventory_menu } )
@@ -481,7 +478,7 @@ end
 safehouse_menu = function()
 	local data = {
 		-- Round 3: 'Unlock all achievements' removed (fake achievements on the Steam profile)
-		{ text = tr['lock_achievements'], callback = confirm( tr['lock_achievements'], lock_achievements, nil, safehouse_menu ), menu = true },
+		confirm( tr['lock_achievements'], lock_achievements ),
 		{},
 		{ text = tr['Auto_Complete_All_Challenges'], callback = Auto_Complete_All_Challenges, switch_back = true },
 		{ text = tr['Auto_Complete_Safehouse_Challenge'], callback = Auto_Complete_Safehouse_Challenge, switch_back = true },

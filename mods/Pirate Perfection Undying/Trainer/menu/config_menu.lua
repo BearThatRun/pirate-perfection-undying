@@ -240,7 +240,9 @@ end
 
 local main_menu_data = {
 	--TO DO: Improve menu class or create link between these 2, so user can press return and return to this menu.
-	{ text = tr['wp_title'], callback = ppr_require("Trainer/menu/waypoints_settings"), menu = true },
+	{ text = tr['wp_title'], callback = ppr_require("Trainer/menu/waypoints_settings"), menu = true, heist_only = true },
+	-- Undying redesign: colours of every trainer window, saved in the active config
+	{ text = "Theme", callback = ppr_require("Trainer/menu/theme_menu"), menu = true },
 	{},
 	{ text = tr['config_create'], callback = create_config_menu, menu = true },
 	{ text = tr['config_rename'], callback = rename_config_menu, menu = true },
@@ -257,8 +259,10 @@ main_menu = function()
 	local list = main_menu_data
 	if not GameSetup then
 		list = {}
-		for i = 3, #main_menu_data do
-			list[#list + 1] = main_menu_data[i]
+		for _, b in ipairs( main_menu_data ) do
+			if not b.heist_only then
+				list[#list + 1] = b
+			end
 		end
 	end
 	Menu_open( Menu, { title = tr['config_menu'], description = tr['config_current']..': '..ppr_config.DefaultConfig .. ". " .. tr['config_what'], button_list = list } )

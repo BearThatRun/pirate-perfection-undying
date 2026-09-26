@@ -199,7 +199,7 @@ def build_set(SCALE, suffix):
         for tag, im in quads(white(m)):
             shapes.append(("ring%d_%s" % (r, tag), im, r, r))
 
-    for d_ in (14, 16, 20):
+    for d_ in (14, 16, 18, 20):
         Dp = d_ * SCALE
         m = aa_draw(Dp, Dp, lambda d, ss, Dp=Dp: d.ellipse([0, 0, Dp * ss - 1, Dp * ss - 1], fill=255))
         shapes.append(("circle%d" % d_, white(m), d_, d_))
