@@ -5,4 +5,12 @@
 	min_lib_ver="5.1.0">
 	<!-- BeardLib reads this file to list the mod in its mod manager.
 	     Hooks and keybinds are still loaded by SuperBLT from MOD.txt. -->
+	<!-- Menu redesign: Barlow Semi Condensed glyph textures + rounded shapes (see Trainer/tools/new_menu/ppu_draw.lua).
+	     Rebuilt with tools/gen_menu_assets.py in the repo. Font licenses: Assets/guis/textures/ppu/FONT_LICENSES.txt -->
+	<AddFiles directory="Assets">
+		<png path="guis/textures/ppu/font_r"/>
+		<png path="guis/textures/ppu/font_s"/>
+		<png path="guis/textures/ppu/font_b"/>
+		<png path="guis/textures/ppu/shapes"/>
+	</AddFiles>
 </table>

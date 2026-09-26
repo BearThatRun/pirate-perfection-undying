@@ -1,6 +1,6 @@
 --Menu component. Represents tickbox.
 --Author: Simplity
---Undying redesign stage 1: drawn as a switch (track + knob) in the theme colours.
+--Undying redesign: state only. The switch (38x20 pill + 16px knob) is drawn by menu.lua.
 
 local type = type
 
@@ -11,36 +11,17 @@ local loaded = plugins.g_loaded
 
 local Tickbox = class()
 
-local TRACK_W, TRACK_H, KNOB = 34, 18, 14
-
 function Tickbox:init( panel, button, plugin_path )
 	self.panel = panel
 	self.button = button
 	self.plugin_path = plugin_path
-
-	self:create_gui()
 end
 
-function Tickbox:create_gui()
-	local panel = self.panel
-	local T = PPU_T
-
-	local sw = panel:panel( { name = "tickbox", w = TRACK_W, h = TRACK_H, layer = 3 } )
-	sw:set_right( panel:w() - 16 )
-	sw:set_center_y( panel:h() / 2 )
-	sw:rect( { name = "track", color = T.line2, layer = 0 } )
-	sw:rect( { name = "knob", x = 2, y = 2, w = KNOB, h = KNOB, color = T.text, layer = 1 } )
-	self.tickbox = sw
-
-	self:toggle()
-end
-
+-- Called after the state may have changed: redraw the switch
 function Tickbox:toggle()
-	local on = self:get_state()
-	local T = PPU_T
-	local sw = self.tickbox
-	sw:child( "track" ):set_color( on and T.acc or T.line2 )
-	sw:child( "knob" ):set_x( on and ( TRACK_W - KNOB - 2 ) or 2 )
+	if self.on_change then
+		self.on_change( self:get_state() )
+	end
 end
 
 function Tickbox:get_state()
@@ -54,15 +35,15 @@ function Tickbox:get_state()
 		if ( path ) then
 			local real_name = required_plugins[path..plug]
 			if ( real_name ) then
-				return loaded( plugins, real_name )
+				return loaded( plugins, real_name ) and true or false
 			end
 		end
 	end
 	if toggle ~= 'nil' then
 		if toggle == "string" then
-			return togg_vars[ obj_toggle ]
+			return togg_vars[ obj_toggle ] and true or false
 		elseif toggle == "function" then
-			return obj_toggle()
+			return obj_toggle() and true or false
 		end
 	end
 	return false

@@ -1,258 +1,159 @@
 --Menu component. Represents field, where you can enter your text
 --Author: Simplity
-
---TO DO:
---Add event callbacks:
---On clicked
---On released
---On text
----------
---Improve design
+--Undying redesign: the field is drawn by menu.lua; this keeps the text and reads the keyboard.
+--The typed text is also kept in a hidden game text object called "input_text" inside
+--input_panel, because config_menu.lua reads it from there.
 
 local kb = Input:keyboard()
-local mb = Input:mouse()
 local kb_pressed = kb.pressed
 local kb_down = kb.down
-local mb_pressed = mb.pressed
-
-local os_clock = os.clock
 
 local pcall = pcall
 local safecall = safecall
-
 local Idstring = Idstring
 
-local left_clk = Idstring("0")
 local bkspace = Idstring("backspace")
 local enter = Idstring("enter")
-local left = Idstring( "left" )
-local right = Idstring( "right" )
-
-local managers = managers
-local M_mouse_pointer = managers.mouse_pointer
-
-local RunNewLoop = RunNewLoop
-local callback = callback
-
-local ulen = utf8.len
 
 local m_log_error = m_log_error
-local StopLoopIdent = StopLoopIdent
+local str_gmatch = string.gmatch
+
+local UTF8 = "[%z\1-\127\194-\244][\128-\191]*"
+
+local function now()
+	local ok, t = pcall( function() return Application:time() end )
+	if ok and t then
+		return t
+	end
+	return os and os.clock and os.clock() or 0
+end
+
+local function drop_last_char( s )
+	local list = {}
+	for ch in str_gmatch( s, UTF8 ) do
+		list[ #list + 1 ] = ch
+	end
+	list[ #list ] = nil
+	return table.concat( list )
+end
 
 local TextInput = class()
 
-function TextInput:init( panel, button, ws )
+function TextInput:init( panel, button, ws, kb_panel )
 	self.panel = panel
+	self.kb_panel = kb_panel or panel -- object that receives typed text (kept alive while the menu redraws)
 	self.button = button
-	
-	ws:connect_keyboard( kb )
-	
-	self:create_gui()
-	
-	self.id = RunNewLoop( callback( self, self, "update" ) )
+	self.ws = ws
+	if ws then
+		ws:connect_keyboard( kb )
+	end
+	-- hidden mirror for config_menu.lua
+	self.input_panel = panel:panel( { name = "input_panel", w = 1, h = 1, visible = false } )
+	self.mirror = self.input_panel:text( { name = "input_text", text = "", font = tweak_data.menu.pd2_small_font, font_size = 10, visible = false } )
+	self:set_text( button._ppu_text or button.value or "" )
 end
 
-local T_menu = tweak_data.menu
-local pd2_small_font = T_menu.pd2_small_font
-local pd2_small_font_size = T_menu.pd2_small_font_size
-function TextInput:create_gui()
-	-- Undying redesign stage 1: a boxed field in the theme colours, right of the label.
-	local T = PPU_T
-	local panel = self.panel
-	local button_text = panel:child("text")
-	local x = button_text:right() + 12
-	local w = panel:w() - x - 16
-	if w < 120 then
-		w = 120
-		x = panel:w() - 16 - w
-	end
+function TextInput:text()
+	return self._text or ""
+end
 
-	local input_panel = panel:panel( { name = "input_panel", x = x, y = 3, h = panel:h() - 6, w = w, layer = 3 } )
-	input_panel:rect( { name = "focus_indicator", visible = true, color = Color.black:with_alpha(0.1), layer = 4 } )
-
-	local text_input = input_panel:text( { name = "input_text", text = "", font = pd2_small_font, font_size = 18, x = 8, y = 0, w = w - 16, h = input_panel:h(),
-										align="left", halign="left", vertical="center", hvertical="center", blend_mode="normal",
-										color = T.text, layer = 5, wrap = true, word_wrap = false } )
-
-	local caret = input_panel:rect( { name="caret", layer = 6, x = 8, y = 3, w = 1, h = input_panel:h() - 6, color = T.acc, visible = false } )
-	input_panel:rect( { name="input_bg", color = T.surf, layer = -1, valign = "grow", h = input_panel:h() } )
-	local ih = input_panel:h()
-	for _, r in ipairs( { { 0, 0, w, 1 }, { 0, ih - 1, w, 1 }, { 0, 0, 1, ih }, { w - 1, 0, 1, ih } } ) do
-		input_panel:rect( { x = r[1], y = r[2], w = r[3], h = r[4], color = T.line2, layer = 0 } )
-	end
-
-	self.input_panel = input_panel
-
-	if self.button.value then
-		self:enter_text( nil, self.button.value )
+function TextInput:set_text( s )
+	s = tostring( s or "" )
+	self._text = s
+	self.button._ppu_text = s
+	self.mirror:set_text( s )
+	if self.on_change then
+		self.on_change( s )
 	end
 end
 
 function TextInput:enter_text( o, s )
-	local text = self.input_panel:child("input_text")
-	
-	text:replace_text(s)
-	
-	local lbs = text:line_breaks()
-	
-	if #lbs > 1 then
-		local s = lbs[2]
-		local e = ulen( text:text() )
-	
-		text:set_selection( s, e )
-		text:replace_text( "" )
+	if s == nil or s == "" then
+		return
 	end
+	-- ignore control characters (Enter, Backspace, Tab come as keys)
+	if s:byte( 1 ) and s:byte( 1 ) < 32 then
+		return
+	end
+	self:set_text( self:text() .. s )
 	self:on_text()
-	self:update_caret()
-end
-
-function TextInput:update()
-	local enabled = self.input_enabled
-	local x, y = ppr_menu_mouse_pos()
-	local is_inside = self.input_panel:inside( x, y )
-	
-	if ( not enabled and is_inside ) then
-		if mb_pressed(mb, left_clk ) then
-			self:activate_input()
-		end
-	elseif ( not is_inside and enabled and mb_pressed(mb, left_clk ) ) then
-		self:disable_input()
-	elseif ( enabled ) then
-		self:update_buttons()
-	end
-end
-
-local function holding_key(keys_t, key)
-	local pressed = kb_pressed( kb, key )
-	local is_down = kb_down( kb, key )
-	local clocks = os_clock()
-	local t = is_down and (keys_t[key] or clocks) or false
-	if (t and (clocks - t) > 0.75) then
-		pressed = true
-		t = t + 0.04 --Move it smooth, not so fast
-	end
-	keys_t[key] = t
-	return pressed
-end
-
-function TextInput:update_buttons()
-	local hold_key_tab = self.holding_keys
-	if ( not hold_key_tab ) then
-		hold_key_tab = {}
-		self.holding_keys = hold_key_tab
-	end
-	if holding_key(hold_key_tab, bkspace) then
-		self:remove_text()
-	--If input activated, then let's trace left and right presses
-	elseif holding_key(hold_key_tab, left) then
-		local text = self.input_panel:child( "input_text" )
-		local s, e = text:selection()
-		
-		if e>s then 
-			text:set_selection(s,s)
-		elseif s>0 then
-			text:set_selection(s-1,s-1)
-		end
-		self:update_caret()
-	elseif holding_key(hold_key_tab, right) then
-		local text = self.input_panel:child( "input_text" )
-		local s, e = text:selection()
-		
-		if e>s then
-			text:set_selection(e,e)
-		elseif s<ulen(text:text()) then
-			text:set_selection(s+1,s+1)
-		end
-		self:update_caret()
-	elseif kb_pressed(kb, enter ) then
-		self:do_callback()
-		self:disable_input()
-	end
-end
-
-function TextInput:update_caret()
-	local text = self.input_panel:child( "input_text" )
-	local caret = self.input_panel:child( "caret" )
-	
-	local s, e = text:selection()
-	local x, y, w, h = text:selection_rect()
-	
-	if s == 0 and e == 0 then
-		x = text:world_x()
-		y = text:world_y()
-		h = text:h()
-	end
-
-	caret:set_world_shape( x, y, w, h )
 end
 
 function TextInput:activate_input()
 	if self.input_enabled then
 		return
 	end
-	self.input_panel:enter_text( callback( self, self, "enter_text" ) )
+	if TextInput.active and TextInput.active ~= self then
+		TextInput.active:disable_input()
+	end
+	local ok = pcall( function()
+		self.kb_panel:enter_text( function( o, s ) self:enter_text( o, s ) end )
+	end )
 	self.input_enabled = true
 	TextInput.active = self
-	
-	local caret = self.input_panel:child("caret")
-	caret:animate( self.blink )
-	caret:set_visible( true )
+	self._bk_t = nil
+	if self.on_focus then
+		self.on_focus( true )
+	end
 end
 
 function TextInput:disable_input()
 	if not self.input_enabled then
 		return
 	end
-	self.input_panel:enter_text( nil )
+	pcall( function() self.kb_panel:enter_text( nil ) end )
 	self.input_enabled = false
-	self.button.value = ( self.input_panel:child("input_text") ):text()
+	self.button.value = self:text()
 	if TextInput.active == self then
 		TextInput.active = nil
 	end
-	
-	local caret = self.input_panel:child("caret")
-	caret:stop()
-	caret:set_visible( false )
+	if self.on_focus then
+		self.on_focus( false )
+	end
+end
+
+-- Called every frame by the menu while this field is active. Returns true when Enter was pressed.
+function TextInput:update_keys()
+	if not self.input_enabled then
+		return
+	end
+	-- Backspace, repeating while held
+	local t = now()
+	if kb_pressed( kb, bkspace ) then
+		self:remove_text()
+		self._bk_t = t + 0.45
+	elseif kb_down( kb, bkspace ) then
+		if self._bk_t and t >= self._bk_t then
+			self:remove_text()
+			self._bk_t = t + 0.04
+		end
+	else
+		self._bk_t = nil
+	end
+	if kb_pressed( kb, enter ) then
+		return true
+	end
 end
 
 function TextInput:remove_text()
-	local text = self.input_panel:child("input_text")
-	
-	local s, e = text:selection()
-
-	if s == e and s > 0 then
-		text:set_selection( s - 1, e )
-	end
-	
-	text:replace_text("")
-	self:on_text()
-	self:update_caret()
-end
-
-local wait = wait
-function TextInput.blink( o )
-	while true do
-		o:set_visible( true )
-		wait(0.4)
-		o:set_visible( false )
-		wait(0.4)
+	local s = self:text()
+	if s ~= "" then
+		self:set_text( drop_last_char( s ) )
+		self:on_text()
 	end
 end
 
 function TextInput:on_text()
 	local on_text_clbk = self.button.on_text_clbk
 	if ( on_text_clbk ) then
-		local text = self.input_panel:child("input_text")
-		safecall( on_text_clbk, text:text() )
+		safecall( on_text_clbk, self:text() )
 	end
 end
 
 function TextInput:do_callback()
-	local text = self.input_panel:child("input_text")
-	
 	local clbk_input = self.button.callback_input
 	if clbk_input then
-		local s, e = pcall( clbk_input, text:text() )
+		local s, e = pcall( clbk_input, self:text() )
 		if not s then
 			m_log_error('TextInput:do_callback()', e)
 		end
@@ -261,7 +162,6 @@ end
 
 function TextInput:close()
 	self:disable_input()
-	StopLoopIdent( self.id )
 end
 
 local G = getfenv(0)
