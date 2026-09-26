@@ -28,8 +28,9 @@ local ppr_config = ppr_config
 
 local main_menu
 
-local back_num = 0
-local back_track = {}
+-- Undying round 11: Back goes one level up. Every submenu used to get back = main_menu,
+-- so Back from e.g. Fixes & Tweaks > Tweaks > Weapon Tweaks jumped to the top.
+-- Each submenu now gets the function that reopens the menu it was opened from.
 local is_legacy
 
 local prefix = "base_"
@@ -251,13 +252,17 @@ local function config_edit(id, val, back)
 	val = val == nil and not get_value(id) or val ~= nil and (val ~= "" and val or false)
 	togg_vars[prefix..id] = val
 	if back then
-		main_menu()
+		if type(back) == "function" then
+			back()
+		else
+			main_menu()
+		end
 	end
 end
 
 local create_item, create_sub, create_menu, create_lasercolor, create_color_xray
 
-create_item = function(opt)
+create_item = function(opt, parent)
 	local name = opt.name
 	if not name then
 		return {}
@@ -284,7 +289,7 @@ create_item = function(opt)
 		callback = (is_toggle and config_edit) or (is_sub and create_sub) or (is_menu and create_menu) or (is_lasercolor and create_lasercolor) or (is_color_xray and create_color_xray) or nil,
 		callback_input = (is_input and function(val) config_edit(name, val) end) or nil,
 		multi_callback = is_multi and config_edit or nil,
-		data = (is_toggle and name) or (is_sub and {pre_name, opt}) or (is_menu and {name, opt}) or (is_lasercolor and {name, opt.disable}) or (is_color_xray and {name, opt.disable}) or nil,
+		data = (is_toggle and name) or (is_sub and {pre_name, opt, parent}) or (is_menu and {name, opt, parent}) or (is_lasercolor and {name, opt.disable or false, parent}) or (is_color_xray and {name, opt.disable or false, parent}) or nil,
 		multi_choice_data = is_multi and opt.choices() or nil,
 		value = is_multi and opt_val or nil,
 		switch_back = not opt.forceout and (is_toggle or is_slider or is_input or is_multi) or nil,
@@ -307,7 +312,8 @@ end
 
 local save_button = {text = tr.save, type = "save_button", callback = save_config, name = prefix.."menu_save"}
 
-create_sub = function(pre_id, menu)
+create_sub = function(pre_id, menu, parent)
+	local reopen = function() create_sub(pre_id, menu, parent) end
 	local opts = menu.sub
 	if type(opts) == "function" then
 		opts = opts()
@@ -316,7 +322,7 @@ create_sub = function(pre_id, menu)
 	local i = 0
 	local opts_size = size(opts)
 	for _, opt in pairs(opts) do
-		insert(data, create_item(opt))
+		insert(data, create_item(opt, reopen))
 		i = i + 1
 		if i % 20 == 0 or i == opts_size then
 			insert(data, {})
@@ -324,10 +330,10 @@ create_sub = function(pre_id, menu)
 		end
 	end
 
-	Menu_open(Menu, {title = tr[pre_id]..(menu.host and "    "..tr.host_only or ""), description = menu.desc and tr[pre_id.."_desc"] or nil, button_list = data, back = main_menu})
+	Menu_open(Menu, {title = tr[pre_id]..(menu.host and "    "..tr.host_only or ""), description = menu.desc and tr[pre_id.."_desc"] or nil, button_list = data, back = parent or main_menu})
 end
 
-create_menu = function(id, menu)
+create_menu = function(id, menu, parent)
 	local opts = menu.menu
 	if type(opts) == "function" then
 		opts = opts()
@@ -340,11 +346,11 @@ create_menu = function(id, menu)
 			insert(data, 1, {})
 			insert(data, 1, {text = tr.base_selected..":  "..(same_name and val or tr[ind]), switch_back = true})
 		end
-		insert(data, {text = same_name and val or tr[ind], callback = config_edit, data = {id, val, true}})
+		insert(data, {text = same_name and val or tr[ind], callback = config_edit, data = {id, val, parent or true}})
 	end
 
 	local pre_id = prefix..id
-	Menu_open(Menu, {title = (is_legacy and not (menu.sub or menu.notlegacy) and id or tr[pre_id])..(menu.host and "    "..tr.host_only or ""), description = tr[pre_id.."_desc"], button_list = data, back = main_menu})
+	Menu_open(Menu, {title = (is_legacy and not (menu.sub or menu.notlegacy) and id or tr[pre_id])..(menu.host and "    "..tr.host_only or ""), description = tr[pre_id.."_desc"], button_list = data, back = parent or main_menu})
 end
 
 local c_tab = {"R", "G", "B"}
@@ -357,7 +363,7 @@ end
 
 local b_lc = "base_lasercolor_"
 
-create_lasercolor = function(id, disable)
+create_lasercolor = function(id, disable, parent)
 	local data = {}
 	for _, c in pairs(c_tab) do
 		local id_c = id..c
@@ -365,10 +371,10 @@ create_lasercolor = function(id, disable)
 	end
 	local pre_id = prefix..id
 	if disable then
-		insert(data, {text = tr.base_disable, callback = disable_lasercolor, data = pre_id, switch_back = main_menu})
+		insert(data, {text = tr.base_disable, callback = disable_lasercolor, data = pre_id, switch_back = parent or main_menu})
 	end
 	insert(data, save_button)
-	Menu_open(Menu, {title = tr[pre_id], description = tr[pre_id.."_desc"].."\n"..tr.base_lasercolor_ins, button_list = data, back = main_menu})
+	Menu_open(Menu, {title = tr[pre_id], description = tr[pre_id.."_desc"].."\n"..tr.base_lasercolor_ins, button_list = data, back = parent or main_menu})
 end
 
 local function disable_color_xray(id)
@@ -379,7 +385,7 @@ end
 
 local b_xc = "base_xraycolor_"
 
-create_color_xray = function(id, disable)
+create_color_xray = function(id, disable, parent)
 	local data = {}
 	for _, c in pairs(c_tab) do
 		local id_c = id..c
@@ -387,10 +393,10 @@ create_color_xray = function(id, disable)
 	end
 	local pre_id = prefix..id
 	if disable then
-		insert(data, {text = tr.base_disable, callback = disable_color_xray, data = pre_id, switch_back = main_menu})
+		insert(data, {text = tr.base_disable, callback = disable_color_xray, data = pre_id, switch_back = parent or main_menu})
 	end
 	insert(data, save_button)
-	Menu_open(Menu, {title = tr[pre_id], description = tr[pre_id.."_desc"].."\n"..tr.base_color_xray_ins, button_list = data, back = main_menu})
+	Menu_open(Menu, {title = tr[pre_id], description = tr[pre_id.."_desc"].."\n"..tr.base_color_xray_ins, button_list = data, back = parent or main_menu})
 end
 
 is_legacy = get_value("LegacyMenu")
