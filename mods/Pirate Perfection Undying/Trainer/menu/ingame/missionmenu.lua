@@ -226,6 +226,10 @@ main = function()
 	if current_level == "alex_1" or current_level == "rat" then
 		data[#data+1] = { text = tr.auto_cooker, plugin = 'autocooker', switch_back = true }
 	end
+	-- Round 10: Lab Rats support (moves ingredient bags into the lab; host only)
+	if current_level == "nail" then
+		data[#data+1] = { text = tr.auto_cooker, plugin = 'autocooker', switch_back = true, host_only = true }
+	end
 
 	if current_level == "welcome_to_the_jungle_2" and is_server then
 		data[#data+1] = { text = tr.cengine_menu_title, callback = ppr_dofile, data = path .. 'correctengine', menu = true, host_only = true }
