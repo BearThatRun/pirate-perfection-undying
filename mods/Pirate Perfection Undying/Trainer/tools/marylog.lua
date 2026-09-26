@@ -149,7 +149,7 @@ local error_file
 local error_write
 error_to_file = function( input )
 	if ( ppr_config.LogErrorsToFile) then
-		error_file = io_open("Log Files/Error.log", "a")
+		error_file = io_open("Logfiles/Error.log", "a") -- Undying: folder is "Logfiles" (was "Log Files", which does not exist, so nothing was ever written)
 		if (error_file) then
 			error_write = error_file.write
 			error_to_file = function( data ) error_write( error_file, data ) end

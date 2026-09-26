@@ -76,12 +76,16 @@ end
 -- and moves ONE bag of the right chemical at a time into the centre of that chemical's
 -- "correct" trigger zone, using the game's own synced bag move (CarryData:set_position_and_throw).
 -- It never moves a bag while no chemical is requested, and never a bag of another chemical.
+-- Round 10b: the request is ALSO taken from Bain's repeated lines (every 20 s), so turning it on
+-- after the heist picked the chemical works (round 10 waited for the next pick = forever).
+-- Everything it does is written to Logfiles/Autocooker.log.
 local NAIL = {
-	set_add_mu  = { id = 101819, carry = 'nail_muriatic_acid',     trigger = 101726, trigger_name = 'money_correct_trigger', label = 'Muriatic Acid' },
-	set_add_cs  = { id = 101827, carry = 'nail_caustic_soda',      trigger = 101729, trigger_name = 'coke_correct_trigger',  label = 'Caustic Soda' },
-	set_add_hcl = { id = 101834, carry = 'nail_hydrogen_chloride', trigger = 101732, trigger_name = 'HCL_correct_trigger',   label = 'Hydrogen Chloride' },
+	set_add_mu  = { id = 101819, carry = 'nail_muriatic_acid',     trigger = 101726, trigger_name = 'money_correct_trigger', label = 'Muriatic Acid',     dialogs = { 'pln_rt1_20', 'pln_rat_stage1_20' } },
+	set_add_cs  = { id = 101827, carry = 'nail_caustic_soda',      trigger = 101729, trigger_name = 'coke_correct_trigger',  label = 'Caustic Soda',      dialogs = { 'pln_rt1_22', 'pln_rat_stage1_22' } },
+	set_add_hcl = { id = 101834, carry = 'nail_hydrogen_chloride', trigger = 101732, trigger_name = 'HCL_correct_trigger',   label = 'Hydrogen Chloride', dialogs = { 'pln_rt1_24', 'pln_rat_stage1_24' } },
 }
 local NAIL_STOP = { ingredients_added = 101812, fail_start = 100577 }
+local NAIL_WRONG = { id = 101739, name = 'money_wrong_trigger' }
 local FEED_DELAY = 1.5		-- seconds between two bags
 local MAX_TRIES_PER_BAG = 3	-- same bag moved this often without counting -> give up on it
 
@@ -92,10 +96,35 @@ local nail_wrapped = {}		-- elements whose on_executed we wrapped
 local nail_hinted
 local nail_active = false
 
+local log_fh
+local function nlog( msg )
+	if not log_fh then
+		log_fh = ppr_io.open( 'Logfiles/Autocooker.log', 'a' )
+		if not log_fh then
+			return
+		end
+	end
+	local ok, t = pcall( function() return managers.game_play_central:get_heist_timer() end )
+	t = ok and math.floor( tonumber( t ) or 0 ) or 0
+	log_fh:write( string.format( '%02d:%02d  ', math.floor( t / 60 ), t % 60 ) .. tostring( msg ) .. '\n' )
+	log_fh:flush()
+end
+
 local function hint( msg )
+	nlog( 'HINT ' .. msg )
 	if show_hint then
 		show_hint( 'Auto-cook: ' .. msg )
 	end
+end
+
+local function set_need( e, source )
+	if nail_need ~= e then
+		nlog( 'request: ' .. ( e and e.label or 'none' ) .. ' (from ' .. source .. ')' )
+		nail_tries = {}
+		nail_hinted = nil
+		nail_next_t = TimerManager:game():time() + FEED_DELAY
+	end
+	nail_need = e
 end
 
 local function find_element( id, name )
@@ -162,6 +191,10 @@ local function nail_update()
 	end
 	nail_next_t = t + FEED_DELAY
 	if need.el_trigger._values and need.el_trigger._values.enabled == false then
+		if nail_hinted ~= 'disabled' then
+			nail_hinted = 'disabled'
+			nlog( need.trigger_name .. ' is disabled, waiting' )
+		end
 		return -- the lab isn't accepting this chemical right now
 	end
 	local unit, cd = find_bag( need.carry )
@@ -174,7 +207,17 @@ local function nail_update()
 	end
 	local key = unit:key()
 	nail_tries[key] = ( nail_tries[key] or 0 ) + 1
+	nlog( 'move ' .. need.carry .. ' bag ' .. tostring( key ) .. ' (try ' .. nail_tries[key] .. ') from ' .. tostring( unit:position() ) .. ' to ' .. tostring( need.point ) )
 	cd:set_position_and_throw( need.point, Vector3( 0, 0, 0 ), 0 )
+end
+
+local nail_update_err
+local function nail_update_safe()
+	local ok, err = pcall( nail_update )
+	if not ok and err ~= nail_update_err then
+		nail_update_err = err
+		nlog( 'ERROR in update: ' .. tostring( err ) )
+	end
 end
 
 local function nail_start()
@@ -191,6 +234,9 @@ local function nail_start()
 			return false
 		end
 		local point = zone_point( trig )
+		nlog( e.trigger_name .. ': area=' .. tostring( trig.update_area ~= nil ) .. ' shapes=' .. #( trig._shapes or {} )
+			.. ' shape_elements=' .. #( trig._shape_elements or {} ) .. ' enabled=' .. tostring( trig._values and trig._values.enabled )
+			.. ' point=' .. tostring( point ) )
 		if not point then
 			hint( 'Lab Rats: could not find the lab drop zone for ' .. e.label )
 			return false
@@ -211,26 +257,47 @@ local function nail_start()
 		e.el_trigger = found[name].trig
 		e.point = found[name].point
 		wrap_element( found[name].el, function()
-			nail_need = e
-			nail_tries = {}
-			nail_hinted = nil
-			nail_next_t = TimerManager:game():time() + FEED_DELAY
+			set_need( e, name )
+		end )
+		wrap_element( found[name].trig, function()
+			nlog( 'correct ' .. e.label .. ' bag counted' )
 		end )
 	end
-	for _, el in pairs( stops ) do
+	for sname, el in pairs( stops ) do
 		wrap_element( el, function()
-			nail_need = nil
+			nlog( sname )
+			set_need( nil, sname )
 		end )
 	end
-	RunNewLoopIdent( 'autocooker_nail', nail_update )
+	local wrong = find_element( NAIL_WRONG.id, NAIL_WRONG.name )
+	if wrong then
+		wrap_element( wrong, function()
+			nlog( 'WRONG bag thrown in (' .. NAIL_WRONG.name .. ')' )
+		end )
+	end
+	local by_dialog = {}
+	for _, e in pairs( NAIL ) do
+		for _, d in ipairs( e.dialogs ) do
+			by_dialog[d] = e
+		end
+	end
+	add_clbk( backuper, 'DialogManager.queue_dialog', function( o, self, id )
+		local e = nail_active and by_dialog[id]
+		if e then
+			set_need( e, 'Bain ' .. tostring( id ) )
+		end
+	end, 'nail_dialog_hook', 1 )
+	RunNewLoopIdent( 'autocooker_nail', nail_update_safe )
 	hint( 'Lab Rats ON: it adds the right chemicals; you still bag and carry out the meth' )
 	return true
 end
 
 local function nail_stop()
+	nlog( 'OFF' )
 	nail_active = false
 	nail_need = nil
 	StopLoopIdent( 'autocooker_nail' )
+	remove_clbk( backuper, 'DialogManager.queue_dialog', 'nail_dialog_hook', 1 )
 	for i = #nail_wrapped, 1, -1 do
 		local el, fn = nail_wrapped[i][1], nail_wrapped[i][2]
 		if rawget( el, 'on_executed' ) == fn then
@@ -242,7 +309,12 @@ end
 
 function MAIN()
 	if level_id == 'nail' then
-		nail_start()
+		nlog( '=== ON  (host: ' .. tostring( not is_client() ) .. ')' )
+		local ok, err = xpcall( nail_start, debug and debug.traceback or tostring )
+		if not ok then
+			nlog( 'ERROR in start: ' .. tostring( err ) )
+			hint( 'Lab Rats: error while starting, see Logfiles/Autocooker.log' )
+		end
 		return
 	end
 	add_clbk(backuper, 'DialogManager.queue_dialog', function(o, self, id)
