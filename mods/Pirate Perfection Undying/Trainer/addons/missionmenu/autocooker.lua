@@ -221,10 +221,12 @@ local function nail_update_safe()
 end
 
 local function nail_start()
+	nlog( 'step 1: host check' )
 	if is_client() then
 		hint( 'Lab Rats cooking only works when you are the host' )
 		return false
 	end
+	nlog( 'step 2: find elements (scripts: ' .. tostring( managers.mission and managers.mission.scripts ~= nil ) .. ')' )
 	local found = {}
 	for name, e in pairs( NAIL ) do
 		local el, err = find_element( e.id, name )
@@ -252,6 +254,7 @@ local function nail_start()
 		end
 		stops[name] = el
 	end
+	nlog( 'step 3: hooks' )
 	nail_active = true
 	for name, e in pairs( NAIL ) do
 		e.el_trigger = found[name].trig
@@ -287,6 +290,7 @@ local function nail_start()
 			set_need( e, 'Bain ' .. tostring( id ) )
 		end
 	end, 'nail_dialog_hook', 1 )
+	nlog( 'step 4: loop' )
 	RunNewLoopIdent( 'autocooker_nail', nail_update_safe )
 	hint( 'Lab Rats ON: it adds the right chemicals; you still bag and carry out the meth' )
 	return true
@@ -310,9 +314,10 @@ end
 function MAIN()
 	if level_id == 'nail' then
 		nlog( '=== ON  (host: ' .. tostring( not is_client() ) .. ')' )
-		local ok, err = xpcall( nail_start, debug and debug.traceback or tostring )
+		-- Round 10c: plain pcall (10b used xpcall + debug.traceback and the toggle failed with a nil error)
+		local ok, err = pcall( nail_start )
+		nlog( 'start returned ok=' .. tostring( ok ) .. ' result=' .. tostring( err ) .. ' (' .. type( err ) .. ')' )
 		if not ok then
-			nlog( 'ERROR in start: ' .. tostring( err ) )
 			hint( 'Lab Rats: error while starting, see Logfiles/Autocooker.log' )
 		end
 		return
