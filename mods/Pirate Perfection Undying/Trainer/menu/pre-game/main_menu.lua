@@ -356,15 +356,14 @@ local function confirm( text, fn, arg, danger )
 end
 
 -- Menu
+-- Redesign: a slider's own button (Add / Set) does the action; the separate Save rows are gone.
 level_menu = function()	
 	local data = { 
 		{},
 		{},
-		{ text = tr['set_level'] .. ":", type = "slider", slider_data = { name = "set_level", value = 0, max = 100 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = change_level, name = "set_level" },
+		{ text = tr['set_level'] .. ":", type = "slider", slider_data = { name = "set_level", value = 0, max = 100 }, slider_callback = change_level, apply_label = "Set", switch_back = true },
 		{},
-		{ text = tr['add_exp'] .. ":", type = "slider", slider_data = { name = "add_exp", value = 0, max = 1000000 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = add_exp, name = "add_exp" },
+		{ text = tr['add_exp'] .. ":", type = "slider", slider_data = { name = "add_exp", value = 0, max = 1000000, step = 10000, add = true }, slider_callback = add_exp, apply_label = "Add", switch_back = true },
 	}
 	
 	Menu_open(Menu,  { title = tr['level_title'], description = tr['level_desc'], button_list = data, plugin_path = path, back = main_menu } )
@@ -382,11 +381,9 @@ money_menu = function()
 		{},
 		{ text = tr['add_money_7'], callback = function() add_money(9999999999999) end, switch_back = true },
 		{},
-		{ text = tr['add_money'] .. ":", type = "slider", slider_data = { name = "add_money", value = 0, max = 5000000 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = add_money, name = "add_money" },
+		{ text = tr['add_money'] .. ":", type = "slider", slider_data = { name = "add_money", value = 0, max = 5000000, step = 50000, add = true, prefix = "$" }, slider_callback = add_money, apply_label = "Add", switch_back = true },
 		{},
-		{ text = tr['add_offshore'] .. ":", type = "slider", slider_data = { name = "add_offshore", value = 0, max = 50000000 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = add_offshore, name = "add_offshore" },
+		{ text = tr['add_offshore'] .. ":", type = "slider", slider_data = { name = "add_offshore", value = 0, max = 50000000, step = 500000, add = true, prefix = "$" }, slider_callback = add_offshore, apply_label = "Add", switch_back = true },
 		{},
 		--{ text = tr['add_money'] ..":", type = "input", callback_input = function() add_money() end, switch_back = true },
 		{},
@@ -401,16 +398,14 @@ skill_menu = function()
 		{ text = tr['unlock_all_skills'], callback = function() for i = 1, 2 do unlock_all_skills() end end, switch_back = true },
 		{ text = tr['unlock_tiers'], callback = ppr_dofile, data = path .. "unlock_tiers", switch_back = true },
 		{},
-		{ text = tr['set_points'] .. ":", type = "slider", slider_data = { name = "skill_points", value = 0, max = 690 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_skillpoints, name = "skill_points" },
+		{ text = tr['set_points'] .. ":", type = "slider", slider_data = { name = "skill_points", value = 0, max = 690 }, slider_callback = set_skillpoints, apply_label = "Set", switch_back = true },
 		{},
 		{ text = tr['reset_points'], callback = set_skillpoints, data = 0, switch_back = true },
 		{},
 		{ text = tr['unlock_perks'], callback = function() ppr_dofile(path..'unlock_all_specs') end, switch_back = true },
 		{ text = tr['lock_perks'], callback = reset_perks, switch_back = true },
 		{},
-		{ text = tr['set_perks'] .. ":", type = "slider", slider_data = { name = "perk_points", value = 0, max = 205500 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_perk_points, name = "perk_points" },
+		{ text = tr['set_perks'] .. ":", type = "slider", slider_data = { name = "perk_points", value = 0, max = 205500 }, slider_callback = set_perk_points, apply_label = "Set", switch_back = true },
 		{},
 		{ text = tr['reset_perk_points'], callback = function() G_specs.points = 0 end, switch_back = true },
 	}
@@ -423,11 +418,9 @@ infamy_menu = function()
 	local ranks = tweak_data.infamy and tweak_data.infamy.ranks
 	local max_inf = type(ranks) == "table" and #ranks or tonumber(ranks) or 500
 	local data = { 
-		{ text = tr['set_inf'] .. ':', type = "slider", slider_data = { name = "inf_level", value = 0, max = max_inf }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_infamy_level, name = "inf_level" },
+		{ text = tr['set_inf'] .. ':', type = "slider", slider_data = { name = "inf_level", value = 0, max = max_inf }, slider_callback = set_infamy_level, apply_label = "Set", switch_back = true },
 		{},
-		{ text = tr['set_inf_points'] .. ':', type = "slider", slider_data = { name = "inf_points", value = 0, max = 25 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_infamy_points, name = "inf_points" },
+		{ text = tr['set_inf_points'] .. ':', type = "slider", slider_data = { name = "inf_points", value = 0, max = 25 }, slider_callback = set_infamy_points, apply_label = "Set", switch_back = true },
 		{},
 		{ text = tr['reset_inf'], callback = function() set_infamy_level(0) end, switch_back = true },
 	}
@@ -486,8 +479,7 @@ safehouse_menu = function()
 		{ text = tr['unlock_safehouse_trophies'], callback = unlock_safehouse_trophies, switch_back = true },
 		{ text = tr['unlock_tier_3_rooms'], callback = max_rooms_tier, switch_back = true },
 		{},
-		{ text = tr['set_continental_coins'] .. ':', type = "slider", slider_data = { name = "set_continental_coins", value = 0, max = 1000 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_continental_coins, name = "set_continental_coins" },
+		{ text = tr['set_continental_coins'] .. ':', type = "slider", slider_data = { name = "set_continental_coins", value = 0, max = 1000 }, slider_callback = set_continental_coins, apply_label = "Set", switch_back = true },
 	}
 
 	Menu_open(Menu,  { title = tr['safehouse_title'], description = tr['safehouse_desc'], button_list = data, back = main_menu } )
@@ -498,17 +490,13 @@ end
 crimespree_menu = function()
 	local data = {
 		{},
-		{ text = tr['set_crimespree_spree_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_spree_level", value = 0, max = 10000 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_crimespree_spree_level, name = "set_crimespree_spree_level" },
+		{ text = tr['set_crimespree_spree_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_spree_level", value = 0, max = 10000 }, slider_callback = set_crimespree_spree_level, apply_label = "Set", switch_back = true },
 		{},
-		{ text = tr['set_crimespree_reward_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_reward_level", value = 0, max = 10000 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_crimespree_reward_level, name = "set_crimespree_reward_level" },
+		{ text = tr['set_crimespree_reward_level'] .. ":", type = "slider", slider_data = { name = "set_crimespree_reward_level", value = 0, max = 10000 }, slider_callback = set_crimespree_reward_level, apply_label = "Set", switch_back = true },
 		{},
-		{ text = tr['set_crimespree_catchup_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_catchup_bonus", value = 0, max = 100 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_crimespree_catchup_bonus, name = "set_crimespree_catchup_bonus" },
+		{ text = tr['set_crimespree_catchup_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_catchup_bonus", value = 0, max = 100 }, slider_callback = set_crimespree_catchup_bonus, apply_label = "Set", switch_back = true },
 		{},
-		{ text = tr['set_crimespree_winning_streak_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_winning_streak_bonus", value = 0, max = 10000 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = set_crimespree_winning_streak_bonus, name = "set_crimespree_winning_streak_bonus" },
+		{ text = tr['set_crimespree_winning_streak_bonus'] .. ":", type = "slider", slider_data = { name = "set_crimespree_winning_streak_bonus", value = 0, max = 10000 }, slider_callback = set_crimespree_winning_streak_bonus, apply_label = "Set", switch_back = true },
 	}
 
 	Menu_open(Menu,  { title = tr['crimespree_title'], description = tr['crimespree_desc'], button_list = data, back = main_menu } )

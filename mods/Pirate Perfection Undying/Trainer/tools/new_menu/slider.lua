@@ -18,8 +18,14 @@ function Slider:init( panel, button )
 	self.min = data.min or 0
 	self.max = data.max or 100
 	self.step = data.step or 1
+	-- add = true: the button adds the amount and the slider goes back to the start (money, XP)
+	self.add = data.add and true or false
+	self.prefix = data.prefix or ""
 	local name = self.name
 	local cur = togg_vars[ name ] or data.value or self.min
+	if self.add then
+		cur = button._ppu_val or self.min
+	end
 	if button._ppu_applied == nil then
 		button._ppu_applied = cur
 	end
@@ -48,6 +54,9 @@ function Slider:fraction()
 end
 
 function Slider:can_apply()
+	if self.add then
+		return self.value > self.min
+	end
 	return self.value ~= self.applied
 end
 
@@ -58,6 +67,12 @@ function Slider:apply()
 	self:do_callback()
 	self.applied = self.value
 	self.button._ppu_applied = self.value
+	if self.add then
+		-- added: back to the start for the next amount
+		self.value = self.min
+		self.button._ppu_val = nil
+		togg_vars[ self.name ] = self.min
+	end
 	return true
 end
 

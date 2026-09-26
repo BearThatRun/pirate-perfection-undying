@@ -88,12 +88,59 @@ local function game_cfg()
 	return rawget( _G, "game_config" )
 end
 
+-- The active config file. game_config only exists after a config was loaded (in a heist, or
+-- after F2 > Load), so in the main menu the name comes from ppr_config.DefaultConfig.
+local function active_config_path()
+	local gc = game_cfg()
+	local p = gc and rawget( gc, "auto_config" )
+	if type( p ) == "string" then
+		return p
+	end
+	local name = ppr_config and rawget( ppr_config, "DefaultConfig" )
+	if type( name ) ~= "string" or name == "" then
+		name = "default_config"
+	end
+	return "Trainer/configs/" .. name .. ".lua"
+end
+
+local function read_file( path )
+	local src
+	pcall( function()
+		local f = ppr_io.open( path, "r" )
+		if f then
+			src = f:read( "*a" )
+			f:close()
+		end
+	end )
+	return src
+end
+
+-- Theme string for the active config: what was changed in this session, else the config file.
+-- PPU_theme_live = { path = config file, str = "r,g,b;..." or false (= defaults) }
+local function theme_string_now()
+	local path = active_config_path()
+	local live = rawget( _G, "PPU_theme_live" )
+	if live and live.path == path then
+		return live.str or nil
+	end
+	local str
+	local gc = game_cfg()
+	local v = gc and rawget( gc, "PPU_Theme" )
+	if type( v ) == "string" then
+		str = v
+	else
+		local src = read_file( path )
+		str = src and src:match( 'cfg%.PPU_Theme%s*=%s*"([^"\n]*)"' )
+	end
+	PPU_theme_live = { path = path, str = str or false }
+	return str
+end
+
 -- Current colours (copy): saved theme of the active config, else the defaults
 function ppu_theme_raw()
 	local saved
 	pcall( function()
-		local gc = game_cfg()
-		saved = theme_parse( gc and rawget( gc, "PPU_Theme" ) )
+		saved = theme_parse( theme_string_now() )
 		if not saved then
 			-- rawget: ppr_config warns in the log for every missing key
 			local old = ppr_config and rawget( ppr_config, "PPU_Theme" )
@@ -125,54 +172,61 @@ function ppu_theme()
 	return T
 end
 
+local function set_theme_string( str )
+	PPU_theme_live = { path = active_config_path(), str = str or false }
+	local gc = game_cfg()
+	if gc then
+		rawset( gc, "PPU_Theme", str or nil ) -- "Save all settings" in F2 writes it too
+	end
+	local m = tweak_data.menu_active
+	if m and m.apply_theme then m:apply_theme() end
+end
+
 -- Change one channel (1-3) of one colour; the open menu redraws in the new colours
 function ppu_theme_set( role, ch, v )
 	local t = ppu_theme_raw()
 	if not t[ role ] then return end
 	t[ role ][ ch ] = math.max( 0, math.min( 255, math.floor( v + 0.5 ) ) )
-	local gc = game_cfg()
-	if gc then
-		rawset( gc, "PPU_Theme", theme_string( t ) )
-	end
-	local m = tweak_data.menu_active
-	if m and m.apply_theme then m:apply_theme() end
+	set_theme_string( theme_string( t ) )
 end
 
 function ppu_theme_reset()
-	local gc = game_cfg()
-	if gc then
-		rawset( gc, "PPU_Theme", nil )
-	end
+	set_theme_string( nil )
 	ppu_theme_save()
-	local m = tweak_data.menu_active
-	if m and m.apply_theme then m:apply_theme() end
 end
 
 -- Write only the PPU_Theme line into the active config file (the rest of the file is kept)
 function ppu_theme_save()
-	local gc = game_cfg()
-	local path = gc and rawget( gc, "auto_config" )
-	if type( path ) ~= "string" then return false end
+	local path = active_config_path()
+	local live = rawget( _G, "PPU_theme_live" )
+	local value = live and live.path == path and live.str or nil
 	local ok, err = pcall( function()
-		local f = ppr_io.open( path, "r" )
-		if not f then return end
-		local src = f:read( "*a" )
-		f:close()
+		local src = read_file( path )
+		if not src then
+			error( "can't read " .. path )
+		end
 		local body = src:gsub( "\r?\n[ \t]*cfg%.PPU_Theme[ \t]*=[^\n]*", "" )
-		local value = rawget( gc, "PPU_Theme" )
 		if value then
 			local head, tail = body:match( "^(.*)(\r?\nend%s*)$" )
-			if not head then return end -- not the usual "return function( cfg ) ... end" file: leave it alone
+			if not head then
+				error( path .. " is not the usual 'return function( cfg ) ... end' file" )
+			end
 			body = head .. "\n\tcfg.PPU_Theme = " .. string.format( "%q", value ) .. tail
 		end
 		if body == src then return end
-		if not loadstring( body ) then return end -- never write a config that wouldn't load
-		local w = ppr_io.open( path, "w" )
-		if w then
-			w:write( body )
-			w:close()
+		if not loadstring( body ) then
+			error( "the changed " .. path .. " wouldn't load, not written" )
 		end
+		local w = ppr_io.open( path, "w" )
+		if not w then
+			error( "can't write " .. path )
+		end
+		w:write( body )
+		w:close()
 	end )
+	if not ok and m_log_error then
+		m_log_error( "ppu_theme_save()", tostring( err ) )
+	end
 	return ok
 end
 
@@ -1283,13 +1337,14 @@ function Menu:build_slider_row( p, r )
 
 	local y = 8
 	D.text( p, { name = "text", text = label_of( b ), font = "r16", color = T.text, x = PAD, y = y, layer = 2 } )
-	local vt = D.text( p, { name = "slider_value", text = fmt_num( sl.value ), font = "s16", color = T.text, x = 0, y = y, layer = 2 } )
+	local vt = D.text( p, { name = "slider_value", text = sl.prefix .. fmt_num( sl.value ), font = "s16", color = T.text, x = 0, y = y, layer = 2 } )
 	vt:set_right( W - PAD )
 	r.value_text = vt
 	y = y + D.lh( "r16" ) + 5
 
-	-- Apply button
-	local aw = D.measure( "s14", "Apply" ) + 24 + 2
+	-- Apply button (menus can name it: "Add", "Set", ...)
+	local alabel = b.apply_label or "Apply"
+	local aw = D.measure( "s14", alabel ) + 24 + 2
 	local ah = D.lh( "s14" ) + 6 + 2
 	local ax = W - PAD - aw
 	local row2_h = math_max( 20, ah )
@@ -1309,12 +1364,12 @@ function Menu:build_slider_row( p, r )
 	r.apply_parts = {
 		bg = D.box( abtn, { x = 0, y = 0, w = aw, h = ah, r = 3, color = T.acc, layer = 0 } ),
 		border = D.border( abtn, { x = 0, y = 0, w = aw, h = ah, r = 3, color = T.acc, layer = 1 } ),
-		text = D.text( abtn, { text = "Apply", font = "s14", color = T.bg, x = 0, y = 4, w = aw, align = "center", layer = 2 } ),
+		text = D.text( abtn, { text = alabel, font = "s14", color = T.bg, x = 0, y = 4, w = aw, align = "center", layer = 2 } ),
 	}
 	y = y + row2_h + 5
 
-	D.text( p, { text = fmt_num( sl.min ), font = "r12", color = T.muted, x = PAD, y = y, layer = 2 } )
-	local maxl = D.text( p, { text = fmt_num( sl.max ), font = "r12", color = T.muted, x = 0, y = y, layer = 2 } )
+	D.text( p, { text = sl.prefix .. fmt_num( sl.min ), font = "r12", color = T.muted, x = PAD, y = y, layer = 2 } )
+	local maxl = D.text( p, { text = sl.prefix .. fmt_num( sl.max ), font = "r12", color = T.muted, x = 0, y = y, layer = 2 } )
 	maxl:set_right( W - PAD - ( aw + 12 ) )
 	y = y + D.lh( "r12" ) + 10
 
@@ -1341,7 +1396,7 @@ function Menu:refresh_slider( r )
 	local kx = TP + tw * f - 7
 	r.knob.panel:set_x( kx )
 	r.knob_ring.panel:set_x( kx - 3 )
-	r.value_text:set_text( fmt_num( sl.value ) )
+	r.value_text:set_text( sl.prefix .. fmt_num( sl.value ) )
 	r.value_text:set_right( self.W - PAD )
 	local can = sl:can_apply()
 	r.apply_parts.bg:set_visible( can )
@@ -1800,13 +1855,20 @@ end
 function Menu:apply_slider( r )
 	local gen = self._gen
 	local sl = r.slider
+	local msg = self.msg
+	local value = sl.value
 	local applied = sl:apply()
 	if self:stale( gen ) then
 		return
 	end
-	if applied then
+	-- a callback that reports its own result (ppu_feedback) keeps its message
+	if applied and self.msg == msg then
 		local label = label_of( r.button ):gsub( ":%s*$", "" )
-		self:set_description( label .. " " .. fmt_num( sl.value ) )
+		if sl.add then
+			self:set_description( "Added " .. sl.prefix .. fmt_num( value ) )
+		else
+			self:set_description( label .. " " .. sl.prefix .. fmt_num( value ) )
+		end
 	end
 	if not self:stale( gen ) then
 		self:refresh_slider( r )
