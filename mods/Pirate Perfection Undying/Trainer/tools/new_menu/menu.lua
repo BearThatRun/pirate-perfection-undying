@@ -55,7 +55,8 @@ local function rgb( t, a )
 end
 
 function ppu_theme()
-	local ok_s, saved = pcall( function() return ppr_config and ppr_config.PPU_Theme end )
+	-- rawget: ppr_config warns in the log for every missing key
+	local ok_s, saved = pcall( function() return ppr_config and rawget( ppr_config, "PPU_Theme" ) end )
 	saved = ok_s and saved or nil
 	local src = {}
 	for k, v in pairs( PPU_THEME_DEFAULT ) do
@@ -480,7 +481,15 @@ end
 -- Build (the whole window is redrawn when its layout changes)
 ---------------------------------------------------------------------------------------------
 
+-- True when the window was closed or redrawn since `gen` was taken. The game crashes (not a Lua
+-- error) when a removed GUI object is touched, so code that runs a row's callback must check this
+-- before touching any of the old objects again.
+function Menu:stale( gen )
+	return not self._ws or self._gen ~= gen
+end
+
 function Menu:destroy_gui()
+	self._gen = ( self._gen or 0 ) + 1
 	for _, r in ipairs( self.rows or {} ) do
 		local w = r.input
 		if w then
@@ -1530,12 +1539,17 @@ function Menu:row_enter()
 end
 
 function Menu:apply_slider( r )
+	local gen = self._gen
 	local sl = r.slider
-	if sl:apply() then
+	local applied = sl:apply()
+	if self:stale( gen ) then
+		return
+	end
+	if applied then
 		local label = label_of( r.button ):gsub( ":%s*$", "" )
 		self:set_description( label .. " " .. fmt_num( sl.value ) )
 	end
-	if self._ws and r.fill then
+	if not self:stale( gen ) then
 		self:refresh_slider( r )
 	end
 end
@@ -1544,8 +1558,9 @@ function Menu:confirm_input( input )
 	if input:text() == "" then
 		return
 	end
-	input:do_callback()
+	-- leave the field first: the callback may close or replace this window
 	input:disable_input()
+	input:do_callback()
 end
 
 -- Controller "confirm" (Enter / gamepad A). Enter is also read directly; don't run twice.
@@ -1561,6 +1576,7 @@ function Menu:enter_button_pressed()
 end
 
 function Menu:mouse_update()
+	local gen = self._gen
 	local x, y = self:mouse_pos()
 	local T = self.T
 	local clicked = mouse_pressed( mouse, left_click )
@@ -1615,6 +1631,17 @@ function Menu:mouse_update()
 		self:remember_position()
 	end
 	-- slider drag in progress
+	if self.drag_slider and self.drag_gen ~= self._gen then
+		-- the window was redrawn while dragging: follow the same slider in the new rows
+		local b = self.drag_slider.button
+		self.drag_slider = nil
+		for _, nr in ipairs( self.rows or {} ) do
+			if nr.button == b and nr.kind == "sld" and nr.track then
+				self.drag_slider = nr
+			end
+		end
+		self.drag_gen = self._gen
+	end
 	if self.drag_slider then
 		if held then
 			local r = self.drag_slider
@@ -1764,6 +1791,9 @@ function Menu:mouse_update()
 					self:set_focus( vi, false )
 				end
 				link = self:row_mouse( r, x, y, clicked, rclicked ) or link
+				if self:stale( gen ) then
+					return link -- the row closed or replaced this window
+				end
 				break
 			end
 		end
@@ -1811,6 +1841,7 @@ function Menu:row_mouse( r, x, y, clicked, rclicked )
 		if r.track:inside( x, y ) then
 			if clicked then
 				self.drag_slider = r
+				self.drag_gen = self._gen
 			end
 			return true
 		end
