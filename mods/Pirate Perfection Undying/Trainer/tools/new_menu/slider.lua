@@ -1,5 +1,6 @@
 --Menu component. Represents progress bar, that can be changed by user
 --Author: Simplity
+--Undying redesign stage 1: label + live value on top, thin track with fill and knob below.
 
 local mouse = Input:mouse()
 local mouse_down = mouse.down
@@ -16,15 +17,27 @@ local togg_vars = togg_vars
 local RunNewLoop = RunNewLoop
 local callback = callback
 local tweak_data = tweak_data
-local button_stage_2 = tweak_data.screen_colors.button_stage_2
 local pd2_small_font = tweak_data.menu.pd2_small_font
 local plugins = plugins
+
+local KNOB = 12
+
+-- 1234567 -> "1,234,567"
+local function fmt( n )
+	local s = tostring( n )
+	local neg, int, rest = s:match( "^(-?)(%d+)(.*)$" )
+	if not int then
+		return s
+	end
+	int = int:reverse():gsub( "(%d%d%d)", "%1," ):reverse():gsub( "^,", "" )
+	return neg .. int .. rest
+end
 
 local Slider = class()
 
 function Slider:init( panel, button )
 	local data = button.slider_data
-	
+
 	self.panel = panel
 	self.button = button
 	self.name = data.name
@@ -32,39 +45,46 @@ function Slider:init( panel, button )
 	local name = self.name
 	self.value = togg_vars[ name ] or data.value or 0 -- current value
 	togg_vars[ name ] = self.value
-	
+
 	self:create_gui()
 	self.id = RunNewLoop( callback( self, self, "update" ) )
 end
 
 function Slider:create_gui()
 	local panel = self.panel
-	
-	local slider = panel:panel( { name = "slider", w = panel:w(), h = panel:h() } )
+	local T = PPU_T
+
+	local slider = panel:panel( { name = "slider", x = 16, y = 24, w = panel:w() - 32, h = 20, layer = 3 } )
 	self.slider = slider
-	
-	self.slider_bg = slider:rect( { name = "slider_bg", w = 0, h = slider:h(), color = Color.VIP:with_alpha( 0.6 ), layer = 1 } )
-	
-	self.slider_text = slider:text( { name = "slider_text", layer = 2, wrap = "true", word_wrap = "true", visible = true,
-						  font = pd2_small_font, font_size = 15, color = Color.VIP,
-						  align="left", halign="left", vertical="center", valign="center", blend_mode = "add" } )
-	
+
+	slider:rect( { name = "track", x = 0, y = 8, w = slider:w(), h = 4, color = T.line2, layer = 0 } )
+	self.slider_bg = slider:rect( { name = "slider_bg", x = 0, y = 8, w = 0, h = 4, color = T.acc, layer = 1 } )
+	self.knob = slider:rect( { name = "knob", x = 0, y = 4, w = KNOB, h = KNOB, color = T.text, layer = 2 } )
+
+	self.slider_text = panel:text( { name = "slider_text", text = "", layer = 3, wrap = false, word_wrap = false, visible = true,
+						  font = pd2_small_font, font_size = 18, color = T.text, y = 6,
+						  align = "left", vertical = "top", blend_mode = "normal" } )
+
 	self:set_default_value()
-	
-	self.slider_text:set_left( slider:w() - 40 )
-	self.slider_text:set_y( 5 )
+end
+
+function Slider:_draw( where )
+	local slider = self.slider
+	self.slider_bg:set_w( slider:w() * where )
+	self.knob:set_x( ( slider:w() - KNOB ) * where )
 end
 
 function Slider:set_default_value()
-	local where = ( self.value * 100 / self.max ) / 100
-	self.slider_bg:set_w( self.slider:w() * where )
+	local where = self.max > 0 and ( self.value / self.max ) or 0
+	if where < 0 then where = 0 elseif where > 1 then where = 1 end
+	self:_draw( where )
 	self:safe_set_text( self.value )
 end
 
 function Slider:update()
 	local x, y = ppr_menu_mouse_pos()
 	local held = ( not self.button.plugin and mouse_down( mouse, left_click ) ) or mouse_down( mouse, right_click )
-	
+
 	-- Round 4: once you press on the bar you keep dragging while the button is held, even
 	-- outside the bar, so dragging past either end gives the exact min / max.
 	if held and ( self.dragging or self.slider:inside( x, y ) ) then
@@ -77,26 +97,25 @@ end
 
 function Slider:on_slider( x )
 	local slider = self.slider
-	local slider_bg = self.slider_bg
-	
+
 	local where = ( x - slider:world_left() ) / ( slider:world_right() - slider:world_left() )
-	
+
 	-- Round 4: no snap zone any more (it blocked values near the ends); just clamp.
 	if where < 0 then
 		where = 0
 	elseif where > 1 then
 		where = 1
 	end
-	
-	slider_bg:set_w( slider:w() * where )
-	
+
+	self:_draw( where )
+
 	self.value = math.floor( self.max * where + 0.5 )
 	self:safe_set_text( self.value )
-	
+
 	self:do_callback()
 end
 
-function Slider:do_callback()	
+function Slider:do_callback()
 	if self.button.plugin then
 		self:callback_plugin()
 	else
@@ -106,13 +125,13 @@ end
 
 function Slider:callback_plugin()
 	local callback_func = self.button.slider_callback
-	
+
 	if callback_func then
 		callback_func( self.value )
 	end
-	
+
 	togg_vars[ self.name ] = self.value -- save current value
-	
+
 	if game_config then
 		game_config[ self.name ] = self.value
 	end
@@ -120,12 +139,12 @@ end
 
 function Slider:callback_button()
 	togg_vars[ self.name ] = self.value
-	
+
 	local callback_func = self.button.slider_callback -- Undying: live callback for non-plugin sliders too
 	if callback_func then
 		callback_func( self.value )
 	end
-	
+
 	if game_config then
 		game_config[ self.name ] = self.value
 	end
@@ -133,10 +152,11 @@ end
 
 function Slider:safe_set_text( text )
 	local slider_text = self.slider_text
-	
-	slider_text:set_text( text )
-	local _,_,w,h = slider_text:text_rect() 
+
+	slider_text:set_text( fmt( text ) )
+	local _,_,w,h = slider_text:text_rect()
 	slider_text:set_size( w, h )
+	slider_text:set_right( self.panel:w() - 16 )
 end
 
 function Slider:close()

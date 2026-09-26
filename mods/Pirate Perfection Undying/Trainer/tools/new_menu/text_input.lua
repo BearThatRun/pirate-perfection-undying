@@ -56,21 +56,33 @@ local T_menu = tweak_data.menu
 local pd2_small_font = T_menu.pd2_small_font
 local pd2_small_font_size = T_menu.pd2_small_font_size
 function TextInput:create_gui()
+	-- Undying redesign stage 1: a boxed field in the theme colours, right of the label.
+	local T = PPU_T
 	local panel = self.panel
-	local button_text = panel:child("text") 
-	
-	local input_panel = panel:panel( { name = "input_panel", x = button_text:w() + 10, h = panel:h(), w = panel:w() - button_text:w() - 10, layer = 1 } )
+	local button_text = panel:child("text")
+	local x = button_text:right() + 12
+	local w = panel:w() - x - 16
+	if w < 120 then
+		w = 120
+		x = panel:w() - 16 - w
+	end
+
+	local input_panel = panel:panel( { name = "input_panel", x = x, y = 3, h = panel:h() - 6, w = w, layer = 3 } )
 	input_panel:rect( { name = "focus_indicator", visible = true, color = Color.black:with_alpha(0.1), layer = 4 } )
 
-	local text_input = input_panel:text( { name = "input_text", text = "", font = pd2_small_font, font_size = pd2_small_font_size, x = 0, y = 0,
+	local text_input = input_panel:text( { name = "input_text", text = "", font = pd2_small_font, font_size = 18, x = 8, y = 0, w = w - 16, h = input_panel:h(),
 										align="left", halign="left", vertical="center", hvertical="center", blend_mode="normal",
-										color = Color.VIP, layer = 5, wrap = true, word_wrap = false } )
-										
-	local caret = input_panel:rect( { name="caret", layer = 2, x = 0, y = 2, w = 0.8, h = panel:h() - 5, color = Color.VIP } )
-	input_panel:rect( { name="input_bg", color=Color.black:with_alpha(0.5), layer = -1, valign = "grow", h = input_panel:h() } )
-	
+										color = T.text, layer = 5, wrap = true, word_wrap = false } )
+
+	local caret = input_panel:rect( { name="caret", layer = 6, x = 8, y = 3, w = 1, h = input_panel:h() - 6, color = T.acc, visible = false } )
+	input_panel:rect( { name="input_bg", color = T.surf, layer = -1, valign = "grow", h = input_panel:h() } )
+	local ih = input_panel:h()
+	for _, r in ipairs( { { 0, 0, w, 1 }, { 0, ih - 1, w, 1 }, { 0, 0, 1, ih }, { w - 1, 0, 1, ih } } ) do
+		input_panel:rect( { x = r[1], y = r[2], w = r[3], h = r[4], color = T.line2, layer = 0 } )
+	end
+
 	self.input_panel = input_panel
-	
+
 	if self.button.value then
 		self:enter_text( nil, self.button.value )
 	end
@@ -220,10 +232,10 @@ end
 local wait = wait
 function TextInput.blink( o )
 	while true do
-		o:set_color( Color.VIP )
-		wait(0.3)
-		o:set_color( Color.VIP )
-		wait(0.3)
+		o:set_visible( true )
+		wait(0.4)
+		o:set_visible( false )
+		wait(0.4)
 	end
 end
 
