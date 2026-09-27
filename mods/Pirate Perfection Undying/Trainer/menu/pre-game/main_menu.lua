@@ -278,6 +278,39 @@ do
 	end
 end
 
+-- what is in the file, to count unsaved changes (menu redesign: Save bar)
+local function copy_skills(t)
+	local out = {}
+	for skill, levels in pairs(t) do
+		out[skill] = {}
+		for level, v in pairs(levels) do
+			out[skill][level] = v
+		end
+	end
+	return out
+end
+local saved_skills = copy_skills(secret_skills)
+
+local function count_skill_changes()
+	local n = 0
+	local seen = {}
+	for _, t in pairs({secret_skills, saved_skills}) do
+		for skill in pairs(t) do
+			if not seen[skill] then
+				seen[skill] = true
+				for level = 1, 2 do
+					local a = secret_skills[skill] and secret_skills[skill][level] or false
+					local b = saved_skills[skill] and saved_skills[skill][level] or false
+					if a ~= b then
+						n = n + 1
+					end
+				end
+			end
+		end
+	end
+	return n
+end
+
 local function check_skill(skill, level)
 	return secret_skills[skill] and secret_skills[skill][level]
 end
@@ -295,6 +328,8 @@ local function toggle_skill(skill, level)
 	end
 end
 
+local skills_bar -- set below save_skills
+
 local function create_secret_skills_sub_menu(name, skilltree, back_f)
 	local data = {}
 	for _, row in pairs(skilltree.tiers) do
@@ -310,7 +345,7 @@ local function create_secret_skills_sub_menu(name, skilltree, back_f)
 			end
 		end
 	end
-	Menu_open(Menu, {title = name, button_list = data, back = back_f or secret_skills_menu}) -- Undying: back goes to the tree, not the top menu
+	Menu_open(Menu, {title = name, button_list = data, back = back_f or secret_skills_menu, save_bar = skills_bar}) -- Undying: back goes to the tree, not the top menu
 end
 
 local function create_secret_skills_menu(tree)
@@ -327,7 +362,7 @@ local function create_secret_skills_menu(tree)
 			menu = true,
 		})
 	end
-	Menu_open(Menu, {title = tr_trees[tree], button_list = data, back = secret_skills_menu})
+	Menu_open(Menu, {title = tr_trees[tree], button_list = data, back = secret_skills_menu, save_bar = skills_bar})
 end
 
 local function save_skills()
@@ -346,7 +381,12 @@ local function save_skills()
 	end
 	save_file:write(menu_write..ingame_write.."},"..secert_skills_ver)
 	save_file:close()
+	saved_skills = copy_skills(secret_skills)
+	ppu_feedback("Saved. Restart the game to apply.")
 end
+
+-- design: one Save bar at the bottom of the Secret Skills pages (no Save row)
+skills_bar = {text = "Save, then restart the game", count = count_skill_changes, save = save_skills}
 
 -- Undying: destructive buttons ask first. Redesign: the question is shown inside the row
 -- (Yes / No), so no separate "Are you sure?" menu. Returns the row.
@@ -431,21 +471,23 @@ end
 inventory_menu = function()
 	local data = {
 		{ text = tr['safe_sim'], callback = ppr_dofile, data = path.."safe_sim", menu = true},
-		{},
 		{ text = tr['remove_exclamation'], callback = remove_exclamation, switch_back = true},
 		{ text = tr['no_weap_mod_limit'], plugin = "no_weap_mod_limit", switch_back = true},
-		{},
 		{ text = tr['unlock_slots'], callback = unlock_slots, switch_back = true },
 		{ text = tr['unlock_all'], callback = unlock_items, data = "all", switch_back = true },
-		{},
-		{ text = tr['unlock_weapons'], callback = unlock_items, data = "weapons", switch_back = true },
-		{ text = tr['unlock_weap_mods'], callback = unlock_items, data = "weapon_mods", switch_back = true },
-		{},
-		{ text = tr['unlock_masks'], callback = unlock_items, data = "masks", switch_back = true },
-		{ text = tr['unlock_materials'], callback = unlock_items, data = "materials", switch_back = true },
-		{ text = tr['unlock_textures'], callback = unlock_items, data = "textures", switch_back = true },
-		{ text = tr['unlock_colors'], callback = unlock_items, data = "colors", switch_back = true },
-		{},
+		-- menu redesign: pick the kinds, then one Unlock button
+		{ type = "chips", text = "Unlock", switch_back = true,
+			chips = { { "Weapons", "weapons" }, { "Weapon mods", "weapon_mods" }, { "Masks", "masks" },
+				{ "Materials", "materials" }, { "Textures", "textures" }, { "Colors", "colors" } },
+			action = function( kinds )
+				local names = { weapons = "Weapons", weapon_mods = "Weapon mods", masks = "Masks", materials = "Materials", textures = "Textures", colors = "Colors" }
+				local done = {}
+				for _, k in ipairs( kinds ) do
+					unlock_items( k )
+					done[ #done + 1 ] = names[ k ] or k
+				end
+				ppu_feedback( "Unlocked: " .. table.concat( done, ", " ) )
+			end },
 		{ text = tr['clear_inventory_menu'], callback = remove_items_menu, menu = true },
 	}
 
@@ -507,10 +549,8 @@ secret_skills_menu = function()
 	for i = 1, 5 do
 		tab_insert(data, {text = tr_trees[i], callback = create_secret_skills_menu, data = i, menu = true})
 	end
-	tab_insert(data, {})
-	tab_insert(data, {text = tr['save'], type = "save_button", callback = save_skills, name = "secret_skills_save"})
 
-	Menu_open(Menu, {title = tr['secret_skills_title'], description = tr['secret_skills_desc'], button_list = data, back = main_menu})
+	Menu_open(Menu, {title = tr['secret_skills_title'], description = tr['secret_skills_desc'], button_list = data, back = main_menu, save_bar = skills_bar})
 end
 
 main_menu = function()

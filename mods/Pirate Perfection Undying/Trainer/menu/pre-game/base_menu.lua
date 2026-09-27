@@ -62,16 +62,16 @@ local options = {
 		{name = "NoSkinMods"},
 	}},
 	{name = "Anticheat_Sub", desc = true, sub = {
-		{name = "ControlCheats", desc = true, menu = {
-			base_ControlCheats_false = false,
-			base_ControlCheats_1 = 1,
-			base_ControlCheats_2 = 2,
+		{name = "ControlCheats", desc = true, choice = {
+			{"base_ControlCheats_1", 1},
+			{"base_ControlCheats_false", false},
+			{"base_ControlCheats_2", 2},
 		}},
 	}},
 	{name = "Equipment_Sub", desc = true, sub = {
 		{name = "far_placements"},
 		{},
-		{name = "equipment_place_key", type = "input"},
+		{name = "equipment_place_key", type = "key"},
 	}},
 	{name = "Misc_Sub", desc = true, sub = {
 		{name = "LaserColor", lasercolor = true, disable = true},
@@ -113,15 +113,17 @@ local options = {
 		{},
 	}},
 	{name = "job_sub", desc = true, sub = {
-		{name = "jobmenu_def_difficulty", menu = {
-			"Easy", --"easy",
-			"Normal", --"normal",
-			"Hard", --"hard",
-			"Very Hard", --"overkill",
-			"Overkill", --"overkill_145",
-			"Mayhem", --"easy_wish",
-			"Deathwish", --"overkill_290",
-			"One Down", --"sm_wish",
+		-- Undying 4b: the value is the game's difficulty id (the old list saved "Overkill" etc.,
+		-- which the Job Menu passed on as a difficulty id)
+		{name = "jobmenu_def_difficulty", choice = {
+			{"Easy", "easy"},
+			{"Normal", "normal"},
+			{"Hard", "hard"},
+			{"Very Hard", "overkill"},
+			{"Overkill", "overkill_145"},
+			{"Mayhem", "easy_wish"},
+			{"Deathwish", "overkill_290"},
+			{"One Down", "sm_wish"},
 		}},
 		{},
 		{name = "jobmenu_singleplayer"},
@@ -131,18 +133,18 @@ local options = {
 	{name = "Spawn_sub", desc = true, sub = {
 		{name = "SpawnUnitsAmount", type = "slider", max = 100},
 		{},
-		{name = "SpawnPos", menu = {
-			base_SpawnPos_ray = "ray",
-			base_SpawnPos_spawn_point = "spawn_point",
-			base_SpawnPos_random_spawn_point = "random_spawn_point",
+		{name = "SpawnPos", choice = {
+			{"base_SpawnPos_ray", "ray"},
+			{"base_SpawnPos_spawn_point", "spawn_point"},
+			{"base_SpawnPos_random_spawn_point", "random_spawn_point"},
 		}},
 		{},
-		{name = "SpawnUnitKey", type = "input"},
+		{name = "SpawnUnitKey", type = "key"},
 	}},
 	{name = "inventory_sub", desc = true, sub = {
 		{name = "rain_bags_amount", type = "slider", max = 1000},
 		{name = "SpawnBagsAmount", type = "slider", max = 100},
-		{name = "SpawnBagKey", type = "input"},
+		{name = "SpawnBagKey", type = "key"},
 	}},
 	{name = "slow_sub", desc = true, sub = {
 		{name = "SmSpeed", type = "slider", max = 100},
@@ -167,10 +169,10 @@ local options = {
 		{name = "xray_Items"},
 	}},
 	{name = "aimbot_sub", desc = true, sub = {
-		{name = "AimMode", menu = {
-			base_AimMode_1 = 1,
-			base_AimMode_2 = 2,
-			base_AimMode_3 = 3,
+		{name = "AimMode", choice = {
+			{"base_AimMode_2", 2},
+			{"base_AimMode_3", 3},
+			{"base_AimMode_1", 1},
 		}},
 		{name = "RightClick"},
 		{name = "AimbotInfAmmo"},
@@ -260,7 +262,37 @@ local function config_edit(id, val, back)
 	end
 end
 
-local create_item, create_sub, create_menu, create_lasercolor, create_color_xray
+local create_item, create_sub
+
+local c_tab = {"R", "G", "B"}
+
+-- Colour options (laser, X-ray): shown as one colour row with R / G / B sliders (menu redesign).
+-- false in a channel = colour turned off.
+local function color_row(name, text)
+	return {
+		text = text,
+		type = "rgb",
+		get_rgb = function()
+			local out = {}
+			for i, c in pairs(c_tab) do
+				local v = get_value(name..c)
+				out[i] = type(v) == "number" and v or 0
+			end
+			return out
+		end,
+		set_rgb = function(ci, v)
+			for i, c in pairs(c_tab) do
+				local pre = prefix..name..c
+				if type(get_value(name..c)) ~= "number" then
+					togg_vars[pre] = 0
+				end
+				if i == ci then
+					togg_vars[pre] = v
+				end
+			end
+		end,
+	}
+end
 
 create_item = function(opt, parent)
 	local name = opt.name
@@ -268,49 +300,93 @@ create_item = function(opt, parent)
 		return {}
 	end
 	local pre_name = prefix..name
-	if togg_vars[pre_name] == nil and not opt.sub and not opt.lasercolor and not opt.color_xray then
+	local is_color = opt.lasercolor or opt.color_xray
+	if togg_vars[pre_name] == nil and not opt.sub and not is_color then
 		togg_vars[pre_name] = ppr_config[name]
 	end
-	local opt_val = not opt.sub and not opt.lasercolor and not opt.color_xray and get_value(name)
-	local is_lasercolor = opt.lasercolor
-	local is_color_xray = opt.color_xray
+	local label = (opt.disp or is_legacy and not (opt.sub or opt.notlegacy) and name or tr[pre_name])..(opt.host and " "..tr.host_only or "")
+	if is_color then
+		return color_row(name, label)
+	end
+	local opt_val = not opt.sub and get_value(name)
+	if opt.type == "key" then
+		-- design "key": press the row, then the key
+		return {
+			text = label,
+			type = "key",
+			key_value = opt_val or nil,
+			key_callback = function(k) config_edit(name, k) end,
+			switch_back = true,
+		}
+	end
+	if opt.choice then
+		local data, index = {}, 1
+		for i, c in pairs(opt.choice) do
+			insert(data, {text = tr[c[1]] ~= c[1] and tr[c[1]] or c[1], value = c[2]})
+			if c[2] == opt_val then
+				index = i
+			end
+		end
+		return {
+			text = label,
+			type = "multi_choice",
+			name = name,
+			multi_choice_data = data,
+			index = index,
+			multi_callback = config_edit,
+			switch_back = true,
+		}
+	end
 	local is_slider = opt.type == "slider"
-	local is_input = opt.type == "input"
 	local is_multi = opt.type == "multi_choice"
-	local is_menu = opt.menu
 	local is_sub = opt.sub
-	local is_toggle = not is_sub and not is_menu and not is_lasercolor and not is_color_xray and not opt.type
+	local is_toggle = not is_sub and not opt.type
 	return {
-		text = (opt.disp or is_legacy and not (is_sub or opt.notlegacy) and name or tr[pre_name])..(is_input and "  ( "..(opt_val or tr.base_none).." ) :" or "")..(opt.host and " "..tr.host_only or ""),
+		text = label,
 		type = (is_toggle and "toggle") or opt.type or nil,
 		name = is_multi and name or nil,
 		toggle = (is_toggle and pre_name) or nil,
 		slider_data = is_slider and {name = pre_name, value = opt_val, max = opt.max} or nil,
-		callback = (is_toggle and config_edit) or (is_sub and create_sub) or (is_menu and create_menu) or (is_lasercolor and create_lasercolor) or (is_color_xray and create_color_xray) or nil,
-		callback_input = (is_input and function(val) config_edit(name, val) end) or nil,
+		callback = (is_toggle and config_edit) or (is_sub and create_sub) or nil,
 		multi_callback = is_multi and config_edit or nil,
-		data = (is_toggle and name) or (is_sub and {pre_name, opt, parent}) or (is_menu and {name, opt, parent}) or (is_lasercolor and {name, opt.disable or false, parent}) or (is_color_xray and {name, opt.disable or false, parent}) or nil,
+		data = (is_toggle and name) or (is_sub and {pre_name, opt, parent}) or nil,
 		multi_choice_data = is_multi and opt.choices() or nil,
 		value = is_multi and opt_val or nil,
-		switch_back = not opt.forceout and (is_toggle or is_slider or is_input or is_multi) or nil,
-		menu = is_sub or is_menu or is_lasercolor or is_color_xray or nil,
+		switch_back = not opt.forceout and (is_toggle or is_slider or is_multi) or nil,
+		menu = is_sub or nil,
 	}
+end
+
+-- Settings changed in this menu and not saved yet (the Save bar counts them)
+local function count_changes()
+	local n = 0
+	local pre_len = len(prefix)
+	for id, val in pairs(togg_vars) do
+		if sub(id, 1, pre_len) == prefix and id ~= prefix.."menu_save" then
+			local cur = rawget(ppr_config, sub(id, pre_len + 1))
+			if (val or false) ~= (cur or false) then
+				n = n + 1
+			end
+		end
+	end
+	return n
 end
 
 local function save_config()
 	local pre_len = len(prefix)
 	for id, val in pairs(togg_vars) do
 		local check = sub(id, 1, pre_len)
-		if check == prefix then
+		if check == prefix and id ~= prefix.."menu_save" then
 			id = sub(id, pre_len + 1)
 			ppr_config[id] = val
 		end
 	end
 	ppr_config()
-	Menu_open(Menu, {title = tr[prefix.."menu"], description = tr.base_menu_restart, button_list = {}})
+	ppu_feedback("Saved. Restart the game to apply.")
 end
 
-local save_button = {text = tr.save, type = "save_button", callback = save_config, name = prefix.."menu_save"}
+-- design: one Save bar at the bottom of every PPR Setup page (no Save rows)
+local save_bar = {text = "Save, then restart the game to apply", count = count_changes, save = save_config}
 
 create_sub = function(pre_id, menu, parent)
 	local reopen = function() create_sub(pre_id, menu, parent) end
@@ -319,84 +395,24 @@ create_sub = function(pre_id, menu, parent)
 		opts = opts()
 	end
 	local data = {}
-	local i = 0
-	local opts_size = size(opts)
 	for _, opt in pairs(opts) do
 		insert(data, create_item(opt, reopen))
-		i = i + 1
-		if i % 20 == 0 or i == opts_size then
-			insert(data, {})
-			insert(data, save_button)
+		if opt.lasercolor and opt.disable then
+			local name = opt.name
+			insert(data, {text = "Disable laser color", switch_back = true, callback = function()
+				for _, c in pairs(c_tab) do
+					togg_vars[prefix..name..c] = false
+				end
+				ppu_feedback("Laser color off (save to keep it)")
+			end})
 		end
 	end
 
-	Menu_open(Menu, {title = tr[pre_id]..(menu.host and "    "..tr.host_only or ""), description = menu.desc and tr[pre_id.."_desc"] or nil, button_list = data, back = parent or main_menu})
-end
-
-create_menu = function(id, menu, parent)
-	local opts = menu.menu
-	if type(opts) == "function" then
-		opts = opts()
+	local desc = menu.desc and tr[pre_id.."_desc"] or nil
+	if pre_id == prefix.."menu" then
+		desc = "Every option here needs Save, then a game restart."
 	end
-	local same_name = opts[1] and true
-	local cur_val = get_value(id)
-	local data = {}
-	for ind, val in pairs(opts) do
-		if cur_val == val then
-			insert(data, 1, {})
-			insert(data, 1, {text = tr.base_selected..":  "..(same_name and val or tr[ind]), switch_back = true})
-		end
-		insert(data, {text = same_name and val or tr[ind], callback = config_edit, data = {id, val, parent or true}})
-	end
-
-	local pre_id = prefix..id
-	Menu_open(Menu, {title = (is_legacy and not (menu.sub or menu.notlegacy) and id or tr[pre_id])..(menu.host and "    "..tr.host_only or ""), description = tr[pre_id.."_desc"], button_list = data, back = parent or main_menu})
-end
-
-local c_tab = {"R", "G", "B"}
-
-local function disable_lasercolor(id)
-	for _, c in pairs(c_tab) do
-		togg_vars[id..c] = false
-	end
-end
-
-local b_lc = "base_lasercolor_"
-
-create_lasercolor = function(id, disable, parent)
-	local data = {}
-	for _, c in pairs(c_tab) do
-		local id_c = id..c
-		insert(data, {text = tr[b_lc..c], type = "slider", slider_data = {name = prefix..id_c, value = get_value(id_c) or 1, max = 255}, switch_back = true})
-	end
-	local pre_id = prefix..id
-	if disable then
-		insert(data, {text = tr.base_disable, callback = disable_lasercolor, data = pre_id, switch_back = parent or main_menu})
-	end
-	insert(data, save_button)
-	Menu_open(Menu, {title = tr[pre_id], description = tr[pre_id.."_desc"].."\n"..tr.base_lasercolor_ins, button_list = data, back = parent or main_menu})
-end
-
-local function disable_color_xray(id)
-	for _, c in pairs(c_tab) do
-		togg_vars[id..c] = false
-	end
-end
-
-local b_xc = "base_xraycolor_"
-
-create_color_xray = function(id, disable, parent)
-	local data = {}
-	for _, c in pairs(c_tab) do
-		local id_c = id..c
-		insert(data, {text = tr[b_xc..c], type = "slider", slider_data = {name = prefix..id_c, value = get_value(id_c) or 1, max = 255}, switch_back = true})
-	end
-	local pre_id = prefix..id
-	if disable then
-		insert(data, {text = tr.base_disable, callback = disable_color_xray, data = pre_id, switch_back = parent or main_menu})
-	end
-	insert(data, save_button)
-	Menu_open(Menu, {title = tr[pre_id], description = tr[pre_id.."_desc"].."\n"..tr.base_color_xray_ins, button_list = data, back = parent or main_menu})
+	Menu_open(Menu, {title = tr[pre_id]..(menu.host and "    "..tr.host_only or ""), description = desc, button_list = data, back = parent or main_menu, save_bar = save_bar})
 end
 
 is_legacy = get_value("LegacyMenu")

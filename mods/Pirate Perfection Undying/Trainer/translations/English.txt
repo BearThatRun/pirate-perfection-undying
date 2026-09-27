@@ -848,9 +848,9 @@ Usefull when you want to reload some modified plugin on fly or turn on cheats ag
 	config_save_all								=	"Save all current settings",
 	config_save_into_new							=	"Save changes into new config",
 	config_save_default							=	"Set active config as default",
-	config_are_you_sure							=	"Config with that name already exists. Are you sure you want to overwrite it ?",
+	config_are_you_sure							=	"Config with that name already exists. Overwrite it?",
 	config_current									=	"Your current config",
-	config_what							=	"A config stores which in-heist features are turned on (character, stealth, interaction, inventory, equipment and mission menu toggles). Money, level, skills, secret skills and infamy are not in it.",
+	config_what							=	"A config stores which in-heist features are turned on. Money, level, skills, secret skills and infamy are not in it.",
 
 -- WayPoints menu
 	wp_title											=	"WayPoints menu (only in-game)",

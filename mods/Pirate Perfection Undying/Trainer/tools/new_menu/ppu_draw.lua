@@ -419,6 +419,38 @@ function D.border( parent, cfg )
 	return self
 end
 
+-- 1px dashed border (CSS "1px dashed"): dashes of 3, gaps of about 2, spread so each straight
+-- side starts and ends with a dash; the rounded corners stay empty like Chrome draws them.
+function D.dashed( parent, cfg )
+	cfg.x, cfg.y = snap( cfg.x or 0 ), snap( cfg.y or 0 )
+	cfg.w, cfg.h = math_max( 1, snap( cfg.w ) ), math_max( 1, snap( cfg.h ) )
+	local self = setmetatable( { parts = {}, color = cfg.color }, Shape )
+	local w, h = cfg.w, cfg.h
+	local p = parent:panel( { name = cfg.name or "ppu_dashed", x = cfg.x, y = cfg.y, w = w, h = h, layer = cfg.layer or 0 } )
+	self.panel = p
+	local c = cfg.color
+	local r = cfg.r or 0
+	local dash, gap = cfg.dash or 3, cfg.gap or 2
+	local parts = self.parts
+	local function side( len, place )
+		if len <= 0 then return end
+		local n = math_max( 1, math_floor( ( len + gap ) / ( dash + gap ) + 0.5 ) )
+		local step = n > 1 and ( len - dash ) / ( n - 1 ) or 0
+		for i = 0, n - 1 do
+			local a = math_floor( i * step + 0.5 )
+			local l = math_min( dash, len - a )
+			if l > 0 then
+				parts[ #parts + 1 ] = place( a, l )
+			end
+		end
+	end
+	side( w - 2 * r, function( a, l ) return p:rect( { x = r + a, y = 0, w = l, h = 1, color = c } ) end )
+	side( w - 2 * r, function( a, l ) return p:rect( { x = r + a, y = h - 1, w = l, h = 1, color = c } ) end )
+	side( h - 2 * r, function( a, l ) return p:rect( { x = 0, y = r + a, w = 1, h = l, color = c } ) end )
+	side( h - 2 * r, function( a, l ) return p:rect( { x = w - 1, y = r + a, w = 1, h = l, color = c } ) end )
+	return self
+end
+
 -- Circle of diameter 14 or 16
 function D.circle( parent, cfg )
 	if D.snap then -- whole pixels at 100 %: 1 px lines stay sharp and don't vanish

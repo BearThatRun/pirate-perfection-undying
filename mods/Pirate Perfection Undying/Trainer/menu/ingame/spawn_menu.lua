@@ -238,12 +238,24 @@ end
 
 -- Menu
 
+-- Undying 4b (menu redesign): position as a choice row, amount as a slider with its own Set button
 spawn_settings = function()
-	local data = { 
-		{ text = tr['spawn_position_menu'], callback = spawn_position_menu, menu = true },
-		{ text = tr['spawn_amount_menu'], callback = spawn_amount_menu, menu = true },
+	local positions = {
+		{ text = "Spawn point", value = "spawn_point" },
+		{ text = "Crosshair position", value = "ray" },
+		{ text = "Random point", value = "random_spawn_point" },
 	}
-	
+	local index = 1
+	for i, p in ipairs( positions ) do
+		if p.value == ppr_config.SpawnPos then index = i end
+	end
+	local data = {
+		{ text = "Spawn position", type = "multi_choice", multi_choice_data = positions, index = index, switch_back = true,
+			multi_callback = function( _, val ) ppr_config.SpawnPos = val end },
+		{ text = tr['spawn_amount_menu'], type = "slider", slider_data = { name = "spawn_amount", value = ppr_config.SpawnUnitsAmount or 1, min = 1, max = 50 },
+			apply_label = "Set", switch_back = true, slider_callback = function( v ) spawn_set_amount( v ) end },
+	}
+
 	Menu_open( Menu, { title = tr['spawn_settings'], button_list = data, back = main_menu } )
 end
 
@@ -260,25 +272,6 @@ spawn_load_packages = function()
 	end
 	
 	Menu_open( Menu, { title = tr['spawn_load_packages'], button_list = data, back = main_menu } )
-end
-
-spawn_position_menu = function()
-	local data = { 
-		{ text = tr['spawn_on_spawn_point'], callback = function() ppr_config.SpawnPos = "spawn_point" end, switch_back = main_menu },
-		{ text = tr['spawn_on_ray'], callback = function() ppr_config.SpawnPos = "ray" end, switch_back = main_menu },
-		{ text = tr['spawn_on_random_point'], callback = function() ppr_config.SpawnPos = "random_spawn_point" end, switch_back = main_menu },
-	}
-	
-	Menu_open( Menu, { title = tr['spawn_position_menu'], button_list = data, back = spawn_settings } )
-end
-
-spawn_amount_menu = function()
-	local data = { 
-		{ text = tr['spawn_set_to'] .. ":", type = "slider", slider_data = { name = "spawn_amount", value = 5, max = 50 }, switch_back = true },
-		{ text = tr['save'], type = "save_button", callback = spawn_set_amount, name = "spawn_amount", switch_back = main_menu },
-	}
-	
-	Menu_open( Menu, { title = tr['spawn_amount_menu'], button_list = data, back = spawn_settings } )
 end
 
 spawn_special_menu = function()
@@ -310,6 +303,67 @@ spawn_special_menu = function()
 	Menu_open( Menu, { title = tr['spawn_special_menu'], button_list = data, back = main_menu } )
 end
 
+-- Undying 4b (menu redesign): one "Spawn units" page with a tab per faction and a
+-- "bodyguard" switch, one "Spawn animations" page with a tab per group.
+local UNIT_TABS = { { "Cop", "cops" }, { "FBI", "fbi" }, { "SWAT", "swats" }, { "Gang", "gangs" } }
+local ANIM_TABS = { { "Civilians", "anim_civs" }, { "Enemy", "anim_enemies" }, { "Other", "anim_other" } }
+local unit_tab, anim_tab, friendly = 1, 1, false
+
+local function tab_names( tabs )
+	local out = {}
+	for i, t in ipairs( tabs ) do out[i] = t[1] end
+	return out
+end
+
+local function units_rows()
+	local data = {
+		{ type = "tabs", tabs = tab_names( UNIT_TABS ), selected = unit_tab, on_select = function( i ) unit_tab = i ppu_menu_rebuild() end },
+		{ text = "Spawn as bodyguard (friendly)", type = "toggle", toggle = function() return friendly end,
+			callback = function() friendly = not friendly ppu_menu_rebuild() end, switch_back = true },
+	}
+	local category_data = get_category_data( UNIT_TABS[ unit_tab ][2] )
+	local unit_type = friendly and "friendly" or "enemy"
+	local n = 0
+	for _, unit_name in pairs( category_data.unit_table ) do
+		if unit_on_map( unit_name ) then
+			local label = parse_unit_name( unit_name )
+			insert( data, { text = tr['spawn'] .. " " .. label, callback = spawn_unit, data = { unit_name, unit_type }, switch_back_alt = true,
+				alt_callback = function( name, utype )
+					switch_unit( name, utype )
+					ppu_feedback( "Bound '" .. label .. "' to your spawn key '" .. bound_key .. "'" )
+				end } )
+			n = n + 1
+		end
+	end
+	if n == 0 then
+		insert( data, { type = "info", text = tr['no_units_on_map'] } )
+	end
+	return data
+end
+
+local spawn_units_menu = function()
+	Menu_open( Menu, { title = "Spawn units", description = "Right click to bind a unit to your spawn key '" .. bound_key .. "'",
+		rebuild = units_rows, button_list = {}, back = main_menu } )
+end
+
+local function anim_rows()
+	local data = {
+		{ type = "tabs", tabs = tab_names( ANIM_TABS ), selected = anim_tab, on_select = function( i ) anim_tab = i ppu_menu_rebuild() end },
+	}
+	local category_data = get_category_data( ANIM_TABS[ anim_tab ][2] )
+	for _, anim_name in pairs( category_data.unit_table ) do
+		insert( data, { text = parse_anim_name( anim_name ), callback = function()
+			set_spawn_anim( anim_name, category_data.anim_type )
+			ppu_feedback( "Spawn animation: " .. parse_anim_name( anim_name ) )
+		end, switch_back = true } )
+	end
+	return data
+end
+
+local spawn_anim_menu = function()
+	Menu_open( Menu, { title = "Spawn animations", rebuild = anim_rows, button_list = {}, back = main_menu } )
+end
+
 -- Main menu
 
 main_menu = function()
@@ -320,19 +374,9 @@ main_menu = function()
 		{ text = tr['spawn_special_menu'],   callback = spawn_special_menu, menu = true },
 		{ text = tr['spawn_civs_menu'],      callback = load_unit_menu, data = { "civilians", 'civilians' }, menu = true },
 		{},
-		{ text = tr['spawn_civ_anim_menu'],  callback = load_anim_menu, data = "anim_civs", menu = true },
-		{ text = tr['spawn_ene_anim_menu'],  callback = load_anim_menu, data = "anim_enemies", menu = true },
-		{ text = tr['spawn_other_anim_menu'],callback = load_anim_menu, data = "anim_other", menu = true },
+		{ text = "Spawn animations",         callback = spawn_anim_menu, menu = true },
 		{},
-		{ text = tr['spawn_cops_menu'],      callback = load_unit_menu, data = { "cops", 'enemy' }, menu = true },
-		{ text = tr['spawn_fbi_menu'],       callback = load_unit_menu, data = { "fbi", 'enemy' }, menu = true },
-		{ text = tr['spawn_swats_menu'],     callback = load_unit_menu, data = { "swats", 'enemy' }, menu = true },
-		{ text = tr['spawn_gangs_menu'],     callback = load_unit_menu, data = { "gangs", 'enemy' }, menu = true },
-		{},
-		{ text = tr['spawn_bg_cops_menu'],   callback = load_unit_menu, data = { "cops", 'friendly' }, menu = true },
-		{ text = tr['spawn_bg_fbi_menu'],    callback = load_unit_menu, data = { "fbi", 'friendly' }, menu = true },
-		{ text = tr['spawn_bg_swats_menu'],  callback = load_unit_menu, data = { "swats", 'friendly' }, menu = true },
-		{ text = tr['spawn_bg_gangs_menu'],  callback = load_unit_menu, data = { "gangs", 'friendly' }, menu = true },
+		{ text = "Spawn units",              callback = spawn_units_menu, menu = true },
 	}
 	
 	Menu_open( Menu, { title = tr['spawn_menu'], button_list = data } )

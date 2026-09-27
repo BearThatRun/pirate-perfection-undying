@@ -310,6 +310,10 @@ ppr_require 'Trainer/tools/new_menu/save_button'
 ppr_require 'Trainer/experimental/dev/pluginmanager'
 
 local D = PPUDraw
+-- text width rounded to whole pixels, for boxes around text (fractional box edges blur or vanish)
+local function measure_px( ... )
+	return math.floor( D.measure( ... ) + 0.5 )
+end
 local Tickbox = Tickbox
 local MultiChoice = MultiChoice
 local Slider = Slider
@@ -329,6 +333,26 @@ local WHEEL_UP = Idstring('mouse wheel up')
 local WHEEL_DOWN = Idstring('mouse wheel down')
 local K_UP, K_DOWN, K_LEFT, K_RIGHT = Idstring("up"), Idstring("down"), Idstring("left"), Idstring("right")
 local K_ENTER, K_BACK = Idstring("enter"), Idstring("backspace")
+-- keys a "key" row can be set to (the names keyconfig.lua and KeyInput understand)
+local CAPTURE_KEYS = {}
+do
+	local names = {}
+	for c in ( "abcdefghijklmnopqrstuvwxyz0123456789" ):gmatch( "." ) do names[ #names + 1 ] = c end
+	for i = 1, 12 do names[ #names + 1 ] = "f" .. i end
+	for i = 0, 9 do names[ #names + 1 ] = "num " .. i end
+	for _, n in ipairs( { "num +", "num -", "num .", "num *", "num /", "num enter", "insert", "delete", "home", "end",
+		"page up", "page down", "left shift", "right shift", "left ctrl", "right ctrl", "space" } ) do
+		names[ #names + 1 ] = n
+	end
+	for i, n in ipairs( names ) do
+		CAPTURE_KEYS[ i ] = { n, Idstring( n ) }
+	end
+end
+-- "page up" -> "Page Up", "f5" -> "F5"
+local function key_label( k )
+	if not k or k == "" or k == false then return "NONE" end
+	return ( tostring( k ):gsub( "(%a)([%w]*)", function( a, b ) return a:upper() .. b end ) )
+end
 local K_LSHIFT, K_RSHIFT = Idstring("left shift"), Idstring("right shift")
 local K_LCTRL, K_RCTRL = Idstring("left ctrl"), Idstring("right ctrl")
 local K_ZERO = Idstring("0")
@@ -577,6 +601,11 @@ end
 local preload_plugin = plugins.pre_require
 
 function Menu.open( _, data, n ) -- n (page start) is no longer used: the list scrolls
+	if type( data.rebuild ) == "function" then
+		local fresh, desc = data.rebuild()
+		data.button_list = fresh or data.button_list
+		if desc then data.description = desc end
+	end
 	local menu_data = clone( data )
 	local list = {}
 	local plug_path = data.plugin_path
@@ -611,6 +640,10 @@ local function row_kind( b )
 	if b.type == "info" then return "info" end
 	if b.type == "disabled" then return "dis" end
 	if b.type == "kv" then return "kv" end
+	if b.type == "config" then return "cfg" end
+	if b.type == "key" then return "key" end
+	if b.type == "tabs" then return "tabs" end
+	if b.type == "chips" then return "chips" end
 	if b.type == "rgb" then return "rgb" end
 	if b.type == "slider" then return "sld" end
 	if b.type == "multi_choice" then return "cho" end
@@ -630,7 +663,7 @@ function Menu:visible_buttons()
 	local q = self.q:lower()
 	for i, b in ipairs( self._data.button_list or {} ) do
 		local kind = row_kind( b )
-		if q == "" or ( kind ~= "sp" and kind ~= "hd" and label_of( b ):lower():find( q, 1, true ) ) then
+		if q == "" or ( kind ~= "sp" and kind ~= "hd" and kind ~= "tabs" and label_of( b ):lower():find( q, 1, true ) ) then
 			out[ #out + 1 ] = { index = i, button = b, kind = kind }
 		end
 	end
@@ -693,6 +726,7 @@ function Menu:build()
 	y = self:add_tabs( y )
 	y = self:add_header( y )
 	y = self:add_list( y )
+	y = self:add_save_bar( y )
 	y = self:add_navigation( y )
 
 	-- keep the whole window on screen (the list gets shorter if needed)
@@ -729,7 +763,12 @@ function Menu:build()
 	self.shadow = D.shadow( root, self.win_x, self.win_y, W + 2, H + 2, T_gui.DIALOG_LAYER - 1 )
 
 	-- give text focus back after a redraw
-	if was_search and self.search_input then
+	local pf = self._pending_focus
+	self._pending_focus = nil
+	if pf and pf.input then
+		self.fi = pf.vi
+		pf.input:activate_input()
+	elseif was_search and self.search_input then
 		self.search_input:activate_input()
 	elseif was_input then
 		for _, r in ipairs( self.rows ) do
@@ -869,7 +908,7 @@ function Menu:add_header( y )
 	local cx = PAD
 	local tab = self:tab_for_current()
 	if tab then
-		local bw = D.measure( "b12", tab[2], 0.06, true ) + 12
+		local bw = measure_px( "b12", tab[2], 0.06, true ) + 12
 		D.box( hp, { name = "badge_bg", x = cx, y = hy, w = bw, h = 16, r = 2, color = T.acc, layer = 1 } )
 		D.text( hp, { name = "badge", text = tab[2], font = "b12", ls = 0.06, upper = true, color = T.bg, x = cx + 6, y = hy + 1, layer = 2 } )
 		cx = cx + bw + 6
@@ -939,7 +978,7 @@ function Menu:add_header( y )
 		D.box( sb, { x = 0, y = 0, w = IW, h = SH, r = 3, color = T.surf, layer = 0 } )
 		local border = D.border( sb, { x = 0, y = 0, w = IW, h = SH, r = 3, color = self.search_focused and T.acc or T.line2, layer = 1 } )
 		-- "/" key cap: min-width 18, height 18, border 1 (bottom 2) -> 20 x 21
-		local kw = math_max( 18, D.measure( "r11", "/" ) ) + 2
+		local kw = math_max( 18, measure_px( "r11", "/" ) ) + 2
 		local kh = 21
 		local kx = IW - 1 - 10 - kw
 		local ky = ( SH - kh ) / 2
@@ -1092,8 +1131,14 @@ function Menu:build_row( canvas, vi, v, y )
 		return self:build_input_row( p, r )
 	elseif kind == "rgb" then
 		return self:build_rgb_row( p, r )
-	elseif b.ask and self.confirm == b and not r.locked then
+	elseif b.ask and ( self.confirm == b or b.ask_open ) and not r.locked then
 		return self:build_ask_row( p, r )
+	elseif kind == "cfg" then
+		return self:build_config_row( p, r )
+	elseif kind == "tabs" then
+		return self:build_tabs_row( p, r )
+	elseif kind == "chips" then
+		return self:build_chips_row( p, r )
 	end
 
 	-- Line row: [lock] label ........ [switch | < value > | ›]
@@ -1116,6 +1161,14 @@ function Menu:build_row( canvas, vi, v, y )
 			right = right - cw
 			parts.cho_x = right
 			parts.cho_vw = vw
+			right = right - 10
+		elseif kind == "key" then
+			-- cap: min-width 44 + padding 0 8, height 22, border 1 (bottom 2), 13px semibold
+			local capturing = self.capture == b
+			local kt = capturing and "Press a key…" or key_label( b.key_value )
+			local cw = math_max( 44, measure_px( "s13", kt ) ) + 16 + 2
+			right = right - cw
+			parts.key_x, parts.key_w, parts.key_text, parts.capturing = right, cw, kt, capturing
 			right = right - 10
 		elseif kind == "sub" then
 			local aw = D.measure( "r18", "›" )
@@ -1145,7 +1198,7 @@ function Menu:build_row( canvas, vi, v, y )
 	local cap
 	if kind == "kv" then
 		local key = tostring( b.key or "" )
-		local cw = math_max( 54, D.measure( "s13", key ) ) + 12 + 2
+		local cw = math_max( 54, measure_px( "s13", key ) ) + 12 + 2
 		cap = { w = cw, h = 23, key = key, x = lx }
 		lx = lx + cw + 10
 	end
@@ -1226,6 +1279,12 @@ function Menu:build_row( canvas, vi, v, y )
 		mc.on_change = function()
 			self._dirty = true -- the value width can change the layout
 		end
+	elseif parts.key_x then
+		local cy = ( line_h - 25 ) / 2
+		local col = parts.capturing and T.acc or T.text
+		D.border( p, { name = "key_cap", x = parts.key_x, y = cy, w = parts.key_w, h = 25, r = 3, color = parts.capturing and T.acc or T.line2, bottom = 2, layer = 3 } )
+		local kt = D.text( p, { name = "key_text", text = parts.key_text, font = "s13", color = col, x = parts.key_x, w = parts.key_w, align = "center", y = 0, layer = 4 } )
+		kt:center_line_on( cy + 1 + 11 )
 	elseif parts.arrow_x then
 		local at = D.text( p, { name = "arrow", text = "›", font = "r18", color = T.muted, x = parts.arrow_x, y = 0, layer = 3 } )
 		at:center_line_on( line_h / 2 )
@@ -1241,8 +1300,8 @@ function Menu:build_ask_row( p, r )
 	local b = r.button
 	local RH0 = ROW_H + 8 -- min-height 36 + padding 4 top/bottom
 	-- buttons: Yes (warn fill) and No (outline)
-	local nw = D.measure( "r14", "No" ) + 24 + 2
-	local yw = D.measure( "s14", "Yes" ) + 24 + 2
+	local nw = measure_px( "r14", "No" ) + 24 + 2
+	local yw = measure_px( "s14", "Yes" ) + 24 + 2
 	local bh = D.lh( "s14" ) + 4 + 2
 	local nx = W - PAD - nw
 	local yx = nx - 8 - yw
@@ -1250,7 +1309,7 @@ function Menu:build_ask_row( p, r )
 	local RH = math_max( ROW_H, q:h() ) + 8
 	if q:h() > ROW_H then q:set_y( 4 ) else q:center_line_on( RH / 2 ) end
 	local function btn( name, x, w, label, font, fill, border, color )
-		local bp = p:panel( { name = name, x = x, y = ( RH - bh ) / 2, w = w, h = bh, layer = 3 } )
+		local bp = p:panel( { name = name, x = x, y = D.snap_value( ( RH - bh ) / 2 ), w = w, h = bh, layer = 3 } )
 		if fill then
 			D.box( bp, { x = 0, y = 0, w = w, h = bh, r = 3, color = fill, layer = 0 } )
 		end
@@ -1261,6 +1320,7 @@ function Menu:build_ask_row( p, r )
 	r.ask_yes = btn( "ask_yes", yx, yw, "Yes", "s14", T.warn, T.warn, T.bg )
 	r.ask_no = btn( "ask_no", nx, nw, "No", "r14", nil, T.line2, T.text )
 	r.asking = true
+	r.pinned = true
 	-- red background and bar whether focused or not
 	r.focus_bg:set_color( T.warnsoft )
 	r.focus_bar:set_color( T.warn )
@@ -1273,13 +1333,231 @@ function Menu:build_ask_row( p, r )
 	return r
 end
 
+-- Text that fits max_w, cut with "…" (design: overflow hidden + text-overflow ellipsis)
+local function fit_text( font, text, max_w )
+	text = tostring( text or "" )
+	if D.measure( font, text ) <= max_w then
+		return text
+	end
+	while #text > 0 do
+		text = text:gsub( "[%z\1-\127\194-\244][\128-\191]*$", "" )
+		if D.measure( font, text .. "…" ) <= max_w then
+			break
+		end
+	end
+	return text .. "…"
+end
+
+-- Config row (design "cfgrow"): name, ACTIVE / DEFAULT badges, Load / Rename / Delete.
+-- button: { type = "config", text, active, default, load = fn, rename = fn, delete = fn }
+-- (Rename / Delete are left out when the function is missing.)
+local CFG_BUTTONS = { { "load", "Load" }, { "rename", "Rename" }, { "delete", "Delete" } }
+function Menu:build_config_row( p, r )
+	local T = self.T
+	local W = self.W
+	local b = r.button
+	local RH = ROW_H -- min-height 36, no padding
+	-- buttons (14px, padding 2 6, gap 2), right to left
+	local bh = D.lh( "r14" ) + 4
+	local x = W - PAD
+	r.cfg_btns = {}
+	local shown = {}
+	for _, def in ipairs( CFG_BUTTONS ) do
+		if type( b[ def[1] ] ) == "function" then
+			shown[ #shown + 1 ] = def
+		end
+	end
+	for i = #shown, 1, -1 do
+		local def = shown[ i ]
+		local w = measure_px( "r14", def[2] ) + 12
+		x = x - w
+		local bp = p:panel( { name = "cfg_" .. def[1], x = x, y = D.snap_value( ( RH - bh ) / 2 ), w = w, h = bh, layer = 3 } )
+		local hover = D.box( bp, { x = 0, y = 0, w = w, h = bh, r = 3, color = T.accsoft, layer = 0 } )
+		hover:set_visible( false )
+		local col = def[1] == "load" and T.acc or T.muted
+		local tt = D.text( bp, { text = def[2], font = "r14", color = col, x = 0, y = 2, w = w, align = "center", layer = 1 } )
+		table.insert( r.cfg_btns, 1, { panel = bp, hover = hover, text = tt, name = def[1], color = col } )
+		if i > 1 then x = x - 2 end
+	end
+	if #shown > 0 then x = x - 8 end
+	-- badges: DEFAULT (outline), ACTIVE (filled), 12px semibold, padding 1 6
+	local function badge( label, filled )
+		local tw = measure_px( "s12", label )
+		local w = tw + 12 + ( filled and 0 or 2 )
+		local h = D.lh( "s12" ) + 2 + ( filled and 0 or 2 )
+		x = x - w
+		local bp = p:panel( { name = "badge_" .. label, x = x, y = D.snap_value( ( RH - h ) / 2 ), w = w, h = h, layer = 3 } )
+		if filled then
+			D.box( bp, { x = 0, y = 0, w = w, h = h, r = 2, color = T.accsoft, layer = 0 } )
+		else
+			D.border( bp, { x = 0, y = 0, w = w, h = h, r = 2, color = T.line2, layer = 0 } )
+		end
+		local t = D.text( bp, { text = label, font = "s12", color = filled and T.acc or T.muted, x = 0, y = 0, w = w, align = "center", layer = 1 } )
+		t:center_line_on( h / 2 )
+		x = x - 8
+	end
+	if b.default then badge( "DEFAULT", false ) end
+	if b.active then badge( "ACTIVE", true ) end
+	local lw = math_max( 20, x - PAD )
+	local label = D.text( p, { name = "text", text = fit_text( "r16", label_of( b ), lw ), font = "r16", color = T.text, x = PAD, y = 0, layer = 2 } )
+	label:center_line_on( RH / 2 )
+	r.label = label
+	p:set_h( RH )
+	r.focus_bar:set_h( RH )
+	r.focus_bg:set_h( RH )
+	r.h = RH
+	return r
+end
+
+-- Segmented tabs inside a page (design "tabs", F12 factions / animations):
+-- { type = "tabs", tabs = { "Cop", "FBI", ... }, selected = i, on_select = fn( i ) }
+-- margin 4 16 6, line under the strip; 15px semibold caps, padding 6 12, 2 px accent under the active one
+function Menu:build_tabs_row( p, r )
+	local T = self.T
+	local W = self.W
+	local b = r.button
+	local RH = 4 + 32 + 6
+	p:rect( { name = "tabs_line", x = PAD, y = 4 + 31, w = W - PAD * 2, h = 1, color = T.line, layer = 1 } )
+	local x = PAD
+	r.tab_btns = {}
+	for i, name in ipairs( b.tabs or {} ) do
+		local on = i == ( b.selected or 1 )
+		local w = measure_px( "s15", name, 0.04, true ) + 24
+		local tp = p:panel( { name = "tab_" .. i, x = x, y = 4, w = w, h = 32, layer = 2 } )
+		if on then
+			tp:rect( { name = "tab_line", x = 0, y = 30, w = w, h = 2, color = T.acc, layer = 1 } )
+		end
+		D.text( tp, { text = name, font = "s15", ls = 0.04, upper = true, color = on and T.text or T.muted, x = 12, y = 6, layer = 2 } )
+		r.tab_btns[ i ] = tp
+		x = x + w
+	end
+	p:set_h( RH )
+	r.focus_bar:set_h( RH )
+	r.focus_bg:set_h( RH )
+	r.h = RH
+	return r
+end
+
+function Menu:select_tab( r, i )
+	local b = r.button
+	local n = #( b.tabs or {} )
+	if n == 0 then return end
+	i = ( i - 1 ) % n + 1
+	if i ~= b.selected and b.on_select then
+		b.selected = i
+		safecall( b.on_select, i )
+		self._dirty = true
+	end
+end
+
+-- Multi-select chips + one action button (design "chips", F3 Inventory "Unlock"):
+-- { type = "chips", text = "Unlock", chips = { { "Weapons", value }, ... }, action = fn( values ) }
+function Menu:build_chips_row( p, r )
+	local T = self.T
+	local W = self.W
+	local b = r.button
+	b._sel = b._sel or {}
+	local n = 0
+	for _, c in ipairs( b.chips or {} ) do
+		if b._sel[ c[2] ] then n = n + 1 end
+	end
+	local can = n > 0
+	-- first line: label + button (14px semibold, padding 2 12, border 1)
+	local blabel = label_of( b ) .. ( can and ( " " .. n ) or "" )
+	local bw = measure_px( "s14", blabel ) + 24 + 2
+	local bh = D.lh( "s14" ) + 4 + 2
+	local label = D.text( p, { name = "text", text = label_of( b ), font = "r16", color = T.text, x = PAD, y = 0, layer = 2 } )
+	label:center_line_on( 8 + bh / 2 )
+	r.label = label
+	local btn = p:panel( { name = "chips_action", x = W - PAD - bw, y = 8, w = bw, h = bh, layer = 3 } )
+	local fill = D.box( btn, { x = 0, y = 0, w = bw, h = bh, r = 3, color = T.acc, layer = 0 } )
+	fill:set_visible( can )
+	D.border( btn, { x = 0, y = 0, w = bw, h = bh, r = 3, color = can and T.acc or T.line2, layer = 1 } )
+	D.text( btn, { text = blabel, font = "s14", color = can and T.bg or T.muted, x = 0, y = 2, w = bw, align = "center", layer = 2 } )
+	r.chips_action = btn
+	r.chips_can = can
+	-- chips: 14px, padding 3 10, border 1, radius 12, gap 6, wrapping
+	local x, y = PAD, 8 + bh + 8
+	local ch = D.lh( "r14" ) + 6 + 2
+	r.chip_btns = {}
+	for i, c in ipairs( b.chips or {} ) do
+		local on = b._sel[ c[2] ] and true or false
+		-- wrap on the exact (fractional) widths like the browser, draw on whole pixels
+		local cwf = D.measure( "r14", c[1] ) + 20 + 2
+		if x > PAD and x + cwf > W - PAD then
+			x = PAD
+			y = y + ch + 6
+		end
+		local cw = math_floor( cwf + 0.5 )
+		local cp = p:panel( { name = "chip_" .. i, x = math_floor( x + 0.5 ), y = y, w = cw, h = ch, layer = 3 } )
+		if on then
+			D.box( cp, { x = 0, y = 0, w = cw, h = ch, r = 12, color = T.accsoft, layer = 0 } )
+		end
+		D.border( cp, { x = 0, y = 0, w = cw, h = ch, r = 12, color = on and T.acc or T.line2, layer = 1 } )
+		D.text( cp, { text = c[1], font = "r14", color = on and T.acc or T.text, x = 0, y = 4, w = cw, align = "center", layer = 2 } )
+		r.chip_btns[ i ] = { panel = cp, value = c[2] }
+		x = x + cwf + 6
+	end
+	local RH = y + ch + 10
+	p:set_h( RH )
+	r.focus_bar:set_h( RH )
+	r.focus_bg:set_h( RH )
+	r.h = RH
+	return r
+end
+
+function Menu:run_chips( r )
+	local b = r.button
+	if not r.chips_can or not b.action then return end
+	local vals = {}
+	for _, c in ipairs( b.chips or {} ) do
+		if b._sel[ c[2] ] then vals[ #vals + 1 ] = c[2] end
+	end
+	b._sel = {}
+	self._dirty = true
+	safecall( b.action, vals )
+end
+
+-- Hover look of the config row buttons (Load: soft accent background, Rename: text, Delete: red)
+function Menu:cfg_hover( r, x, y )
+	local T = self.T
+	local hit
+	for _, cb in ipairs( r.cfg_btns or {} ) do
+		local over = x and cb.panel:inside( x, y ) or false
+		cb.hover:set_visible( over and cb.name == "load" )
+		local col = cb.color
+		if over and cb.name == "rename" then col = T.text end
+		if over and cb.name == "delete" then col = T.warn end
+		cb.text:set_color( col )
+		if over then hit = cb end
+	end
+	return hit
+end
+
+-- Lists that change while the window is open (F2 configs): data.rebuild() returns the new
+-- button list (and optionally a new description); the window redraws in place.
+function Menu:rebuild()
+	local data = self._data
+	if type( data.rebuild ) ~= "function" then return end
+	local list, desc = data.rebuild()
+	if list then data.button_list = list end
+	if desc then data.description = desc end
+	self._dirty = true
+end
+
+function ppu_menu_rebuild()
+	local m = tweak_data.menu_active
+	if m and m.rebuild then m:rebuild() end
+end
+
 -- Colour row (design "trgb"): swatch, name, "r, g, b", ▸ / ▾; open shows R, G, B sliders.
 local CHANNELS = { "R", "G", "B" }
 function Menu:build_rgb_row( p, r )
 	local T = self.T
 	local W = self.W
 	local b = r.button
-	local c = T.raw[ b.role ] or { 0, 0, 0 }
+	-- theme rows (b.role) or any colour: b.get_rgb() -> { r, g, b }, b.set_rgb( channel, value )
+	local c = ( b.role and T.raw[ b.role ] ) or ( b.get_rgb and b.get_rgb() ) or { 0, 0, 0 }
 	local open = self.open_rgb == b
 	r.open = open
 	local line_h = ROW_H + 6
@@ -1342,6 +1620,31 @@ function Menu:build_rgb_row( p, r )
 	return r
 end
 
+-- move the dragged colour channel to the pointer (theme rows save when the drag ends)
+function Menu:rgb_drag_step( x )
+	local d = self.drag_rgb
+	local ch
+	for _, nr in ipairs( self.rows or {} ) do
+		if nr.button == d.button and nr.channels then
+			ch = nr.channels[ d.ci ]
+		end
+	end
+	if not ch then return end
+	local f = ( x - ch.track:world_x() - ch.pad ) / ch.w
+	local v = math_floor( math_max( 0, math_min( 1, f ) ) * 255 + 0.5 )
+	if v ~= d.last then
+		d.last = v
+		if d.button.role then
+			ppu_theme_set( d.button.role, d.ci, v )
+			self.theme_changed = true
+		elseif d.button.set_rgb then
+			d.button.set_rgb( d.ci, v )
+			self._dirty = true
+			self:refresh_save_bar()
+		end
+	end
+end
+
 function Menu:toggle_rgb( r )
 	self.open_rgb = ( self.open_rgb ~= r.button ) and r.button or nil
 	self._dirty = true
@@ -1351,6 +1654,10 @@ end
 function Menu:answer_ask( r, yes )
 	self.confirm = nil
 	self._dirty = true
+	if not yes and r.button.on_no then
+		safecall( r.button.on_no )
+		return
+	end
 	if yes then
 		local msg = self.msg
 		self:button_pressed( r.index, nil, true )
@@ -1395,13 +1702,15 @@ function Menu:build_slider_row( p, r )
 	r.value_text = vt
 	y = y + D.lh( "r16" ) + 5
 
-	-- Apply button (menus can name it: "Add", "Set", ...)
+	-- Apply button (menus can name it: "Add", "Set", ...); none in menus with a Save bar
+	local no_apply = self._data.save_bar ~= nil
+	r.no_apply = no_apply
 	local alabel = b.apply_label or "Apply"
-	local aw = D.measure( "s14", alabel ) + 24 + 2
+	local aw = measure_px( "s14", alabel ) + 24 + 2
 	local ah = D.lh( "s14" ) + 6 + 2
 	local ax = W - PAD - aw
-	local row2_h = math_max( 20, ah )
-	local track_w = ax - 12 - PAD
+	local row2_h = math_max( 20, no_apply and 20 or ah )
+	local track_w = no_apply and ( W - PAD * 2 ) or ( ax - 12 - PAD )
 	-- the knob may stick out 10 px past either end (panels clip), so the panel is wider
 	local TP = 10
 	r.track_pad = TP
@@ -1412,18 +1721,20 @@ function Menu:build_slider_row( p, r )
 	r.track = track
 	r.track_w = track_w
 
-	local abtn = p:panel( { name = "apply", x = ax, y = y + ( row2_h - ah ) / 2, w = aw, h = ah, layer = 2 } )
-	r.apply = abtn
-	r.apply_parts = {
-		bg = D.box( abtn, { x = 0, y = 0, w = aw, h = ah, r = 3, color = T.acc, layer = 0 } ),
-		border = D.border( abtn, { x = 0, y = 0, w = aw, h = ah, r = 3, color = T.acc, layer = 1 } ),
-		text = D.text( abtn, { text = alabel, font = "s14", color = T.bg, x = 0, y = 4, w = aw, align = "center", layer = 2 } ),
-	}
+	if not no_apply then
+		local abtn = p:panel( { name = "apply", x = ax, y = D.snap_value( y + ( row2_h - ah ) / 2 ), w = aw, h = ah, layer = 2 } )
+		r.apply = abtn
+		r.apply_parts = {
+			bg = D.box( abtn, { x = 0, y = 0, w = aw, h = ah, r = 3, color = T.acc, layer = 0 } ),
+			border = D.border( abtn, { x = 0, y = 0, w = aw, h = ah, r = 3, color = T.acc, layer = 1 } ),
+			text = D.text( abtn, { text = alabel, font = "s14", color = T.bg, x = 0, y = 4, w = aw, align = "center", layer = 2 } ),
+		}
+	end
 	y = y + row2_h + 5
 
 	D.text( p, { text = sl.prefix .. fmt_num( sl.min ), font = "r12", color = T.muted, x = PAD, y = y, layer = 2 } )
 	local maxl = D.text( p, { text = sl.prefix .. fmt_num( sl.max ), font = "r12", color = T.muted, x = 0, y = y, layer = 2 } )
-	maxl:set_right( W - PAD - ( aw + 12 ) )
+	maxl:set_right( W - PAD - ( no_apply and 0 or ( aw + 12 ) ) )
 	y = y + D.lh( "r12" ) + 10
 
 	p:set_h( y )
@@ -1451,6 +1762,10 @@ function Menu:refresh_slider( r )
 	r.knob_ring.panel:set_x( kx - 3 )
 	r.value_text:set_text( sl.prefix .. fmt_num( sl.value ) )
 	r.value_text:set_right( self.W - PAD )
+	if r.no_apply then
+		self:refresh_save_bar()
+		return
+	end
 	local can = sl:can_apply()
 	r.apply_parts.bg:set_visible( can )
 	r.apply_parts.border:set_color( can and T.acc or T.line2 )
@@ -1468,26 +1783,44 @@ function Menu:build_input_row( p, r )
 	local active = TextInput.active and TextInput.active.button == b
 
 	local label = b.confirm_label or "Confirm"
-	local bw = D.measure( "s14", label ) + 24 + 2
+	local bw = measure_px( "s14", label ) + 24 + 2
 	local bh = D.lh( "s14" ) + 4 + 2
-	local bx = W - PAD - bw
-	local fx, fw = PAD, bx - 8 - PAD
 	local RH = ROW_H + 8 -- min-height 36 + padding 4 top/bottom
+	local right = W - PAD
+	-- optional Cancel (design rename: 14px, padding 2 10, outline)
+	if b.cancel then
+		local cw = measure_px( "r14", "Cancel" ) + 20 + 2
+		right = right - cw
+		local cp = p:panel( { name = "cancel", x = right, y = D.snap_value( ( RH - bh ) / 2 ), w = cw, h = bh, layer = 2 } )
+		D.border( cp, { x = 0, y = 0, w = cw, h = bh, r = 3, color = T.line2, layer = 1 } )
+		D.text( cp, { text = "Cancel", font = "r14", color = T.text, x = 0, y = 2, w = cw, align = "center", layer = 2 } )
+		r.cancel_btn = cp
+		right = right - 8
+	end
+	local bx = right - bw
+	local fx, fw = PAD, bx - 8 - PAD
 	local FH = 30 -- height 28 + 1 px border
 	local field = p:panel( { name = "field", x = fx, y = ( RH - FH ) / 2, w = fw, h = FH, layer = 2 } )
 	r.field = field
 	local has = ti:text() ~= ""
-	-- idle: outline in line2, typing: accent outline on the surface colour (design cfgnew / rename)
+	-- idle: outline in line2, typing: accent outline on the surface colour.
+	-- b.dashed (design "+ New config"): dashed outline that stays the same while typing.
+	-- b.selected (design rename): surface + accent outline all the time, row marked.
+	local fixed = b.dashed or b.selected
 	r.field_bg = D.box( field, { x = 0, y = 0, w = fw, h = FH, r = 3, color = T.surf, layer = 0 } )
-	r.field_bg:set_visible( active )
-	r.field_border = D.border( field, { x = 0, y = 0, w = fw, h = FH, r = 3, color = active and T.acc or T.line2, layer = 1 } )
+	r.field_bg:set_visible( b.selected or ( active and not b.dashed ) and true or false )
+	if b.dashed then
+		r.field_border = D.dashed( field, { x = 0, y = 0, w = fw, h = FH, r = 3, color = T.line2, layer = 1 } )
+	else
+		r.field_border = D.border( field, { x = 0, y = 0, w = fw, h = FH, r = 3, color = ( active or b.selected ) and T.acc or T.line2, layer = 1 } )
+	end
 	local ph = b.placeholder or ( label_of( b ):gsub( ":%s*$", "" ) )
 	local ft = D.text( field, { name = "field_text", text = has and ti:text() or ph, font = "r15", color = has and T.text or T.placeholder, x = 9, y = 0, layer = 2 } )
 	ft:center_line_on( FH / 2 )
 	r.field_text = ft
 	r.caret = field:rect( { name = "caret", x = 9 + ( has and ft:w() or 0 ), y = 7, w = 1, h = 16, color = T.text, visible = active and true or false, layer = 3 } )
 
-	local btn = p:panel( { name = "confirm", x = bx, y = ( RH - bh ) / 2, w = bw, h = bh, layer = 2 } )
+	local btn = p:panel( { name = "confirm", x = bx, y = D.snap_value( ( RH - bh ) / 2 ), w = bw, h = bh, layer = 2 } )
 	r.confirm = btn
 	r.confirm_parts = {
 		bg = D.box( btn, { x = 0, y = 0, w = bw, h = bh, r = 3, color = T.acc, layer = 0 } ),
@@ -1506,9 +1839,22 @@ function Menu:build_input_row( p, r )
 		r.confirm_parts.text:set_color( has2 and T.bg or T.muted )
 	end
 	ti.on_focus = function( f )
-		r.field_bg:set_visible( f )
-		r.field_border:set_color( f and T.acc or T.line2 )
+		if not fixed then
+			r.field_bg:set_visible( f )
+			r.field_border:set_color( f and T.acc or T.line2 )
+		end
 		r.caret:set_visible( f )
+	end
+	if b.selected then
+		r.pinned = true
+		r.focus_bg:set_color( T.surf )
+		r.focus_bg:set_visible( true )
+		r.focus_bar:set_visible( true )
+	end
+	-- b.autofocus: start typing right away the first time the row is drawn (rename)
+	if b.autofocus and not b._autofocus_done then
+		b._autofocus_done = true
+		self._pending_focus = r
 	end
 
 	p:set_h( RH )
@@ -1522,7 +1868,7 @@ end
 
 function Menu:foot_button( panel, name, text, x, enabled )
 	local T = self.T
-	local tw = D.measure( "r14", text )
+	local tw = measure_px( "r14", text )
 	local w = tw + 24 + 2
 	local h = D.lh( "r14" ) + 8 + 2
 	local bp = panel:panel( { name = name, x = x, y = 10, w = w, h = h, layer = 1 } )
@@ -1538,7 +1884,7 @@ end
 
 function Menu:has_change_rows()
 	for _, r in ipairs( self.rows or {} ) do
-		if ( r.kind == "cho" or r.kind == "sld" ) and not r.locked then
+		if ( r.kind == "cho" or r.kind == "sld" or r.kind == "tabs" ) and not r.locked then
 			return true
 		end
 	end
@@ -1570,7 +1916,7 @@ function Menu:add_navigation( y )
 	local items = {}
 	local hw = 0
 	for i, h in ipairs( hints ) do
-		local kw = D.measure( "r12", h[1] ) + 8 + 2
+		local kw = measure_px( "r12", h[1] ) + 8 + 2
 		local lw = D.measure( "r12", h[2] )
 		items[ i ] = { k = h[1], l = h[2], kw = kw, lw = lw, w = kw + 4 + lw }
 		hw = hw + items[ i ].w + ( i > 1 and 10 or 0 )
@@ -1596,6 +1942,92 @@ function Menu:add_navigation( y )
 	end
 	np:set_h( total_h )
 	return y + total_h
+end
+
+-- Save bar (design saveBar): menus whose changes only count after Save + restart.
+-- data.save_bar = { text = "...", count = fn() -> unsaved changes, save = fn() }
+function Menu:add_save_bar( y )
+	local sb = self._data.save_bar
+	self.save_bar_ui = nil
+	if not sb then
+		return y
+	end
+	local T = self.T
+	local W = self.W
+	local n = 0
+	pcall( function() n = sb.count and sb.count() or 0 end )
+	self.save_bar_n = n
+	local dirty = n > 0
+	local text = sb.text or "Save"
+	if dirty then
+		text = n .. " unsaved change" .. ( n > 1 and "s" or "" ) .. ". " .. text .. "."
+	end
+	-- padding 9 16, border-top 1; Save: 14px semibold, padding 3 14, border 1
+	local bw = measure_px( "s14", "Save" ) + 28 + 2
+	local bh = D.lh( "s14" ) + 6 + 2
+	local bp = self.content:panel( { name = "save_bar", x = 0, y = y, w = W, h = 100, layer = 2 } )
+	local bg = bp:rect( { name = "save_bg", color = T.accsoft, visible = dirty, layer = 0 } )
+	bp:rect( { name = "save_line", x = 0, y = 0, w = W, h = 1, color = T.line, layer = 1 } )
+	local tw = W - PAD * 2 - 10 - bw
+	local tt = D.text( bp, { name = "save_text", text = text, font = "r14", color = dirty and T.text or T.muted, x = PAD, y = 0, w = tw, wrap = true, layer = 2 } )
+	local inner = math_max( tt:h(), bh )
+	local H = 1 + 9 + inner + 9
+	tt:set_y( 1 + 9 + ( inner - tt:h() ) / 2 )
+	local btn = bp:panel( { name = "save_btn", x = W - PAD - bw, y = D.snap_value( 1 + 9 + ( inner - bh ) / 2 ), w = bw, h = bh, layer = 3 } )
+	local fill = D.box( btn, { x = 0, y = 0, w = bw, h = bh, r = 3, color = T.acc, layer = 0 } )
+	fill:set_visible( dirty )
+	D.border( btn, { x = 0, y = 0, w = bw, h = bh, r = 3, color = dirty and T.acc or T.line2, layer = 1 } )
+	D.text( btn, { text = "Save", font = "s14", color = dirty and T.bg or T.muted, x = 0, y = 4, w = bw, align = "center", layer = 2 } )
+	bp:set_h( H )
+	bg:set_h( H )
+	self.save_bar_ui = { panel = bp, button = btn, enabled = dirty }
+	return y + H
+end
+
+-- a change in a Save-bar menu: redraw when the number of unsaved changes moved
+function Menu:refresh_save_bar()
+	local sb = self._data.save_bar
+	if not sb then return end
+	local n = 0
+	pcall( function() n = sb.count and sb.count() or 0 end )
+	if n ~= self.save_bar_n then
+		self._dirty = true
+	end
+end
+
+function Menu:press_save_bar()
+	local sb = self._data.save_bar
+	if not ( sb and sb.save ) then return end
+	local gen = self._gen
+	safecall( sb.save )
+	if not self:stale( gen ) then
+		self._dirty = true
+	end
+end
+
+-- key rows: the next key pressed becomes the value
+function Menu:start_capture( b )
+	self.capture = self.capture ~= b and b or nil
+	self._dirty = true
+end
+
+function Menu:capture_update()
+	for _, k in ipairs( CAPTURE_KEYS ) do
+		if kb_pressed( keyboard, k[2] ) then
+			local b = self.capture
+			self.capture = nil
+			self._dirty = true
+			b.key_value = k[1]
+			if b.key_callback then
+				safecall( b.key_callback, k[1] )
+			end
+			if tweak_data.menu_active == self and self._ws then
+				self:set_description( "Key set to " .. key_label( k[1] ) )
+				self:refresh_save_bar()
+			end
+			return
+		end
+	end
 end
 
 -- Resize handles (design: right edge, bottom edge, corner) ------------------------------------
@@ -1638,7 +2070,7 @@ function Menu:refresh_focus()
 	end
 	for vi, r in ipairs( rows ) do
 		local on = vi == self.fi and r.focusable
-		if r.focus_bg and not r.asking then -- an ask row stays red
+		if r.focus_bg and not r.pinned then -- ask rows stay red, a row being edited stays marked
 			r.focus_bg:set_visible( on and true or false )
 			r.focus_bar:set_visible( on and true or false )
 		end
@@ -1762,8 +2194,17 @@ end
 
 -- Esc: leave a text field first, otherwise close
 function Menu:cancel_pressed()
-	if TextInput.active then
-		TextInput.active:disable_input()
+	if self.capture then
+		self.capture = nil
+		self._dirty = true
+		return
+	end
+	local input = TextInput.active
+	if input then
+		input:disable_input()
+		-- Esc in a field that has Cancel (rename) cancels it, like the design
+		local cancel = input.button and input.button.cancel
+		if cancel then safecall( cancel ) end
 		return
 	end
 	self:close()
@@ -1847,6 +2288,10 @@ function Menu:keyboard_update()
 		end
 		return
 	end
+	if self.capture then
+		self:capture_update()
+		return
+	end
 	local shift = kb_down( keyboard, K_LSHIFT ) or kb_down( keyboard, K_RSHIFT )
 	local ctrl = kb_down( keyboard, K_LCTRL ) or kb_down( keyboard, K_RCTRL )
 	if ctrl and kb_pressed( keyboard, K_ZERO ) then
@@ -1880,7 +2325,9 @@ end
 function Menu:row_lr( d, big )
 	local r = self.rows and self.rows[ self.fi ]
 	if not r or r.locked then return end
-	if r.kind == "cho" then
+	if r.kind == "tabs" then
+		self:select_tab( r, ( r.button.selected or 1 ) + d )
+	elseif r.kind == "cho" then
 		if d < 0 then r.choice:previous_option() else r.choice:next_option() end
 	elseif r.kind == "sld" then
 		local sl = r.slider
@@ -1896,10 +2343,20 @@ function Menu:row_enter()
 		self:answer_ask( r, true )
 	elseif r.kind == "rgb" then
 		self:toggle_rgb( r )
+	elseif r.kind == "cfg" then
+		if r.button.load then safecall( r.button.load ) end
+	elseif r.kind == "key" then
+		self:start_capture( r.button )
+	elseif r.kind == "chips" then
+		self:run_chips( r )
+	elseif r.kind == "tabs" then
+		return
 	elseif r.kind == "cho" then
 		r.choice:next_option()
 	elseif r.kind == "sld" then
-		self:apply_slider( r )
+		if not r.no_apply then
+			self:apply_slider( r )
+		end
 	elseif r.kind == "inp" then
 		if r.input.input_enabled then
 			self:confirm_input( r.input )
@@ -2014,22 +2471,7 @@ function Menu:mouse_update()
 	-- dragging a colour channel (Theme page)
 	if self.drag_rgb then
 		if held then
-			local d = self.drag_rgb
-			local ch
-			for _, nr in ipairs( self.rows or {} ) do
-				if nr.button == d.button and nr.channels then
-					ch = nr.channels[ d.ci ]
-				end
-			end
-			if ch then
-				local f = ( x - ch.track:world_x() - ch.pad ) / ch.w
-				local v = math_floor( math_max( 0, math_min( 1, f ) ) * 255 + 0.5 )
-				if v ~= d.last then
-					d.last = v
-					ppu_theme_set( d.button.role, d.ci, v )
-					self.theme_changed = true
-				end
-			end
+			self:rgb_drag_step( x )
 			return true
 		end
 		self.drag_rgb = nil
@@ -2167,6 +2609,16 @@ function Menu:mouse_update()
 		return "hand"
 	end
 
+	-- Save bar button
+	local sbu = self.save_bar_ui
+	if sbu and sbu.enabled and sbu.button:inside( x, y ) then
+		link = true
+		if clicked then
+			self:press_save_bar()
+			return true
+		end
+	end
+
 	-- footer buttons
 	for _, fb in ipairs( self.foot_buttons or {} ) do
 		local over = fb.enabled and fb.panel:inside( x, y )
@@ -2207,6 +2659,9 @@ function Menu:mouse_update()
 	end
 	-- choice arrows lose their hover when the pointer leaves them
 	for _, r in ipairs( self.rows or {} ) do
+		if r.cfg_btns and r ~= over_row then
+			self:cfg_hover( r )
+		end
 		if r.cho_prev and r ~= over_row then
 			for _, a in ipairs( { r.cho_prev, r.cho_next } ) do
 				a.bg:set_visible( false )
@@ -2236,6 +2691,7 @@ function Menu:row_mouse( r, x, y, clicked, rclicked )
 			if ch.track:inside( x, y ) then
 				if clicked then
 					self.drag_rgb = { button = r.button, ci = ci, gen = self._gen }
+					self:rgb_drag_step( x ) -- a click sets the value right away
 				end
 				return true
 			end
@@ -2261,8 +2717,37 @@ function Menu:row_mouse( r, x, y, clicked, rclicked )
 			if hit == r.cho_prev then r.choice:previous_option() else r.choice:next_option() end
 		end
 		return hit and true or false
+	elseif kind == "key" then
+		if clicked then
+			self:start_capture( r.button )
+		end
+		return true
+	elseif kind == "tabs" then
+		for i, tp in ipairs( r.tab_btns or {} ) do
+			if tp:inside( x, y ) then
+				if clicked then self:select_tab( r, i ) end
+				return true
+			end
+		end
+		return false
+	elseif kind == "chips" then
+		if r.chips_action:inside( x, y ) then
+			if clicked then self:run_chips( r ) end
+			return r.chips_can
+		end
+		for _, cb in ipairs( r.chip_btns or {} ) do
+			if cb.panel:inside( x, y ) then
+				if clicked then
+					local sel = r.button._sel
+					sel[ cb.value ] = not sel[ cb.value ] or nil
+					self._dirty = true
+				end
+				return true
+			end
+		end
+		return false
 	elseif kind == "sld" then
-		if r.apply:inside( x, y ) then
+		if r.apply and r.apply:inside( x, y ) then
 			if clicked then
 				self:apply_slider( r )
 			end
@@ -2276,7 +2761,21 @@ function Menu:row_mouse( r, x, y, clicked, rclicked )
 			return true
 		end
 		return false
+	elseif kind == "cfg" then
+		local hit = self:cfg_hover( r, x, y )
+		if hit and clicked then
+			local fn = r.button[ hit.name ]
+			if fn then safecall( fn ) end
+		end
+		return hit and true or false
 	elseif kind == "inp" then
+		if r.cancel_btn and r.cancel_btn:inside( x, y ) then
+			if clicked then
+				r.input:disable_input()
+				if r.button.cancel then safecall( r.button.cancel ) end
+			end
+			return true
+		end
 		if r.field:inside( x, y ) then
 			if clicked then
 				r.input:activate_input()
