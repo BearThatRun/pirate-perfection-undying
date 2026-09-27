@@ -73,6 +73,7 @@ The history is split so every step can be reviewed on its own (`git log -p`):
 | Round 10, 11 | Lab Rats support for the Meth auto-cooker (host only). PPR Setup Back goes one level up; Shotgun Physics fixed. |
 | Menu redesign | New menu for every trainer window (see "The menu"). Barlow font drawn from texture atlases, rounded shapes, theme editor, inline Yes/No, section headers, key list and text pages in Help. Fixes found while mapping the menus: I Want That no longer adds weapon skins, F7 Armors title, dead rows removed. |
 | v1.0 | New icon, version 1.0, MIT `LICENSE`, trigger recorder off by default, Autocooker.log only written on errors. |
+| Menu redesign 4b | F2 config list in one page (Load / Rename / Delete, new config from current settings), one Save bar in PPR Setup and Secret Skills, "press a key" rows, colour rows for laser / X-Ray, Unlock chips in the F3 Inventory menu, F12 unit and animation tabs. Fix: PPR Setup Default Difficulty now saves the game's difficulty id. |
 
 ## Language
 
@@ -92,4 +93,3 @@ The trainer is English only. The original shipped 10 other languages, but most o
 
 - Features that need a second human player are untested (drop-in spawn position, teammate weapon switch).
 - Later: move hooks, keybinds, options and translations to BeardLib. The F1–F12 menus stay on the trainer's own menu system.
-- Menu, still to do: the F2 config list with Load/Rename/Delete in one page, one Save bar for PPR Setup and Secret Skills, key-capture rows, inventory unlock chips, F12 unit/animation tabs.
