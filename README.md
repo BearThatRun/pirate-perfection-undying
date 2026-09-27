@@ -2,15 +2,22 @@
 
 An x64 port of **Pirate Perfection Reborn Trainer V.I.P. Edition v2.0.0** for PAYDAY 2 after the Diesel 3.0 (64-bit) update. It targets SuperBLT 64-bit, with BeardLib as a dependency.
 
-> Status: **v0.01 Unique Edition**. Tested in game in single-player, feature by feature, against a checklist. Features that need a second human player haven't been tested yet.
+> Status: **v1.0 Unique Edition**. Tested in game in single-player, feature by feature, against a checklist. Features that need a second human player haven't been tested yet.
 
 ## Credits and permission
 
 - **Original trainer:** Baddog-11 and the Pirate Perfection Developer Crew. All credit for the original trainer is theirs. The full original credits are kept in `Read Me!.txt` and in the in-game Help menu (F1).
 - **x64 port:** [BearThatRun](https://github.com/BearThatRun). Icon artwork: BearThatRun.
+- **Menu font:** [Barlow Semi Condensed](https://github.com/jpt/barlow) by The Barlow Project Authors (SIL Open Font License 1.1), plus a few symbols from Liberation Sans (OFL 1.1) and DejaVu Sans. Licenses: `mods/Pirate Perfection Undying/Assets/guis/textures/ppu/FONT_LICENSES.txt`.
 - **AI-assisted:** the analysis, scripts and edits for this port were made together with Claude (Anthropic). Every change is in the git history.
 
 **Permission:** I don't have permission from the original authors. I tried to reach them through the Pirate Perfection forum, but the admin never replied, and the forum and the team are gone. The base files come from the [Ietu/pirate-perfection](https://github.com/Ietu/pirate-perfection) repository on GitHub. If you are one of the original authors and want this changed or taken down, please contact me through GitHub.
+
+## License
+
+MIT, see [`LICENSE`](LICENSE) (the same license as [Ietu/pirate-perfection](https://github.com/Ietu/pirate-perfection), whose copyright notice is kept). This covers the code and the icon. The font pictures in `Assets/guis/textures/ppu/` keep their own font licenses.
+
+Note: the original Pirate Perfection team never published a license for their trainer. The MIT notice here is the one Ietu's repository ships, plus my own changes; it can't grant rights the original authors never gave.
 
 ## Requirements
 
@@ -25,6 +32,10 @@ An x64 port of **Pirate Perfection Reborn Trainer V.I.P. Edition v2.0.0** for PA
 1. Install SuperBLT 64-bit and BeardLib.
 2. Copy `mods/Pirate Perfection Undying` into `PAYDAY 2\mods\`.
 3. Don't copy any old 32-bit `WSOCK32.dll`, `IPHLPAPI.dll` or `mods/base` into the game folder. They break the 64-bit game.
+
+## The menu
+
+Every trainer window uses one new menu (v1.0): mouse and keyboard (arrows, Enter, Left/Right to change values, Backspace = back, `/` = search), a tab bar for the other menus, breadcrumbs, search in long lists, Yes/No inside the row for risky actions, and greyed-out rows that say why they can't be used. Drag the header to move the window, drag its edges to resize it, Ctrl + mouse wheel to scale it (Ctrl + 0 = 100 %). F2 > Theme changes the colours. Window size and position are saved in `Trainer/configs/menu_ui.lua`.
 
 Keys: F1 opens the Help menu with the full key list. Extra keys (fly, X-ray, replenish, teleport and so on) have no default key; set them in SuperBLT's Options > Mod Keybinds.
 
@@ -59,6 +70,9 @@ The history is split so every step can be reviewed on its own (`git log -p`):
 | Languages | English only: the other 10 language files, the Localization menu and the Language option were removed. |
 | Round 8 | PPR Setup options reviewed against the current game: dead, risky and DLC-gated options removed or fixed; the empty "Show PPR HUD" option and its leftover HUD code removed. |
 | Round 9 | AimBot aims through the camera's own spin/pitch (gun and view stay lined up) and picks the enemy nearest the crosshair. Shotgun Physics rewritten (longer, stronger shotgun ragdoll push, no damage change). Trigger recorder: one file per heist, runs are appended, also logs dialogue, interactions and bags; wraps functions without breaking Bag Stacking or the meth auto-cooker. |
+| Round 10, 11 | Lab Rats support for the Meth auto-cooker (host only). PPR Setup Back goes one level up; Shotgun Physics fixed. |
+| Menu redesign | New menu for every trainer window (see "The menu"). Barlow font drawn from texture atlases, rounded shapes, theme editor, inline Yes/No, section headers, key list and text pages in Help. Fixes found while mapping the menus: I Want That no longer adds weapon skins, F7 Armors title, dead rows removed. |
+| v1.0 | New icon, version 1.0, MIT `LICENSE`, trigger recorder off by default, Autocooker.log only written on errors. |
 
 ## Language
 
@@ -76,7 +90,6 @@ The trainer is English only. The original shipped 10 other languages, but most o
 
 ## Known open items
 
-- The Meth auto-cooker doesn't support Lab Rats yet. It needs a recording of a full Lab Rats cook (the voice lines and steps there are different from Rats).
 - Features that need a second human player are untested (drop-in spawn position, teammate weapon switch).
 - Later: move hooks, keybinds, options and translations to BeardLib. The F1–F12 menus stay on the trainer's own menu system.
-- Planned: a restyle of the trainer's menu (same menu code and content, new look).
+- Menu, still to do: the F2 config list with Load/Rename/Delete in one page, one Save bar for PPR Setup and Secret Skills, key-capture rows, inventory unlock chips, F12 unit/animation tabs.

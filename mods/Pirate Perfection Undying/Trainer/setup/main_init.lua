@@ -11,7 +11,7 @@ function()
 	ppr_dofile("Trainer/Setup/pre_init")
 	--Write here code that needs to be executed on very first ppr_require.
 end
-print("Pirate Perfection Undying v0.01 Unique Edition \nx64 port by BearThatRun \nbased on Pirate Perfection Reborn Trainer V.I.P. v2.0.0 by Baddog-11 \ninitialized")
+print("Pirate Perfection Undying v1.0 Unique Edition \nx64 port by BearThatRun \nbased on Pirate Perfection Reborn Trainer V.I.P. v2.0.0 by Baddog-11 \ninitialized")
 --[[
 --Callbacks, these executed before ppr_require script being executed
 __require_pre[required_script] = callback_function

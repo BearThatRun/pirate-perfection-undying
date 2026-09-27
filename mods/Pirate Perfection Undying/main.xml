@@ -1,6 +1,6 @@
 <table name="Pirate Perfection Undying"
 	author="BearThatRun (x64 port), Pirate Perfection Developer Crew (original)"
-	version="0.01"
+	version="1.0"
 	color="Color(0.98, 0.78, 0.12)"
 	min_lib_ver="5.1.0">
 	<!-- BeardLib reads this file to list the mod in its mod manager.

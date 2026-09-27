@@ -78,7 +78,7 @@ return {
 -- From mission menu
 	waypoints = false,						-- Toggle objects waypoints
 	debug_hud = false,						-- Toggle Debug HUD
-	trigger_recorder = true,				-- Toggle Trigger Recorder (Undying test phase: ON, turn OFF before publishing)
+	trigger_recorder = false,				-- Toggle Trigger Recorder (records mission elements to Logfiles; for debugging maps)
 	intimidator = false,						-- instant intimidator
 	shutdown_dialogs = false,				-- Shutdown all dialogs
 	reduce_ai_health = false,				-- Reduce AI health

@@ -1,4 +1,4 @@
-Pirate Perfection Undying v0.01 Unique Edition - x64 port for PAYDAY 2 (Diesel 3.0, 64-bit)
+Pirate Perfection Undying v1.0 Unique Edition - x64 port for PAYDAY 2 (Diesel 3.0, 64-bit)
 x64 port by BearThatRun. Based on Pirate Perfection Reborn Trainer! V.I.P. Edition v2.0.0
 by Baddog-11 and the Pirate Perfection Developer Crew. All credit for the original trainer is theirs.
 
@@ -68,11 +68,15 @@ by Baddog-11 and the Pirate Perfection Developer Crew. All credit for the origin
 	- Trainer menus work on ultrawide and other non-16:9 screens
 	- No more cmd.exe / hard-coded paths; many old bugs and crashes fixed
 	- English only: the other language files and the language menus were removed
+	- v1.0: a new menu for every trainer window (mouse + keyboard, tabs, search, move/resize,
+	  Ctrl + mouse wheel to scale, F2 > Theme for colours)
 	- Every change is in the git history
 
 -- Credits :
 x64 port: BearThatRun
 Icon artwork: BearThatRun
+Menu font: Barlow Semi Condensed (The Barlow Project Authors, SIL Open Font License 1.1),
+           symbols from Liberation Sans and DejaVu Sans - see Assets/guis/textures/ppu/FONT_LICENSES.txt
 
 Original trainer:
 Main Developer: Baddog-11
@@ -84,6 +88,9 @@ BLT Hook: James Wilkinson
 SuperBLT: ZNix and contributors
 BeardLib: Simon W, Luffy and contributors
 Special thanks from the original team: KIU_Stinger, their night-version testers and everyone who wished to remain anonymous
+
+-- License :
+MIT, see LICENSE.txt (Ietu's copyright notice from Ietu/pirate-perfection is kept).
 
 -- Disclaimer :
 Use at your own risk and be nice to others. Cheats show up to other players and can get you tagged as a cheater;

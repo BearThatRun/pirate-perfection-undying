@@ -15,7 +15,7 @@ local ppr_require = ppr_require
 local type = type
 local ppr_dofile = ppr_dofile
 local ME_CREATOR = 'Baddog-11'
-local ME_VERSION = '0.01'
+local ME_VERSION = '1.0'
 local ME_EDITION = 'Unique'
 local BLT_VERSION = 'SuperBLT 64-bit'
 

@@ -78,7 +78,8 @@ end
 -- It never moves a bag while no chemical is requested, and never a bag of another chemical.
 -- Round 10b: the request is ALSO taken from Bain's repeated lines (every 20 s), so turning it on
 -- after the heist picked the chemical works (round 10 waited for the next pick = forever).
--- Everything it does is written to Logfiles/Autocooker.log.
+-- The last steps are kept in memory and written to Logfiles/Autocooker.log only when something
+-- goes wrong (v1.0: errors only, so the file doesn't grow on every run).
 local NAIL = {
 	set_add_mu  = { id = 101819, carry = 'nail_muriatic_acid',     trigger = 101726, trigger_name = 'money_correct_trigger', label = 'Muriatic Acid',     dialogs = { 'pln_rt1_20', 'pln_rat_stage1_20' } },
 	set_add_cs  = { id = 101827, carry = 'nail_caustic_soda',      trigger = 101729, trigger_name = 'coke_correct_trigger',  label = 'Caustic Soda',      dialogs = { 'pln_rt1_22', 'pln_rat_stage1_22' } },
@@ -97,17 +98,27 @@ local nail_hinted
 local nail_active = false
 
 local log_fh
-local function nlog( msg )
+local log_buf = {}		-- recent steps, written out together with an error
+local LOG_KEEP = 40
+local function nlog( msg, is_error )
+	local ok, t = pcall( function() return managers.game_play_central:get_heist_timer() end )
+	t = ok and math.floor( tonumber( t ) or 0 ) or 0
+	log_buf[ #log_buf + 1 ] = string.format( '%02d:%02d  ', math.floor( t / 60 ), t % 60 ) .. tostring( msg )
+	if #log_buf > LOG_KEEP then
+		table.remove( log_buf, 1 )
+	end
+	if not is_error then
+		return
+	end
 	if not log_fh then
 		log_fh = ppr_io.open( 'Logfiles/Autocooker.log', 'a' )
 		if not log_fh then
 			return
 		end
 	end
-	local ok, t = pcall( function() return managers.game_play_central:get_heist_timer() end )
-	t = ok and math.floor( tonumber( t ) or 0 ) or 0
-	log_fh:write( string.format( '%02d:%02d  ', math.floor( t / 60 ), t % 60 ) .. tostring( msg ) .. '\n' )
+	log_fh:write( '--- error (level ' .. tostring( level_id ) .. '), last steps:\n' .. table.concat( log_buf, '\n' ) .. '\n' )
 	log_fh:flush()
+	log_buf = {}
 end
 
 local function hint( msg )
@@ -216,7 +227,7 @@ local function nail_update_safe()
 	local ok, err = pcall( nail_update )
 	if not ok and err ~= nail_update_err then
 		nail_update_err = err
-		nlog( 'ERROR in update: ' .. tostring( err ) )
+		nlog( 'ERROR in update: ' .. tostring( err ), true )
 	end
 end
 
@@ -275,7 +286,7 @@ local function nail_start()
 	local wrong = find_element( NAIL_WRONG.id, NAIL_WRONG.name )
 	if wrong then
 		wrap_element( wrong, function()
-			nlog( 'WRONG bag thrown in (' .. NAIL_WRONG.name .. ')' )
+			nlog( 'WRONG bag thrown in (' .. NAIL_WRONG.name .. ')', true )
 		end )
 	end
 	local by_dialog = {}
@@ -316,7 +327,7 @@ function MAIN()
 		nlog( '=== ON  (host: ' .. tostring( not is_client() ) .. ')' )
 		-- Round 10c: plain pcall (10b used xpcall + debug.traceback and the toggle failed with a nil error)
 		local ok, err = pcall( nail_start )
-		nlog( 'start returned ok=' .. tostring( ok ) .. ' result=' .. tostring( err ) .. ' (' .. type( err ) .. ')' )
+		nlog( 'start returned ok=' .. tostring( ok ) .. ' result=' .. tostring( err ) .. ' (' .. type( err ) .. ')', not ok or ( err ~= true and not is_client() ) )
 		if not ok then
 			hint( 'Lab Rats: error while starting, see Logfiles/Autocooker.log' )
 		end
