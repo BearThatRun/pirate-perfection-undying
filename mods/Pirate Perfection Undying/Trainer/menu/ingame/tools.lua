@@ -50,8 +50,8 @@ main_menu = function()
 		{ text = tr.force_ready, callback = force_ready, data = true },
 		{ text = tr.force_unready, callback = force_ready, data = false },
 		{},
-		{ text = tr.want_that_title, callback = ppr_dofile, data = path .. 'item_stealing_menu' },
-		{ text = tr.sequencer_menu, callback = ppr_dofile, data = path .. 'sequence_menu', host_only = false },
+		{ text = tr.want_that_title, callback = ppr_dofile, data = path .. 'item_stealing_menu', menu = true },
+		{ text = tr.sequencer_menu, callback = ppr_dofile, data = path .. 'sequence_menu', host_only = false, menu = true, meta = "key 9" },
 		{},
 		{ text = tr.spoof_detection_lvl, plugin = 'spoof_detection_lvl' },
 	}

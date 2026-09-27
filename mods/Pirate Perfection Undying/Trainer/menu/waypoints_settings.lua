@@ -75,9 +75,9 @@ main_menu = function()
 		{ text = tr.way_pointing, plugin = 'waypoints', plugin_path = "Trainer/addons/missionmenu/", switch_back = true },
 		{},
 		-- Undying: both buttons keep the menu open; the toggle reopens it so the list updates.
-		{ text = tr.wp_show_all, type = "toggle", toggle = "all_waypoints", callback = function() togg_vars.all_waypoints = not togg_vars.all_waypoints end, switch_back = function() main_menu() end },
+		{ text = tr.wp_show_all, meta = "all interaction types", type = "toggle", toggle = "all_waypoints", callback = function() togg_vars.all_waypoints = not togg_vars.all_waypoints end, switch_back = function() main_menu() end },
 		{ text = tr.save, callback = save, switch_back = true },
-		{},
+		{ type = "header", text = togg_vars.all_waypoints and "All interaction types" or "Interaction types on this map" },
 	}
 	
 	local interactive_units = {}

@@ -83,7 +83,7 @@ main_menu = function()
 		{ text = tr['lobotomize_ai'], plugin = "lobotomize_ai", host_only = true, switch_back = true },
 		{ text = tr['invisible_player'], plugin = "invisible_player", host_only = true, switch_back = true },
 		{},
-		{text = tr['kill_all_npc'], callback = ppr_dofile, data = path .. "kill_all_npc" },
+		{text = tr['kill_all_npc'], callback = ppr_dofile, data = path .. "kill_all_npc", meta = "ignores: set in PPR Setup" },
 	}
 	
 	Menu_open( Menu, { title = tr['stealth_menu'], button_list = data, plugin_path = path } )

@@ -456,7 +456,7 @@ end
 interaction_with_other = function()
 	local data = { 
 		{ text = tr['troll_interact_team'], callback = interaction_with_team, menu = true },
-		{},
+		{ type = "header", text = "Players" },
 	}
 	
 	local count_data = #data
@@ -472,7 +472,7 @@ interaction_with_other = function()
 	end
 	
 	if #data == count_data then
-		tab_insert(data, { text = tr['troll_no_players'], callback = void })
+		tab_insert(data, { type = "info", text = tr['troll_no_players'] })
 	end
 	
 	open_menu( { title = tr['troll_interaction_with_other'], button_list = data, plugin_path = path, back = main_menu } )

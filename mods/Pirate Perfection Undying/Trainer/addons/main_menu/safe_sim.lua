@@ -127,21 +127,18 @@ end
 
 chance_menu = function()
 	local r_total = get_total(r_index_weapon, "r")
-	local data = {{text = tr.safe_sim_rarity..r_total, switch_back = true}}
+	local data = {{type = "info", text = tr.safe_sim_rarity..r_total}}
 	for i, r in pairs(r_index_weapon) do
 		tab_insert(data, {text = M_localization:text(T_E_rarities[r].name_id), type = "slider", slider_data = {name = "sim_"..r, value = sim_chances.r[i], max = 100}, switch_back = true})
 	end
 	tab_insert(data, {})
-	tab_insert(data, {})
 	local q_total = get_total(q_index, "q")
-	tab_insert(data, {text = tr.safe_sim_quality..q_total, switch_back = true})
+	tab_insert(data, {type = "info", text = tr.safe_sim_quality..q_total})
 	for i, q in pairs(q_index) do
 		tab_insert(data, {text = M_localization:text(T_E_qualities[q].name_id), type = "slider", slider_data = {name = "sim_"..q, value = sim_chances.q[i], max = 100}, switch_back = true})
 	end
 	tab_insert(data, {})
-	tab_insert(data, {})
 	tab_insert(data, {text = tr.safe_sim_stat, type = "slider", slider_data = {name = "sim_stat", value = sim_chances.stat, max = 100}, switch_back = true})
-	tab_insert(data, {})
 	tab_insert(data, {text = tr.reset, callback = function() for _, t in pairs({r_index_weapon, q_index}) do for _, i in pairs(t) do togg_vars["sim_"..i] = nil end end togg_vars["sim_stat"] = nil chance_menu() end})
 
 	Menu_open(Menu, {title = tr.safe_sim_chances, description = tr.safe_sim_chances_desc, button_list = data, back = main_menu})
@@ -150,7 +147,7 @@ end
 main_menu = function()
 	local data = {
 		{text = tr.safe_sim_chances, callback = chance_menu, menu = true},
-		{},
+		{type = "header", text = "Safes"},
 	}
 	for safe, safe_d in pairs(T_E_safes) do
 		tab_insert(data, {text = M_localization:text(safe_d.name_id), callback = start_open, data = {safe, safe_d}})

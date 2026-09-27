@@ -273,11 +273,6 @@ local function open_gift_boxes()
 	interactbytweak('hold_open_xmas_present')
 end
 
--- gen_pku_cocaine_pure, pure meth
-local function pure_meth()
-	interactbytweak('gen_pku_cocaine_pure')
-end
-
 -- Diamond heist
 local function rewire_circuit()
 	interactbytweak('invisible_interaction_open')
@@ -402,7 +397,6 @@ patch_menu = function()
 end
 
 local special_interactions = { 
-	rats				= { { "pure_meth", pure_meth } },
 	big				= { { "hack_computers", hack_all_computers } },
 	mus				= { { "rewire_circuit", rewire_circuit }, { "cut_glasses", cut_glasses } },
 	vit				= { { "cut_wires", cut_wires }, { "start_hack", start_hack }, { "state_interaction_enabled_usb", state_interaction_enabled_usb }, { "tumble_books", tumble_books } },
@@ -440,9 +434,16 @@ open_menu = function()
 		if level( level_id ) then
 			local level_name = M_localization:text( T_levels[ level_id ].name_id )
 
-			insert( contents, #level_data + 1, {} )
-			for _, interaction_data in pairs( level_data ) do
-				insert( contents, 3, { text = level_name .. " - " .. tr[ interaction_data[1] ], callback = interaction_data[2] } )
+			-- design: a section header with the map's name, its rows, then a spacer
+			-- (replaces the spacer after the patches row; the old code put the rows in reverse)
+			local rows = { { type = "header", text = level_name } }
+			for _, interaction_data in ipairs( level_data ) do
+				insert( rows, { text = level_name .. " - " .. tr[ interaction_data[1] ], callback = interaction_data[2] } )
+			end
+			insert( rows, {} )
+			table.remove( contents, 2 )
+			for i, row in ipairs( rows ) do
+				insert( contents, 1 + i, row )
 			end
 
 			break

@@ -47,7 +47,8 @@ local open_menu = function()
 		return no_sequences()
 	end
 	
-	local data = {{ text = "Only this object (off = every object with the same sequence)", type = "toggle", toggle = "seq_single", callback = function() togg_vars.seq_single = not togg_vars.seq_single end, switch_back = true}, {}}
+	local data = {{ text = "Only this object", meta = "off = every object with this sequence", type = "toggle", toggle = "seq_single", callback = function() togg_vars.seq_single = not togg_vars.seq_single end, switch_back = true},
+		{ type = "header", text = "Sequences of the object you look at" }}
 
 	local ids = {}
 	for id in pairs( elements ) do

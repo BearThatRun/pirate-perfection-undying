@@ -789,7 +789,7 @@ Futher throws may be rejected by server and/or mark you as cheater!
 	mission_menu_title							=	"Mission Menu",
 	mission_menu_desc								=	"Scripts for specific heists",
 	auto_cooker										=	"Toggle meth auto-cooking",
-	way_pointing									=	"Toggle objects waypointing",
+	way_pointing									=	"Objects waypointing",
 	debug_hud										=	"Toggle debug HUD",
 	trigger_recorder								=	"Toggle Trigger Recorder",
 	mission_events									=	"Mission events",

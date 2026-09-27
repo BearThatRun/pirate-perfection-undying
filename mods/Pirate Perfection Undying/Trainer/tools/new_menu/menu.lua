@@ -603,9 +603,14 @@ local function is_spacer( b )
 	return b.text == nil and not b.type and not b.callback and not b.plugin and not b.menu and not b.box
 end
 
--- kind: sp, tog, sld, cho, inp, sub, save, act
+-- kind: sp, hd, info, dis, kv, tog, sld, cho, inp, sub, save, act
+local NOT_FOCUSABLE = { sp = true, hd = true, info = true, dis = true, kv = true }
 local function row_kind( b )
 	if is_spacer( b ) then return "sp" end
+	if b.type == "header" then return "hd" end
+	if b.type == "info" then return "info" end
+	if b.type == "disabled" then return "dis" end
+	if b.type == "kv" then return "kv" end
 	if b.type == "rgb" then return "rgb" end
 	if b.type == "slider" then return "sld" end
 	if b.type == "multi_choice" then return "cho" end
@@ -625,7 +630,7 @@ function Menu:visible_buttons()
 	local q = self.q:lower()
 	for i, b in ipairs( self._data.button_list or {} ) do
 		local kind = row_kind( b )
-		if q == "" or ( kind ~= "sp" and label_of( b ):lower():find( q, 1, true ) ) then
+		if q == "" or ( kind ~= "sp" and kind ~= "hd" and label_of( b ):lower():find( q, 1, true ) ) then
 			out[ #out + 1 ] = { index = i, button = b, kind = kind }
 		end
 	end
@@ -920,9 +925,10 @@ function Menu:add_header( y )
 
 	-- search (shown when there are more than 8 rows)
 	self.search_box = nil
+	-- design: rows you can select (headers, notes and key rows don't count)
 	local n_rows = 0
 	for _, b in ipairs( data.button_list or {} ) do
-		if not is_spacer( b ) then n_rows = n_rows + 1 end
+		if not NOT_FOCUSABLE[ row_kind( b ) ] then n_rows = n_rows + 1 end
 	end
 	self.n_rows = n_rows
 	if n_rows > 8 or self.q ~= "" then
@@ -1001,12 +1007,19 @@ function Menu:add_list( y )
 
 	self.rows = {}
 	local ry = 6
+	-- body paragraphs (design m.body: help pages): padding 6 16, 15px, line-height 1.45
+	local body = self._data.body or {}
+	for bi, para in ipairs( body ) do
+		local bt = D.text( canvas, { name = "body_" .. bi, text = tostring( para ), font = "r15", lh = 1.45, color = T.text,
+			x = PAD, y = ry + 6, w = W - PAD * 2, wrap = true } )
+		ry = ry + 6 + bt:h() + 6
+	end
 	for vi, v in ipairs( vis ) do
 		local r = self:build_row( canvas, vi, v, ry )
 		self.rows[ vi ] = r
 		ry = ry + r.h
 	end
-	if #vis == 0 then
+	if #vis == 0 and #body == 0 then
 		local et = D.text( canvas, { name = "empty", text = self.q ~= "" and "No matches" or "Nothing here", font = "r15", color = T.muted, x = PAD, y = 14 } )
 		ry = 14 + et:h() + 14
 	else
@@ -1051,7 +1064,22 @@ function Menu:build_row( canvas, vi, v, y )
 		return r
 	end
 
-	r.focusable = true
+	-- section header (design "hd"): small caps label and a line to the right; margin 10 16 4
+	if kind == "hd" then
+		local lh = D.lh( "r12" )
+		local h = 10 + lh + 4
+		local p = canvas:panel( { name = "row_" .. vi, x = 0, y = y, w = W, h = h } )
+		local text = label_of( b )
+		D.text( p, { name = "text", text = text, font = "r12", ls = 0.06, upper = true, color = T.muted, x = PAD, y = 10, layer = 2 } )
+		local lx = PAD + D.measure( "r12", text, 0.06, true ) + 10
+		if lx < W - PAD then
+			p:rect( { name = "line", x = math_floor( lx + 0.5 ), y = 10 + math_floor( ( lh - 1 ) / 2 + 0.5 ), w = math_floor( W - PAD - lx + 0.5 ), h = 1, color = T.line, layer = 1 } )
+		end
+		r.panel, r.h, r.focusable = p, h, false
+		return r
+	end
+
+	r.focusable = not NOT_FOCUSABLE[ kind ]
 	r.locked = b.host_only and self.client
 	local p = canvas:panel( { name = "row_" .. vi, x = 0, y = y, w = W, h = ROW_H } )
 	r.panel = p
@@ -1112,11 +1140,26 @@ function Menu:build_row( canvas, vi, v, y )
 	if r.locked then
 		lx = lx + 12 + 10
 	end
-	local color = r.locked and T.muted or ( b.danger and T.warn or T.text )
+	-- key row (design "kv"): key cap, then the label. Cap: min-width 54 + padding 0 6,
+	-- height 20, border 1 (bottom 2), 13px semibold
+	local cap
+	if kind == "kv" then
+		local key = tostring( b.key or "" )
+		local cw = math_max( 54, D.measure( "s13", key ) ) + 12 + 2
+		cap = { w = cw, h = 23, key = key, x = lx }
+		lx = lx + cw + 10
+	end
+	local color = ( r.locked or kind == "dis" or kind == "info" ) and T.muted or ( b.danger and T.warn or T.text )
 	local label = D.text( p, { name = "text", text = label_of( b ), font = "r16", color = color, x = lx, y = 0, w = math_max( 20, right - lx ), wrap = true, layer = 2 } )
 	r.label = label
+	-- disabled row (design "dis"): the reason in small grey text under the label
+	local sub
+	if kind == "dis" and b.reason and b.reason ~= "" then
+		sub = D.text( p, { name = "sub", text = tostring( b.reason ), font = "r13", color = T.muted, x = lx, y = 0, w = math_max( 20, right - lx ), wrap = true, layer = 2 } )
+	end
+	local block_h = label:h() + ( sub and sub:h() or 0 )
 	-- min-height 36 + padding 3 top/bottom (content-box, as in the design) = 42
-	local line_h = math_max( ROW_H, label:h() ) + 6
+	local line_h = math_max( ROW_H, block_h ) + 6
 
 	-- the design shows a tip under a focused locked row
 	local tip_h = 0
@@ -1132,10 +1175,20 @@ function Menu:build_row( canvas, vi, v, y )
 	r.focus_bar:set_h( h )
 	r.focus_bg:set_h( h )
 	r.h = h
-	if label:h() > ROW_H then
+	if sub then
+		local ty = 3 + ( line_h - 6 - block_h ) / 2
+		label:set_y( ty )
+		sub:set_y( ty + label:h() )
+	elseif label:h() > ROW_H then
 		label:set_y( 3 )
 	else
 		label:center_line_on( line_h / 2 )
+	end
+	if cap then
+		local cy = ( line_h - cap.h ) / 2
+		D.border( p, { name = "kv_cap", x = cap.x, y = cy, w = cap.w, h = cap.h, r = 3, color = T.line2, bottom = 2, layer = 2 } )
+		local kt = D.text( p, { name = "kv_key", text = cap.key, font = "s13", color = T.text, x = cap.x, w = cap.w, align = "center", y = 0, layer = 3 } )
+		kt:center_line_on( cy + 1 + 10 )
 	end
 	if r.locked then
 		D.sbitmap( p, "lock", PAD, ( line_h - 12 ) / 2, 12, 12, T.muted, 3 )
@@ -1630,6 +1683,11 @@ function Menu:scroll_to_focus()
 	self:clamp_scroll()
 end
 
+function Menu:scroll_by( d )
+	self.scroll_target = ( self.scroll_target or 0 ) + d
+	self:clamp_scroll()
+end
+
 function Menu:move_focus( d )
 	local f = self:focusable_list()
 	if #f == 0 then return end
@@ -1795,10 +1853,11 @@ function Menu:keyboard_update()
 		self:change_scale( 1 - PPU_ui.scale ) -- Ctrl + 0: back to 100 %
 		return
 	end
+	local no_focus = #self:focusable_list() == 0
 	if self:key_rep( K_UP ) then
-		self:move_focus( -1 )
+		if no_focus then self:scroll_by( -40 ) else self:move_focus( -1 ) end
 	elseif self:key_rep( K_DOWN ) then
-		self:move_focus( 1 )
+		if no_focus then self:scroll_by( 40 ) else self:move_focus( 1 ) end
 	elseif self:key_rep( K_LEFT ) then
 		self:row_lr( -1, shift )
 	elseif self:key_rep( K_RIGHT ) then

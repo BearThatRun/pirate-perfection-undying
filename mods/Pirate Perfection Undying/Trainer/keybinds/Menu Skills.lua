@@ -112,12 +112,6 @@ unlmessiah = unlmessiah or function()
 	end
 end
 -------------------------------
--- SKILL PROFILER --
--------------------------------
-startprof = startprof or function()
-	dofile("Trainer/assets/skillprofiler.lua")
-end
--------------------------------
 -- MENU CONTENT --
 -------------------------------
 callinmaster = callinmaster or function()
@@ -297,8 +291,6 @@ else
 	{ text = "Technician aced skills", callback = callintechnician2 },
 	{ text = "Ghost basic skills", callback = callinghost },
 	{ text = "Ghost aced skills", callback = callinghost2 },
-	{},
-	{ text = "Skill profiler", callback = startprof },
 	{},
 	{ text = "Reset skillpoint(s)", callback = resetskill },
 	{},

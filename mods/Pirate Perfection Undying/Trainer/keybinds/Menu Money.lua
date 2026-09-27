@@ -229,10 +229,6 @@ if not inGame() then
 			tweak_data.gui.crime_net.special_contracts[#tweak_data.gui.crime_net.special_contracts+1] = { id="casino", name_id="menu_cn_casino", desc_id="menu_cn_casino_desc", menu_node="crimenet_contract_casino", x=347, y=716, icon="guis/textures/pd2/crimenet_casino", unlock="unlock_level", pulse=true, pulse_color=Color( 204, 255, 209, 32 )/255 }
 		end
 	end	
-	--FULL BLACK MARKET
-	adeptbarter = adeptbarter or function()
-		dofile("Trainer/assets/fullblackmarket.lua")
-	end
 	-----------------
 	-- MENU --
 	-----------------
@@ -245,8 +241,6 @@ if not inGame() then
 		{ text = "Add 100 mill cash + 400 mill offshore", callback = add100mill },
 		{ text = "Add 10 mill cash + 40 mill offshore", callback = add10mill },
 		{ text = "Add 1 mill cash + 4 mill offshore", callback = add1mill },
-		{},
-		{ text = "Full blackmarket", callback = adeptbarter },
 		{},
 		{ text = "Free play in the casino", callback = freeplay },
 		{ text = "Force casino open", callback = opencasino },

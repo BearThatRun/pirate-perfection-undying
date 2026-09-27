@@ -104,13 +104,14 @@ contact_menu = function(contact)
 			if job_name_id and job.contact == contact and locale_exists(M_localization, job_name_id) and job_name ~= "welcome_to_the_jungle_wrapper" then --Obviously, If heist don't have its localization string, this means it isn't fully implemented into game (odd heist)
 				local job_chain = get_job_chain( T_narrative, job_name )
 				local callback_func
+				local is_menu = #job_chain > 1
 				if #job_chain > 1 then
 					callback_func = function() stage_menu(job_name, job_name_id, job_chain, contact) end
 				else
 					callback_func = function() swap_job(job_name, job_chain[1].level_id) end
 				end
 				
-				tab_insert(data, { text = _text(M_localization, job_name_id)..(job.region == "professional" and tr.tpro or ''), callback = callback_func })
+				tab_insert(data, { text = _text(M_localization, job_name_id)..(job.region == "professional" and tr.tpro or ''), callback = callback_func, menu = is_menu })
 			end
 		end
 		table.sort(data, function(a, b) return a.text < b.text end)
@@ -179,7 +180,7 @@ local main_menu_data = {
 	-- empty function in the current game, so the button did nothing (raids you saw came from the game itself).
 --	{},
 	{},
-	{ text = tr.job_menu_escapes, callback = escapes_menu },
+	{ text = tr.job_menu_escapes, callback = escapes_menu, menu = true },
 --	{},
 	--{ text = tr.job_menu_contacts, callback = contact_menu },
 }
@@ -199,7 +200,7 @@ do
 		if name_id and locale_exists(M_localization, name_id) and (job_count[contact_name] or 0) > 0 then
 			local text = locale_text(M_localization, name_id)
 			seen[text] = (seen[text] or 0) + 1
-			tab_insert(list, { text = text, callback = contact_menu, data = contact_name })
+			tab_insert(list, { text = text, callback = contact_menu, data = contact_name, menu = true })
 		end
 	end
 	for _, item in ipairs(list) do
@@ -208,6 +209,7 @@ do
 		end
 	end
 	table.sort(list, function(a, b) return a.text < b.text end)
+	tab_insert(main_menu_data, { type = "header", text = "Contractors" })
 	for _, item in ipairs(list) do
 		tab_insert(main_menu_data, item)
 	end

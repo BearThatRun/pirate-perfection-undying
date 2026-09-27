@@ -197,14 +197,6 @@ local function pass_craft(items, custom_name, factory_id, weapon_type)
 	return failed_reason and failed_start.." - "..failed_item.." - "..failed_reason or true
 end
 
-local function get_free_cosmetic_id()
-	local i = 1
-	while M_blackmarket._global.inventory_tradable[i] ~= nil do
-		i = i + 1
-	end
-	return i
-end
-
 mask_menu = function(mask, peer)
 	local items = {
 		{'masks', mask.mask_id},
@@ -219,7 +211,7 @@ mask_menu = function(mask, peer)
 	local addable_items = deep_clone(items)
 	local data
 	if items[1][2] == "character_locked" then
-		data = {{text = tr['want_that_stock_mask'], switch_back = true}}
+		data = {{type = "info", text = tr['want_that_stock_mask']}}
 	else
 		local mask_name = get_blackmarket_name(items[1][1], items[1][2])
 		local custom_name = peer:name().." - "..mask_name
@@ -248,7 +240,7 @@ mask_menu = function(mask, peer)
 		if craft_enabled == true then
 			tab_insert(data, 2, {text = tr['want_that_craft_mask'], callback = craft_item, data = {items, addable_items, custom_name}, switch_back = function() mask_menu(mask, peer) end})
 		else
-			tab_insert(data, 2, {text = craft_enabled, switch_back = true})
+			tab_insert(data, 2, {type = "info", text = craft_enabled})
 		end
 	end
 
@@ -257,22 +249,33 @@ end
 
 weapon_stats_menu = function(weapon, peer, weapon_type)
 	local stats, perks, custom_stats, skin_bonus = get_weapon_info(weapon)
-	data = {
-		{},
-		{text = perks.silencer and "+ "..tr['want_that_silenced'] or "", switch_back = true},
-		{text = perks.scope and "+ "..tr['want_that_scope'] or "", switch_back = true},
-		{text = perks.gadget and "+ "..tr['want_that_gadget'] or "", switch_back = true},
-		{text = perks.bipod and "+ "..tr['want_that_bipod'] or "", switch_back = true},
-		{text = perks.highlight and "+ "..tr['want_that_auto_hi'] or "", switch_back = true},
-		{text = perks.fire_mode_single and "+ "..tr['want_that_lock_single'] or perks.fire_mode_auto and "+ "..tr['want_that_lock_auto'] or "", switch_back = true},
-		{text = custom_stats.can_shoot_through_shield and custom_stats.can_shoot_through_wall and "+ "..tr['want_that_bullet_pen'] or "", switch_back = true},
-		{text = custom_stats.armor_piercing_add and "+ "..tr['want_that_armor_pierce'] or "", switch_back = true},
-		{text = custom_stats.movement_speed and "+ "..tr['want_that_move_speed'] or "", switch_back = true},
-		{text = skin_bonus and "+ "..tr['want_that_skin_bonus']..":  "..M_localization:text(skin_bonus.name_id, {team_bonus = ((skin_bonus.exp_multiplier or skin_bonus.money_multiplier or 1) * 100 - 100).."%"}), switch_back = true},
-	}
-	for i = 8, 1, -1 do
+	local data = {}
+	for i = 1, 8 do
 		local stat_name = WeaponDescription._stats_shown[i].name
-		tab_insert(data, 1, {text = M_localization:text("bm_menu_"..stat_name)..":  "..stats[stat_name], switch_back = true})
+		tab_insert(data, {type = "info", text = M_localization:text("bm_menu_"..stat_name)..":  "..stats[stat_name]})
+	end
+	-- features the weapon has (the old list kept an empty row for every missing one)
+	local features = {
+		perks.silencer and tr['want_that_silenced'],
+		perks.scope and tr['want_that_scope'],
+		perks.gadget and tr['want_that_gadget'],
+		perks.bipod and tr['want_that_bipod'],
+		perks.highlight and tr['want_that_auto_hi'],
+		perks.fire_mode_single and tr['want_that_lock_single'] or perks.fire_mode_auto and tr['want_that_lock_auto'],
+		custom_stats.can_shoot_through_shield and custom_stats.can_shoot_through_wall and tr['want_that_bullet_pen'],
+		custom_stats.armor_piercing_add and tr['want_that_armor_pierce'],
+		custom_stats.movement_speed and tr['want_that_move_speed'],
+		skin_bonus and tr['want_that_skin_bonus']..":  "..M_localization:text(skin_bonus.name_id, {team_bonus = ((skin_bonus.exp_multiplier or skin_bonus.money_multiplier or 1) * 100 - 100).."%"}),
+	}
+	local first = true
+	for i = 1, 10 do
+		if features[i] then
+			if first then
+				tab_insert(data, {})
+				first = false
+			end
+			tab_insert(data, {type = "info", text = "+ "..features[i]})
+		end
 	end
 
 	Menu_open(Menu, {title = peer:name().." - "..M_weapon_factory:get_weapon_name_by_factory_id(weapon.factory_id), description = "* "..tr['want_that_stats_desc'], button_list = data, back = function() weapon_menu(weapon, peer, weapon_type) end})
@@ -301,17 +304,17 @@ weapon_menu = function(weapon, peer, weapon_type)
 		{text = tr['want_that_add_all'], callback = add_all_items, data = {items}, switch_back = true},
 		{text = tr['want_that_view_stats'], callback = weapon_stats_menu, data = {weapon, peer, weapon_type}, menu = true},
 		{},
-		{text = tr['want_that_weapon']..":  "..weapon_name, switch_back = true},
+		{type = "info", text = tr['want_that_weapon']..":  "..weapon_name},
 		{},
 	}
 	local craft_enabled = pass_craft(items, custom_name, weapon.factory_id, weapon_type)
 	if craft_enabled == true then
-		tab_insert(data, 2, {text = tr['want_that_craft_wep'], callback = craft_item, data = {items, nil, custom_name, weapon.factory_id, weapon_type}, switch_back = function() weapon_menu(weapon, peer, weapon_type) end})
+		tab_insert(data, 3, {text = tr['want_that_craft_wep'], callback = craft_item, data = {items, nil, custom_name, weapon.factory_id, weapon_type}, switch_back = function() weapon_menu(weapon, peer, weapon_type) end})
 	else
-		tab_insert(data, 2, {text = craft_enabled, switch_back = true})
+		tab_insert(data, 3, {type = "info", text = craft_enabled})
 	end
 	if #items == 0 then
-		tab_insert(data, {text = tr['want_that_stock_weapon'], switch_back = true})
+		tab_insert(data, {type = "info", text = tr['want_that_stock_weapon']})
 	else
 		for _, item in pairs(items) do
 			tab_insert(data, {text = tr['want_that_add_mod']..":  "..get_blackmarket_name(item[1], item[2]), callback = add_single_item, data = item, switch_back = true})
@@ -319,7 +322,13 @@ weapon_menu = function(weapon, peer, weapon_type)
 	end
 	if weapon.cosmetics then
 		local has_skin = M_blackmarket:tradable_verify("weapon_skins", weapon.cosmetics.id, weapon.cosmetics.quality, weapon.cosmetics.bonus, M_blackmarket:get_inventory_tradable())
-		tab_insert(data, {text = has_skin and "("..tr['want_that_have_skin']..")" or tr['want_that_add_skin']..":  "..get_blackmarket_name("weapon_skins", weapon.cosmetics.id).." - "..M_localization:text(T_E_qualities[weapon.cosmetics.quality].name_id)..(weapon.cosmetics.bonus and " - "..tr['want_that_skin_bonus'] or ""), callback = not has_skin and M_blackmarket:tradable_add_item(get_free_cosmetic_id(), "weapon_skins", weapon.cosmetics.id, weapon.cosmetics.quality, weapon.cosmetics.bonus, 1) or nil, switch_back = true})
+		-- Undying: adding the skin is removed (it added skins you don't own, and did it while this page
+		-- was being built, without a click). The row stays as a disabled row, like the menu design.
+		if has_skin then
+			tab_insert(data, {type = "info", text = "("..tr['want_that_have_skin']..")"})
+		else
+			tab_insert(data, {type = "disabled", text = tr['want_that_add_skin']..":  "..get_blackmarket_name("weapon_skins", weapon.cosmetics.id).." - "..M_localization:text(T_E_qualities[weapon.cosmetics.quality].name_id)..(weapon.cosmetics.bonus and " - "..tr['want_that_skin_bonus'] or ""), reason = "Removed: adds skins you don't own"})
+		end
 	end
 
 	Menu_open(Menu, {title = peer:name().." - "..(weapon_type == "primaries" and tr['want_that_primary'] or tr['want_that_secondary']), description = tr['want_that_item_desc'].." "..tr['want_that_item_desc_wep'], button_list = data, back = function() inventory_menu(peer) end})
@@ -345,16 +354,15 @@ player_menu = function()
 				tab_insert(data, {text = peer:name(), callback = inventory_menu, data = {peer}, menu = true})
 			end
 		else
-			tab_insert(data, {text = tr['want_that_alone'], switch_back = true})
+			tab_insert(data, {type = "info", text = tr['want_that_alone']})
 		end
-		tab_insert(data, {})
+		-- menu design: you first, then the other players under a "Players" header
 		local yourself = M_network:session():local_peer()
-		tab_insert(data, {text = tr['want_that_you']..":  "..yourself:name(), callback = inventory_menu, data = {yourself}, menu = true})
+		tab_insert(data, 1, {text = tr['want_that_you']..":  "..yourself:name(), callback = inventory_menu, data = {yourself}, menu = true})
+		tab_insert(data, 2, {type = "header", text = "Players"})
 	else
 		data = {
-			{},
-			{},
-			{text = tr['want_that_offline'], switch_back = true}
+			{type = "info", text = tr['want_that_offline']}
 		}
 	end
 

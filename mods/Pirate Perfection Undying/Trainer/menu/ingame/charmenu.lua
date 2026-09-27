@@ -103,14 +103,18 @@ main_menu = function()
 		{ text = tr.hacked_maskoff, plugin = 'hacked_maskoff', switch_back = true },
 	}
 	
+	insert(data, {})
+	-- menu design: the row is always there, greyed out with the reason when you carry nothing
 	if get_my_carry_data(M_player) then
 		insert(data,{ text = tr.secure_carry, callback = secure_carry })
+	else
+		insert(data,{ type = "disabled", text = tr.secure_carry, reason = "Only while carrying a bag" })
 	end
 
 	if in_custody() then
 		insert(data, { text = tr.outta_jail, callback = outta_jail })
 	else
-		insert(data, { text = tr.going_to_jail, callback = _going_to_jail}) --Just add "_" before function to go to the jail with effect
+		insert(data, { text = tr.going_to_jail, callback = _going_to_jail, meta = "Escape from jail while in custody" }) --Just add "_" before function to go to the jail with effect
 	end
 	
 	Menu_open(Menu, { title = tr.char_menu, button_list = data, plugin_path = path } )

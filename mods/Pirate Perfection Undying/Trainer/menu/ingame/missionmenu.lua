@@ -220,37 +220,51 @@ main = function()
 		{ text = tr.increase_ai_amount, plugin = 'increase_ai_amount', switch_back = true, host_only = true },
 		{ text = tr.pointless_medics, plugin = 'pointless_medics', switch_back = true },
 		{ text = tr.Auto_counter_Cloakers, plugin = 'Auto_counter_Cloakers', switch_back = true },
-		{},
 	}
 
+	-- rows for the current map go under a section header with the map's name (menu redesign)
+	local map_rows = {}
+	local overkill_plus = false
+
 	if current_level == "alex_1" or current_level == "rat" then
-		data[#data+1] = { text = tr.auto_cooker, plugin = 'autocooker', switch_back = true }
+		map_rows[#map_rows+1] = { text = tr.auto_cooker, plugin = 'autocooker', switch_back = true }
 	end
 	-- Round 10: Lab Rats support (moves ingredient bags into the lab; host only)
 	if current_level == "nail" then
-		data[#data+1] = { text = tr.auto_cooker, plugin = 'autocooker', switch_back = true, host_only = true }
+		map_rows[#map_rows+1] = { text = tr.auto_cooker, plugin = 'autocooker', switch_back = true, host_only = true }
 	end
 
 	if current_level == "welcome_to_the_jungle_2" and is_server then
-		data[#data+1] = { text = tr.cengine_menu_title, callback = ppr_dofile, data = path .. 'correctengine', menu = true, host_only = true }
+		map_rows[#map_rows+1] = { text = tr.cengine_menu_title, callback = ppr_dofile, data = path .. 'correctengine', menu = true, host_only = true }
 	end
 
 	if ( current_level == "arm_hcm" or current_level == "arm_cro" or current_level == "arm_fac" or current_level == "arm_par" or current_level == "arm_und" ) and is_server then
-		data[#data+1] = { text = tr.spawn_plan, callback = spawn_plan, host_only = true }
+		map_rows[#map_rows+1] = { text = tr.spawn_plan, callback = spawn_plan, host_only = true }
 	end
 
 	if ( Global.game_settings.difficulty == "overkill_145" or Global.game_settings.difficulty == "easy_wish" or Global.game_settings.difficulty == "overkill_290" or Global.game_settings.difficulty == "sm_wish" ) and current_level == "red2" --[[and is_server]] then
-		data[#data+1] = { text = tr.overdrill, callback = overdrill, host_only = true }
-		data[#data+1] = { text = tr.overdrillwaypoints, callback = overdrillwaypoints, host_only = true }
+		map_rows[#map_rows+1] = { text = tr.overdrill, callback = overdrill, host_only = true }
+		map_rows[#map_rows+1] = { text = tr.overdrillwaypoints, callback = overdrillwaypoints, host_only = true }
+		overkill_plus = true
 	end
 
 	if ( Global.game_settings.difficulty == "overkill_145" or Global.game_settings.difficulty == "easy_wish" or Global.game_settings.difficulty == "overkill_290" or Global.game_settings.difficulty == "sm_wish" ) and current_level == "vit" --[[and is_server]] then
-		data[#data+1] = { text = tr.Overlever, callback = Overlever, host_only = true }
-		data[#data+1] = { text = tr.Overlevergate, callback = Overlevergate, host_only = true }
+		map_rows[#map_rows+1] = { text = tr.Overlever, callback = Overlever, host_only = true }
+		map_rows[#map_rows+1] = { text = tr.Overlevergate, callback = Overlevergate, host_only = true }
+		overkill_plus = true
 	end
 
 	if current_level == "chill" and is_server then
-		data[#data+1] = { text = tr.base_custom_safehouse_Sub, callback = customize_safehouse, menu = true, host_only = true }
+		map_rows[#map_rows+1] = { text = tr.base_custom_safehouse_Sub, callback = customize_safehouse, menu = true, host_only = true }
+	end
+
+	if #map_rows > 0 then
+		local level_data = tweak_data.levels[ current_level ]
+		local name = level_data and level_data.name_id and managers.localization:text( level_data.name_id ) or tostring( current_level )
+		data[#data+1] = { type = "header", text = name .. ( overkill_plus and " (Overkill+)" or "" ) }
+		for _, row in ipairs( map_rows ) do
+			data[#data+1] = row
+		end
 	end
 	-- Round 6: show the map id, so map-only options are easy to check
 	Menu_open( Menu, { title = tr.mission_menu_title, description = "Map: " .. tostring( current_level ), button_list = data, plugin_path = path } )

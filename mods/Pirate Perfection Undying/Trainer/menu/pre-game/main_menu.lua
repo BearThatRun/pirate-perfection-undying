@@ -515,7 +515,7 @@ end
 
 main_menu = function()
 	local data = {
-		{ text = tr['base_menu'], callback = ppr_dofile, data = 'Trainer/menu/pre-game/base_menu', menu = true },
+		{ text = tr['base_menu'], callback = ppr_dofile, data = 'Trainer/menu/pre-game/base_menu', menu = true, meta = "restart needed" },
 		{ text = tr['safehouse_title'], callback = safehouse_menu, menu = true },
 		{ text = tr['money_title'], callback = money_menu, menu = true },
 		{ text = tr['level_title'], callback = level_menu, menu = true },

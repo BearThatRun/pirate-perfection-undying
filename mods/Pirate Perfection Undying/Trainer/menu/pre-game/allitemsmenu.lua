@@ -110,7 +110,7 @@ end
 weapon_category_menu = function()
 	local data = {
 		{text = tr.inv_spec_weapon_search, callback = weapon_platform_menu, menu = true},
-		{},
+		{type = "header", text = "By category"},
 	}
 	local part_category = {}
 	

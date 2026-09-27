@@ -284,7 +284,7 @@ armors_menu = function()
 		end
 	end
 	
-	Menu_open( Menu, { title = tr.melee_weapons, button_list = data, back = main_menu } )
+	Menu_open( Menu, { title = tr.armors, button_list = data, back = main_menu } )
 end
 
 main_menu = function()
