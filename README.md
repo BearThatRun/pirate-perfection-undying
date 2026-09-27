@@ -55,18 +55,18 @@ The history is split so every step can be reviewed on its own (`git log -p`):
 
 | Commit | What |
 | --- | --- |
-| `74d4b8e` Baseline | Original V.I.P. v2.0.0 trainer folder, unmodified. The author's broken `.lnk` shortcuts are left out. |
-| `5e6a4bd` Phase 1 | Packaged for SuperBLT 64-bit. BeardLib dependency. Dead update block removed. |
-| `172989a` Phase 2 | Removed the features listed above. |
-| `0f5a515` Phase 3 | Hard-coded mod path replaced by `ModPath`. `io.popen` + `cmd.exe` file listing replaced by SuperBLT's `file` API. |
-| `617761d` Audit fixes | Hooks that pointed at missing classes/functions, wrong backup targets, invalid Lua escapes, broken keybind paths. |
-| `7cb8426` Rename | Renamed to Pirate Perfection Undying, credits added. |
-| `19da0ba` UI cleanup | No first-launch greeting, version text, banner, RSS feed, update checker, announcements, donation ticker, loading tip, in-world watermark or forum links. Menus fixed for ultrawide. BeardLib `main.xml`. |
-| `bcc53fd` `bb3c56a` | New icon, version set to v0.01 Unique Edition. |
-| `d54cde0` | Crash fix for weapon fire rate on x64. |
-| `d792912` | F5 Troll menu back, limited to yourself and AI. |
-| `3f84245` to `ffad26e` | In-game test rounds 1 to 6: crash fixes, broken features fixed or removed, menu fixes, BLT keybind fixes, dead files removed. The commit messages list every change. |
-| `ba6cbb7` Round 7 | Text pass: credits and permission statement, this README, `Read Me!.txt`. |
+| `200a747` Baseline | Original V.I.P. v2.0.0 trainer folder, unmodified. The author's broken `.lnk` shortcuts are left out. |
+| `30eee7d` Phase 1 | Packaged for SuperBLT 64-bit. BeardLib dependency. Dead update block removed. |
+| `50217b8` Phase 2 | Removed the features listed above. |
+| `d85b1cb` Phase 3 | Hard-coded mod path replaced by `ModPath`. `io.popen` + `cmd.exe` file listing replaced by SuperBLT's `file` API. |
+| `f5e370f` Audit fixes | Hooks that pointed at missing classes/functions, wrong backup targets, invalid Lua escapes, broken keybind paths. |
+| `7d50cc6` Rename | Renamed to Pirate Perfection Undying, credits added. |
+| `b1ce600` UI cleanup | No first-launch greeting, version text, banner, RSS feed, update checker, announcements, donation ticker, loading tip, in-world watermark or forum links. Menus fixed for ultrawide. BeardLib `main.xml`. |
+| `c2f6bff` `8c61fad` | New icon, version set to v0.01 Unique Edition. |
+| `ad040ff` | Crash fix for weapon fire rate on x64. |
+| `88f9558` | F5 Troll menu back, limited to yourself and AI. |
+| `63435bb` to `e7d314d` | In-game test rounds 1 to 6: crash fixes, broken features fixed or removed, menu fixes, BLT keybind fixes, dead files removed. The commit messages list every change. |
+| `11b9b30` Round 7 | Text pass: credits and permission statement, this README, `Read Me!.txt`. |
 | Languages | English only: the other 10 language files, the Localization menu and the Language option were removed. |
 | Round 8 | PPR Setup options reviewed against the current game: dead, risky and DLC-gated options removed or fixed; the empty "Show PPR HUD" option and its leftover HUD code removed. |
 | Round 9 | AimBot aims through the camera's own spin/pitch (gun and view stay lined up) and picks the enemy nearest the crosshair. Shotgun Physics rewritten (longer, stronger shotgun ragdoll push, no damage change). Trigger recorder: one file per heist, runs are appended, also logs dialogue, interactions and bags; wraps functions without breaking Bag Stacking or the meth auto-cooker. |
